@@ -13,19 +13,19 @@ class FaceBookController extends GetxController {
   final List<Map<String, String>> sharedCategories = [
     {
       'title': 'Favorite',
-      'icon': 'https://cdn-icons-png.flaticon.com/512/833/833472.png'
+      'icon': 'assets/icons/home.svg'
     },
     {
       'title': 'Game',
-      'icon': 'https://cdn-icons-png.flaticon.com/512/1067/1067346.png'
+      'icon': 'assets/icons/chat.svg'
     },
     {
       'title': 'Entertainment',
-      'icon': 'https://cdn-icons-png.flaticon.com/512/597/597177.png'
+      'icon': 'assets/icons/settings.svg'
     },
     {
       'title': 'Work',
-      'icon': 'https://cdn-icons-png.flaticon.com/512/3595/3595455.png'
+      'icon': 'assets/icons/account_circle.svg'
     },
   ];
 
