@@ -4,6 +4,7 @@ import 'package:get/get.dart';
 
 import 'package:stay_connected/Platform/facebook/facebook_controller.dart';
 import 'package:stay_connected/widget/custom_drwaer.dart';
+import 'package:stay_connected/widget/icon_selector.dart';
 
 class FacebookPage extends StatelessWidget {
   const FacebookPage({Key? key}) : super(key: key);
@@ -23,33 +24,38 @@ class FacebookPage extends StatelessWidget {
           floatingActionButton: FloatingActionButton(
             onPressed: () {
               final nameController = TextEditingController();
-              final iconController = TextEditingController();
 
               Get.defaultDialog(
-                title: 'Add Icon',
+                title: 'Add Custom Icon',
                 content: Column(
                   children: [
                     TextField(
                       controller: nameController,
-                      decoration: const InputDecoration(labelText: 'Name'),
+                      decoration: const InputDecoration(labelText: 'Icon Name'),
                     ),
-                    TextField(
-                      controller: iconController,
-                      decoration: const InputDecoration(labelText: 'Icon URL'),
+                    const SizedBox(height: 16),
+                    ElevatedButton(
+                      onPressed: () {
+                        Get.back();
+                        Get.dialog(
+                          IconSelector(
+                            onIconSelected: (iconPath, iconName) {
+                              if (nameController.text.isNotEmpty) {
+                                controller.addIcon(
+                                  nameController.text,
+                                  iconPath,
+                                );
+                              }
+                            },
+                          ),
+                        );
+                      },
+                      child: const Text('Select Icon'),
                     ),
                   ],
                 ),
-                textConfirm: 'Add',
-                onConfirm: () {
-                  if (nameController.text.isNotEmpty &&
-                      iconController.text.isNotEmpty) {
-                    controller.addIcon(
-                      nameController.text,
-                      iconController.text,
-                    );
-                    Get.back();
-                  }
-                },
+                textConfirm: 'Cancel',
+                onConfirm: () => Get.back(),
               );
             },
             child: const Icon(Icons.add),
@@ -71,8 +77,20 @@ class FacebookPage extends StatelessWidget {
                         vertical: 10,
                       ),
                       child: CircleAvatar(
-                        backgroundImage: NetworkImage(item['icon']!),
+                        backgroundColor: Colors.grey.shade100,
                         radius: 30,
+                        child: item['icon']!.endsWith('.svg')
+                            ? Image.asset(
+                                item['icon']!,
+                                width: 40,
+                                height: 40,
+                                color: Colors.grey.shade700,
+                              )
+                            : Image.asset(
+                                item['icon']!,
+                                width: 40,
+                                height: 40,
+                              ),
                       ),
                     );
                   },
@@ -98,8 +116,20 @@ class FacebookPage extends StatelessWidget {
                     return GestureDetector(
                       onLongPress: () => controller.removeIcon(index),
                       child: CircleAvatar(
-                        backgroundImage: NetworkImage(iconData['icon'] ?? ''),
+                        backgroundColor: Colors.grey.shade100,
                         radius: 30,
+                        child: iconData['icon']!.endsWith('.svg')
+                            ? Image.asset(
+                                iconData['icon']!,
+                                width: 40,
+                                height: 40,
+                                color: Colors.grey.shade700,
+                              )
+                            : Image.asset(
+                                iconData['icon']!,
+                                width: 40,
+                                height: 40,
+                              ),
                       ),
                     );
                   },
