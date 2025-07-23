@@ -5,49 +5,42 @@ class HomeController extends GetxController {
     {
       'name': 'Facebook',
       'url': 'https://facebook.com',
-      'icon':
-          'https://upload.wikimedia.org/wikipedia/commons/0/05/Facebook_Logo_%282019%29.png',
-    },
-    {
-      'name': 'Pinterest',
-      'url': 'https://pinterest.com',
-      'icon':
-          'https://upload.wikimedia.org/wikipedia/commons/0/08/Pinterest-logo.png',
-    },
-    {
-      'name': 'Twitter',
-      'url': 'https://twitter.com',
-      'icon':
-          'https://upload.wikimedia.org/wikipedia/en/6/60/Twitter_Logo_as_of_2021.svg',
+      'icon': 'assets/images/img_facebook_1_60x60.png',
     },
     {
       'name': 'Snapchat',
       'url': 'https://snapchat.com',
-      'icon':
-          'https://upload.wikimedia.org/wikipedia/en/a/ad/Snapchat_logo.svg',
-    },
-    {
-      'name': 'Instagram',
-      'url': 'https://instagram.com',
-      'icon':
-          'https://upload.wikimedia.org/wikipedia/commons/a/a5/Instagram_icon.png',
-    },
-    {
-      'name': 'TikTok',
-      'url': 'https://tiktok.com',
-      'icon': 'https://upload.wikimedia.org/wikipedia/en/0/0a/TikTok_logo.svg',
-    },
-    {
-      'name': 'YouTube',
-      'url': 'https://youtube.com',
-      'icon':
-          'https://upload.wikimedia.org/wikipedia/commons/b/b8/YouTube_Logo_2017.svg',
+      'icon': 'assets/images/img_ic_snapchat_2_2.png',
     },
     {
       'name': 'Reddit',
       'url': 'https://reddit.com',
-      'icon':
-          'https://upload.wikimedia.org/wikipedia/en/5/58/Reddit_logo_new.svg',
+      'icon': 'assets/images/img_ic_reddit_1.png',
+    },
+    {
+      'name': 'Instagram',
+      'url': 'https://instagram.com',
+      'icon': 'assets/images/img_instagram_2.png',
+    },
+    {
+      'name': 'Pinterest',
+      'url': 'https://pinterest.com',
+      'icon': 'assets/images/img_pinterest_1.png',
+    },
+    {
+      'name': 'tiktok',
+      'url': 'https://tiktok.com',
+      'icon': 'assets/images/img_tumblr_1.png',
+    },
+    {
+      'name': 'Twitter',
+      'url': 'https://twitter.com',
+      'icon': 'assets/images/img_twitter_1_60x60.png',
+    },
+    {
+      'name': 'YouTube',
+      'url': 'https://youtube.com',
+      'icon': 'assets/images/yt_resized.png',
     },
   ];
 }
