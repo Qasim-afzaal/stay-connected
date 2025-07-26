@@ -6,7 +6,7 @@ class FacebookBinding extends Bindings {
   @override
   void dependencies() {
     Get.lazyPut<FaceBookController>(
-      () => FaceBookController(""),
+      () => FaceBookController("Facebook"),
     );
   }
 }
