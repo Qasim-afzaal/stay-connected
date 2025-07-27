@@ -6,7 +6,7 @@ class InstagramBinding extends Bindings {
   @override
   void dependencies() {
     Get.lazyPut<InstagramController>(
-      () => InstagramController(""),
+      () => InstagramController("Instagram"),
     );
   }
-} 
+}
