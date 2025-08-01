@@ -6,7 +6,7 @@ class PinterestBinding extends Bindings {
   @override
   void dependencies() {
     Get.lazyPut<PinterestController>(
-      () => PinterestController(""),
+      () => PinterestController("Pinterest"),
     );
   }
-} 
+}
