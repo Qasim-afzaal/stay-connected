@@ -6,7 +6,7 @@ class TikTokBinding extends Bindings {
   @override
   void dependencies() {
     Get.lazyPut<TikTokController>(
-      () => TikTokController(""),
+      () => TikTokController("TikTok"),
     );
   }
-} 
+}
