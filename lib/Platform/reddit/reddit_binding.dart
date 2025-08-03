@@ -6,7 +6,7 @@ class RedditBinding extends Bindings {
   @override
   void dependencies() {
     Get.lazyPut<RedditController>(
-      () => RedditController(""),
+      () => RedditController("Reddit"),
     );
   }
-} 
+}
