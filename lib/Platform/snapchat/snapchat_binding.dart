@@ -6,7 +6,7 @@ class SnapchatBinding extends Bindings {
   @override
   void dependencies() {
     Get.lazyPut<SnapchatController>(
-      () => SnapchatController(""),
+      () => SnapchatController("Snapchat"),
     );
   }
-} 
+}
