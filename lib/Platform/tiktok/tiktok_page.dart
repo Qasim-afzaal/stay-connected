@@ -5,8 +5,6 @@ import 'package:get/get.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 
 import 'package:stay_connected/Platform/tiktok/tiktok_controller.dart';
-import 'package:stay_connected/Platform/tiktok/tiktok_controller.dart';
-import 'package:stay_connected/Platform/tiktok/tiktok_controller.dart';
 import 'package:stay_connected/Platform/tiktok/tiktok_icon_screen.dart';
 import 'package:stay_connected/widget/custom_drwaer.dart';
 import 'package:stay_connected/widget/icon_selector.dart';
