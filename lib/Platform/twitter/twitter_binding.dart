@@ -6,7 +6,7 @@ class TwitterBinding extends Bindings {
   @override
   void dependencies() {
     Get.lazyPut<TwitterController>(
-      () => TwitterController(""),
+      () => TwitterController("Twitter"),
     );
   }
-} 
+}
