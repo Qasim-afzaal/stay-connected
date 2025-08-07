@@ -6,7 +6,7 @@ class YouTubeBinding extends Bindings {
   @override
   void dependencies() {
     Get.lazyPut<YouTubeController>(
-      () => YouTubeController(""),
+      () => YouTubeController("YouTube"),
     );
   }
-} 
+}
