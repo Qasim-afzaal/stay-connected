@@ -15,6 +15,7 @@ abstract class Routes {
   static const REDDIT = _Paths.REDDIT;
   static const SNAPCHAT = _Paths.SNAPCHAT;
   static const PINTEREST = _Paths.PINTEREST;
+  static const TEST_WEBVIEW = _Paths.TEST_WEBVIEW;
 }
 
 abstract class _Paths {
@@ -30,4 +31,5 @@ abstract class _Paths {
   static const REDDIT = '/reddit';
   static const SNAPCHAT = '/snapchat';
   static const PINTEREST = '/pinterest';
+  static const TEST_WEBVIEW = '/test_webview';
 }
