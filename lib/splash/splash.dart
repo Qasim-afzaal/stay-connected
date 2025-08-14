@@ -19,8 +19,8 @@ class SplashPage extends StatelessWidget {
             ),
             child: Center(
               child: Image.asset(
-                "assets/images/logo.png",
-                scale: 8,
+                "assets/images/iconnew_nbg.png",
+                scale: 4,
               ),
             ),
           ),
