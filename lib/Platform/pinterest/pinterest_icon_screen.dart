@@ -12,16 +12,15 @@ class PinterestIconScreen extends StatelessWidget {
   final String platformName;
 
   const PinterestIconScreen({
-    Key? key,
+    super.key,
     required this.iconName,
     required this.platformName,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
     return GetBuilder<PinterestController>(
       builder: (controller) {
-        // Filter friends that belong to this specific category AND have a profileUrl (actual friends, not category icons)
         final categoryFriends = controller.icons
             .where((icon) =>
                 icon['category'] == iconName &&
@@ -80,7 +79,6 @@ class PinterestIconScreen extends StatelessWidget {
                         final friend = categoryFriends[index];
                         return GestureDetector(
                           onTap: () {
-                            // Open the friend's profile in WebView
                             if (friend['profileUrl'] != null) {
                               Get.to(() => _FriendProfileWebView(
                                     profileUrl: friend['profileUrl']!,
@@ -89,7 +87,6 @@ class PinterestIconScreen extends StatelessWidget {
                             }
                           },
                           onLongPress: () {
-                            // Show delete dialog on long press
                             _showDeleteDialog(
                                 context, friend['name'] ?? 'Unknown', index);
                           },
@@ -100,8 +97,7 @@ class PinterestIconScreen extends StatelessWidget {
                                 padding: const EdgeInsets.all(4),
                                 child: Image.asset(
                                   'assets/images/img_pintrest.png',
-                                  width: 50,
-                                  height: 50,
+                                  scale: 0.1,
                                   errorBuilder: (context, error, stackTrace) {
                                     return Icon(
                                       Icons.person,
@@ -216,10 +212,8 @@ class PinterestIconScreen extends StatelessWidget {
             ),
             CupertinoDialogAction(
               onPressed: () async {
-                // Get the controller and remove the friend
                 final controller = Get.find<PinterestController>();
 
-                // Find the friend in the category and remove it - use the same filtering logic as in build method
                 final categoryFriends = controller.icons
                     .where((icon) =>
                         icon['category'] == iconName &&
@@ -234,7 +228,6 @@ class PinterestIconScreen extends StatelessWidget {
                       icon['category'] == friendToDelete['category'] &&
                       icon['profileUrl'] == friendToDelete['profileUrl']);
 
-                  // Save the changes to SharedPreferences
                   await controller.saveToPrefs();
                   controller.update();
                 }
@@ -265,7 +258,6 @@ class PinterestIconScreen extends StatelessWidget {
   }
 }
 
-// Custom WebView for opening friend profiles
 class _FriendProfileWebView extends StatefulWidget {
   final String profileUrl;
   final String friendName;
