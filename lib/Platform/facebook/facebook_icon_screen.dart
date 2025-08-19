@@ -5,7 +5,6 @@ import 'package:get/get.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 
 import 'package:stay_connected/Platform/facebook/facebook_controller.dart';
-import 'package:stay_connected/Platform/facebook/facebook_search_dialog.dart';
 import 'package:stay_connected/Platform/facebook/facebook_webview_screen.dart';
 
 class FacebookIconScreen extends StatelessWidget {
@@ -13,16 +12,15 @@ class FacebookIconScreen extends StatelessWidget {
   final String platformName;
 
   const FacebookIconScreen({
-    Key? key,
+    super.key,
     required this.iconName,
     required this.platformName,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
     return GetBuilder<FaceBookController>(
       builder: (controller) {
-        // Filter friends that belong to this specific category AND have a profileUrl (actual friends, not category icons)
         final categoryFriends = controller.icons
             .where((icon) =>
                 icon['category'] == iconName &&
@@ -30,7 +28,6 @@ class FacebookIconScreen extends StatelessWidget {
                 icon['profileUrl']!.isNotEmpty)
             .toList();
 
-        // Debug: Print all icons to see what's being stored
         print('Facebook - Current category: $iconName');
         print('Facebook - Total icons: ${controller.icons.length}');
         print('Facebook - Category friends: ${categoryFriends.length}');
@@ -90,7 +87,7 @@ class FacebookIconScreen extends StatelessWidget {
                         final friend = categoryFriends[index];
                         return GestureDetector(
                           onTap: () {
-                            // Open the friend's profile in WebView
+                            // Open the fried's profile in WebView
                             if (friend['profileUrl'] != null) {
                               Get.to(() => _FriendProfileWebView(
                                     profileUrl: friend['profileUrl']!,
@@ -99,7 +96,6 @@ class FacebookIconScreen extends StatelessWidget {
                             }
                           },
                           onLongPress: () {
-                            // Show delete dialog on long press
                             _showDeleteDialog(
                                 context, friend['name'] ?? 'Unknown', index);
                           },
@@ -110,8 +106,7 @@ class FacebookIconScreen extends StatelessWidget {
                                 padding: const EdgeInsets.all(4),
                                 child: Image.asset(
                                   'assets/images/img_fb.png',
-                                  width: 50,
-                                  height: 50,
+                                  scale: 0.1,
                                   errorBuilder: (context, error, stackTrace) {
                                     return Icon(
                                       Icons.person,
@@ -171,40 +166,25 @@ class FacebookIconScreen extends StatelessWidget {
         return CupertinoAlertDialog(
           title: Row(
             children: [
-              Container(
-                padding: const EdgeInsets.all(8),
-                decoration: BoxDecoration(
-                  color: CupertinoColors.systemBlue.withOpacity(0.1),
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: Icon(
-                  CupertinoIcons.search,
-                  color: CupertinoColors.systemBlue,
-                  size: 20,
-                ),
+              const Icon(
+                CupertinoIcons.search,
+                color: CupertinoColors.systemBlue,
+                size: 20,
               ),
-              const SizedBox(width: 12),
+              const SizedBox(width: 8),
               const Text(
                 'Search Friends',
                 style: TextStyle(
-                  fontSize: 18,
+                  fontSize: 16,
                   fontWeight: FontWeight.w600,
                 ),
               ),
             ],
           ),
           content: Padding(
-            padding: const EdgeInsets.only(top: 16),
+            padding: const EdgeInsets.only(top: 12),
             child: Column(
               children: [
-                const Text(
-                  'Search and add friends to your category',
-                  style: TextStyle(
-                    fontSize: 14,
-                    color: CupertinoColors.systemGrey,
-                  ),
-                ),
-                const SizedBox(height: 16),
                 CupertinoTextField(
                   controller: searchController,
                   autofocus: true,
@@ -215,11 +195,19 @@ class FacebookIconScreen extends StatelessWidget {
                   ),
                   padding: const EdgeInsets.symmetric(
                     horizontal: 12,
-                    vertical: 12,
+                    vertical: 8,
                   ),
                   style: const TextStyle(
-                    fontSize: 16,
+                    fontSize: 14,
                     fontWeight: FontWeight.w500,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                const Text(
+                  'Search and add friends to your category',
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: CupertinoColors.systemGrey,
                   ),
                 ),
               ],
@@ -242,7 +230,6 @@ class FacebookIconScreen extends StatelessWidget {
                 if (searchQuery.isNotEmpty) {
                   Navigator.of(context).pop();
 
-                  // Open WebView for the search query
                   Get.to(() => FacebookWebviewScreen(
                         searchQuery: searchQuery,
                         iconName: iconName,
@@ -317,10 +304,8 @@ class FacebookIconScreen extends StatelessWidget {
             ),
             CupertinoDialogAction(
               onPressed: () async {
-                // Get the controller and remove the friend
                 final controller = Get.find<FaceBookController>();
 
-                // Find the friend in the category and remove it - use the same filtering logic as in build method
                 final categoryFriends = controller.icons
                     .where((icon) =>
                         icon['category'] == iconName &&
@@ -335,7 +320,6 @@ class FacebookIconScreen extends StatelessWidget {
                       icon['category'] == friendToDelete['category'] &&
                       icon['profileUrl'] == friendToDelete['profileUrl']);
 
-                  // Save the changes to SharedPreferences
                   await controller.saveToPrefs();
                   controller.update();
                 }
@@ -366,7 +350,6 @@ class FacebookIconScreen extends StatelessWidget {
   }
 }
 
-// Custom WebView for opening friend profiles
 class _FriendProfileWebView extends StatefulWidget {
   final String profileUrl;
   final String friendName;
