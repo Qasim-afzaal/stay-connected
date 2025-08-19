@@ -12,16 +12,15 @@ class InstagramIconScreen extends StatelessWidget {
   final String platformName;
 
   const InstagramIconScreen({
-    Key? key,
+    super.key,
     required this.iconName,
     required this.platformName,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
     return GetBuilder<InstagramController>(
       builder: (controller) {
-        // Filter friends that belong to this specific category AND have a profileUrl (actual friends, not category icons)
         final categoryFriends = controller.icons
             .where((icon) =>
                 icon['category'] == iconName &&
@@ -93,55 +92,52 @@ class InstagramIconScreen extends StatelessWidget {
                             _showDeleteDialog(
                                 context, friend['name'] ?? 'Unknown', index);
                           },
-                          child: Container(
-                            child: Stack(
-                              children: [
-                                Column(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: [
-                                    Container(
-                                      padding: const EdgeInsets.all(4),
-                                      child: Image.asset(
-                                        'assets/images/img_instagram.png',
-                                        width: 50,
-                                        height: 50,
-                                        errorBuilder:
-                                            (context, error, stackTrace) {
-                                          return Image.asset(
-                                            'assets/images/img_insta.png',
-                                            width: 50,
-                                            height: 50,
-                                            errorBuilder:
-                                                (context, error, stackTrace) {
-                                              return Icon(
-                                                Icons.person,
-                                                size: 50,
-                                                color: Colors.purple.shade700,
-                                              );
-                                            },
-                                          );
-                                        },
-                                      ),
+                          child: Stack(
+                            children: [
+                              Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Container(
+                                    padding: const EdgeInsets.all(4),
+                                    child: Image.asset(
+                                      'assets/images/img_instagram.png',
+                                      width: 50,
+                                      height: 50,
+                                      errorBuilder:
+                                          (context, error, stackTrace) {
+                                        return Image.asset(
+                                          'assets/images/img_insta.png',
+                                          scale: 0.1,
+                                          errorBuilder:
+                                              (context, error, stackTrace) {
+                                            return Icon(
+                                              Icons.person,
+                                              size: 50,
+                                              color: Colors.purple.shade700,
+                                            );
+                                          },
+                                        );
+                                      },
                                     ),
-                                    const SizedBox(height: 4),
-                                    Padding(
-                                      padding: const EdgeInsets.symmetric(
-                                          horizontal: 4),
-                                      child: Text(
-                                        friend['name'] ?? 'Unknown',
-                                        style: const TextStyle(
-                                          fontSize: 9,
-                                          fontWeight: FontWeight.w500,
-                                        ),
-                                        textAlign: TextAlign.center,
-                                        maxLines: 2,
-                                        overflow: TextOverflow.ellipsis,
+                                  ),
+                                  const SizedBox(height: 4),
+                                  Padding(
+                                    padding: const EdgeInsets.symmetric(
+                                        horizontal: 4),
+                                    child: Text(
+                                      friend['name'] ?? 'Unknown',
+                                      style: const TextStyle(
+                                        fontSize: 9,
+                                        fontWeight: FontWeight.w500,
                                       ),
+                                      textAlign: TextAlign.center,
+                                      maxLines: 2,
+                                      overflow: TextOverflow.ellipsis,
                                     ),
-                                  ],
-                                ),
-                              ],
-                            ),
+                                  ),
+                                ],
+                              ),
+                            ],
                           ),
                         );
                       },
@@ -231,10 +227,8 @@ class InstagramIconScreen extends StatelessWidget {
             ),
             CupertinoDialogAction(
               onPressed: () async {
-                // Get the controller and remove the friend
                 final controller = Get.find<InstagramController>();
 
-                // Find the friend in the category and remove it - use the same filtering logic as in build method
                 final categoryFriends = controller.icons
                     .where((icon) =>
                         icon['category'] == iconName &&
@@ -249,7 +243,6 @@ class InstagramIconScreen extends StatelessWidget {
                       icon['category'] == friendToDelete['category'] &&
                       icon['profileUrl'] == friendToDelete['profileUrl']);
 
-                  // Save the changes to SharedPreferences
                   await controller.saveToPrefs();
                   controller.update();
                 }
@@ -280,7 +273,6 @@ class InstagramIconScreen extends StatelessWidget {
   }
 }
 
-// Custom WebView for opening friend profiles
 class _FriendProfileWebView extends StatefulWidget {
   final String profileUrl;
   final String friendName;
@@ -295,7 +287,6 @@ class _FriendProfileWebView extends StatefulWidget {
 }
 
 class _FriendProfileWebViewState extends State<_FriendProfileWebView> {
-  InAppWebViewController? _webViewController;
   bool isLoading = true;
   bool isBlocked = false;
 
@@ -328,9 +319,7 @@ class _FriendProfileWebViewState extends State<_FriendProfileWebView> {
               mediaPlaybackRequiresUserGesture: false,
               allowsInlineMediaPlayback: true,
             ),
-            onWebViewCreated: (controller) {
-              _webViewController = controller;
-            },
+            onWebViewCreated: (controller) {},
             onLoadStart: (controller, url) {
               setState(() {
                 isLoading = true;
@@ -341,7 +330,6 @@ class _FriendProfileWebViewState extends State<_FriendProfileWebView> {
               setState(() {
                 isLoading = false;
               });
-              // Check for block by title or url
               String? title = await controller.getTitle();
               if (title != null &&
                   (title.toLowerCase().contains('not supported') ||
