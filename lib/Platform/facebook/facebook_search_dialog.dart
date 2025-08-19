@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+
 import 'package:get/get.dart';
+
 import 'package:stay_connected/Platform/facebook/facebook_webview_screen.dart';
 
 class FacebookSearchDialog extends StatelessWidget {
@@ -7,10 +9,10 @@ class FacebookSearchDialog extends StatelessWidget {
   final String platformName;
 
   const FacebookSearchDialog({
-    Key? key,
+    super.key,
     required this.iconName,
     required this.platformName,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
