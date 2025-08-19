@@ -1,26 +1,10 @@
-import 'dart:convert';
-
 import 'package:flutter/material.dart';
 
 import 'package:get/get.dart';
-import 'package:get/get.dart';
-import 'package:get/get.dart';
-import 'package:get/get.dart';
-import 'package:shared_preferences/shared_preferences.dart';
-import 'package:shared_preferences/shared_preferences.dart';
-import 'package:shared_preferences/shared_preferences.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:stay_connected/home/home_controller.dart';
 import 'package:stay_connected/routes/app_pages.dart';
-import 'package:stay_connected/util/util.dart';
-import 'package:stay_connected/webview/webview_binding.dart';
-import 'package:stay_connected/webview/webview_page.dart';
 import 'package:stay_connected/widget/custom_drwaer.dart';
-import 'package:stay_connected/widget/custom_drwaer.dart';
-import 'package:stay_connected/widget/custom_drwaer.dart';
-import 'package:stay_connected/widget/icon_selector.dart';
-import 'package:stay_connected/widget/icon_selector.dart';
 
 class HomePage extends StatelessWidget {
   const HomePage({super.key});
