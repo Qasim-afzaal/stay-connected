@@ -1,9 +1,11 @@
-import 'package:flutter/material.dart';
-import 'package:flutter/cupertino.dart';
-import 'package:get/get.dart';
-import 'package:webview_flutter/webview_flutter.dart';
 import 'dart:async';
 import 'dart:io';
+
+import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
+
+import 'package:get/get.dart';
+import 'package:webview_flutter/webview_flutter.dart';
 
 import 'package:stay_connected/Platform/instagram/instagram_controller.dart';
 
@@ -13,11 +15,11 @@ class InstagramWebviewScreen extends StatefulWidget {
   final String platformName;
 
   const InstagramWebviewScreen({
-    Key? key,
+    super.key,
     required this.searchQuery,
     required this.iconName,
     required this.platformName,
-  }) : super(key: key);
+  });
 
   @override
   State<InstagramWebviewScreen> createState() => _InstagramWebviewScreenState();
@@ -128,12 +130,9 @@ class _InstagramWebviewScreenState extends State<InstagramWebviewScreen> {
   }
 
   bool _isExpectedError(WebResourceError error) {
-    // These are expected errors that don't indicate a real problem
-    return error.errorCode ==
-            -1002 || // unsupported URL (instagram:// protocol)
-        error.errorCode == -999 || // cancelled navigation
-        error.errorCode ==
-            -1001; // timed out (sometimes happens during redirects)
+    return error.errorCode == -1002 ||
+        error.errorCode == -999 ||
+        error.errorCode == -1001;
   }
 
   @override
@@ -145,7 +144,6 @@ class _InstagramWebviewScreenState extends State<InstagramWebviewScreen> {
   void _initializeWebView() {
     print('Instagram WebView - Initializing WebView controller');
 
-    // Platform-specific user agent for better compatibility
     String userAgent = Platform.isIOS
         ? 'Mozilla/5.0 (iPhone; CPU iPhone OS 15_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/15.0 Mobile/15E148 Safari/604.1'
         : 'Mozilla/5.0 (Linux; Android 10; SM-G975F) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.120 Mobile Safari/537.36';
@@ -158,7 +156,6 @@ class _InstagramWebviewScreenState extends State<InstagramWebviewScreen> {
           onPageStarted: (String url) {
             print('Instagram WebView - Page Started: $url');
 
-            // Check if this is an Instagram app redirect
             if (url.startsWith('instagram://')) {
               print(
                   'Instagram WebView - Detected Instagram app redirect, ignoring');
@@ -186,7 +183,6 @@ class _InstagramWebviewScreenState extends State<InstagramWebviewScreen> {
           onPageFinished: (String url) async {
             print('Instagram WebView - Page Finished: $url');
 
-            // Don't process app redirects
             if (url.startsWith('instagram://')) {
               print('Instagram WebView - Ignoring app redirect completion');
               return;
@@ -210,7 +206,6 @@ class _InstagramWebviewScreenState extends State<InstagramWebviewScreen> {
           onNavigationRequest: (NavigationRequest request) {
             print('Instagram WebView - Navigation Request: ${request.url}');
 
-            // Handle Instagram app redirects
             if (request.url.startsWith('instagram://')) {
               print('Instagram WebView - Blocking Instagram app redirect');
               setState(() {
@@ -231,7 +226,6 @@ class _InstagramWebviewScreenState extends State<InstagramWebviewScreen> {
             if (change.url != null && mounted) {
               print('Instagram WebView - URL Changed: ${change.url}');
 
-              // Handle Instagram app redirects
               if (change.url!.startsWith('instagram://')) {
                 print('Instagram WebView - Detected app redirect URL change');
                 setState(() {
@@ -251,7 +245,6 @@ class _InstagramWebviewScreenState extends State<InstagramWebviewScreen> {
             print('Instagram WebView - Error Code: ${error.errorCode}');
             print('Instagram WebView - Error URL: ${error.url}');
 
-            // Only show error if it's not an expected error and we haven't loaded successfully
             if (!_isExpectedError(error) &&
                 !hasLoadedSuccessfully &&
                 !isNavigatingToApp) {
@@ -277,7 +270,6 @@ class _InstagramWebviewScreenState extends State<InstagramWebviewScreen> {
               lastProgressUpdate = DateTime.now().millisecondsSinceEpoch;
             });
 
-            // If progress is high enough, consider it loaded
             if (progress >= 85 &&
                 isLoading &&
                 !hasLoadedSuccessfully &&
@@ -295,7 +287,6 @@ class _InstagramWebviewScreenState extends State<InstagramWebviewScreen> {
                 isLoading &&
                 !hasLoadedSuccessfully &&
                 !isNavigatingToApp) {
-              // Start a timer to check if progress gets stuck
               _startProgressStuckTimer();
             }
           },
@@ -322,7 +313,6 @@ class _InstagramWebviewScreenState extends State<InstagramWebviewScreen> {
         },
       );
 
-    // Add multiple fallback timers to check if page is actually loaded
     _fallbackTimer = Timer(const Duration(seconds: 8), () async {
       if (mounted &&
           isLoading &&
@@ -351,7 +341,6 @@ class _InstagramWebviewScreenState extends State<InstagramWebviewScreen> {
       }
     });
 
-    // Second fallback timer
     Timer(const Duration(seconds: 15), () async {
       if (mounted &&
           isLoading &&
@@ -380,7 +369,6 @@ class _InstagramWebviewScreenState extends State<InstagramWebviewScreen> {
       }
     });
 
-    // Third fallback timer for stuck progress
     Timer(const Duration(seconds: 12), () async {
       if (mounted &&
           isLoading &&
@@ -405,9 +393,6 @@ class _InstagramWebviewScreenState extends State<InstagramWebviewScreen> {
   Widget build(BuildContext context) {
     print(
         'Instagram WebView - Build: isLoading=$isLoading, hasError=$hasError, hasLoadedSuccessfully=$hasLoadedSuccessfully, progress=$loadingProgress%, isNavigatingToApp=$isNavigatingToApp');
-
-    // Allow adding friends from any page (no restrictions due to Instagram limitations)
-    bool canAddFriend = currentUrl != null && currentUrl!.length > 10;
 
     return Scaffold(
       appBar: AppBar(
@@ -679,7 +664,6 @@ class _InstagramWebviewScreenState extends State<InstagramWebviewScreen> {
     controller.addFriendToCategory(
         friendName, widget.iconName, finalProfileUrl);
 
-    // Only close the dialog, not the whole screen
     Get.back();
 
     Get.snackbar(
@@ -695,11 +679,9 @@ class _InstagramWebviewScreenState extends State<InstagramWebviewScreen> {
   }
 
   String? _extractNameFromUrl(String url) {
-    // Try to extract name from Instagram URL
     if (url.contains('instagram.com/')) {
       String path = url.split('instagram.com/')[1];
       if (path.isNotEmpty) {
-        // Remove query parameters and get the username
         String username = path.split('?')[0].split('/')[0];
         if (username != 'explore' &&
             username != 'reels' &&
