@@ -1,9 +1,11 @@
-import 'package:flutter/material.dart';
-import 'package:flutter/cupertino.dart';
-import 'package:get/get.dart';
-import 'package:webview_flutter/webview_flutter.dart';
 import 'dart:async';
 import 'dart:io';
+
+import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
+
+import 'package:get/get.dart';
+import 'package:webview_flutter/webview_flutter.dart';
 
 import 'package:stay_connected/Platform/pinterest/pinterest_controller.dart';
 
@@ -13,11 +15,11 @@ class PinterestWebviewScreen extends StatefulWidget {
   final String platformName;
 
   const PinterestWebviewScreen({
-    Key? key,
+    super.key,
     required this.searchQuery,
     required this.iconName,
     required this.platformName,
-  }) : super(key: key);
+  });
 
   @override
   State<PinterestWebviewScreen> createState() => _PinterestWebviewScreenState();
@@ -128,12 +130,9 @@ class _PinterestWebviewScreenState extends State<PinterestWebviewScreen> {
   }
 
   bool _isExpectedError(WebResourceError error) {
-    // These are expected errors that don't indicate a real problem
-    return error.errorCode ==
-            -1002 || // unsupported URL (pinterest:// protocol)
-        error.errorCode == -999 || // cancelled navigation
-        error.errorCode ==
-            -1001; // timed out (sometimes happens during redirects)
+    return error.errorCode == -1002 ||
+        error.errorCode == -999 ||
+        error.errorCode == -1001;
   }
 
   @override
@@ -145,7 +144,6 @@ class _PinterestWebviewScreenState extends State<PinterestWebviewScreen> {
   void _initializeWebView() {
     print('Pinterest WebView - Initializing WebView controller');
 
-    // Platform-specific user agent for better compatibility
     String userAgent = Platform.isIOS
         ? 'Mozilla/5.0 (iPhone; CPU iPhone OS 15_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/15.0 Mobile/15E148 Safari/604.1'
         : 'Mozilla/5.0 (Linux; Android 10; SM-G975F) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.120 Mobile Safari/537.36';
@@ -158,7 +156,6 @@ class _PinterestWebviewScreenState extends State<PinterestWebviewScreen> {
           onPageStarted: (String url) {
             print('Pinterest WebView - Page Started: $url');
 
-            // Check if this is a Pinterest app redirect
             if (url.startsWith('pinterest://')) {
               print(
                   'Pinterest WebView - Detected Pinterest app redirect, ignoring');
@@ -186,7 +183,6 @@ class _PinterestWebviewScreenState extends State<PinterestWebviewScreen> {
           onPageFinished: (String url) async {
             print('Pinterest WebView - Page Finished: $url');
 
-            // Don't process app redirects
             if (url.startsWith('pinterest://')) {
               print('Pinterest WebView - Ignoring app redirect completion');
               return;
@@ -210,7 +206,6 @@ class _PinterestWebviewScreenState extends State<PinterestWebviewScreen> {
           onNavigationRequest: (NavigationRequest request) {
             print('Pinterest WebView - Navigation Request: ${request.url}');
 
-            // Handle Pinterest app redirects
             if (request.url.startsWith('pinterest://')) {
               print('Pinterest WebView - Blocking Pinterest app redirect');
               setState(() {
@@ -231,7 +226,6 @@ class _PinterestWebviewScreenState extends State<PinterestWebviewScreen> {
             if (change.url != null && mounted) {
               print('Pinterest WebView - URL Changed: ${change.url}');
 
-              // Handle Pinterest app redirects
               if (change.url!.startsWith('pinterest://')) {
                 print('Pinterest WebView - Detected app redirect URL change');
                 setState(() {
@@ -251,7 +245,6 @@ class _PinterestWebviewScreenState extends State<PinterestWebviewScreen> {
             print('Pinterest WebView - Error Code: ${error.errorCode}');
             print('Pinterest WebView - Error URL: ${error.url}');
 
-            // Only show error if it's not an expected error and we haven't loaded successfully
             if (!_isExpectedError(error) &&
                 !hasLoadedSuccessfully &&
                 !isNavigatingToApp) {
@@ -277,7 +270,6 @@ class _PinterestWebviewScreenState extends State<PinterestWebviewScreen> {
               lastProgressUpdate = DateTime.now().millisecondsSinceEpoch;
             });
 
-            // If progress is high enough, consider it loaded
             if (progress >= 85 &&
                 isLoading &&
                 !hasLoadedSuccessfully &&
@@ -295,7 +287,6 @@ class _PinterestWebviewScreenState extends State<PinterestWebviewScreen> {
                 isLoading &&
                 !hasLoadedSuccessfully &&
                 !isNavigatingToApp) {
-              // Start a timer to check if progress gets stuck
               _startProgressStuckTimer();
             }
           },
@@ -322,7 +313,6 @@ class _PinterestWebviewScreenState extends State<PinterestWebviewScreen> {
         },
       );
 
-    // Add multiple fallback timers to check if page is actually loaded
     _fallbackTimer = Timer(const Duration(seconds: 8), () async {
       if (mounted &&
           isLoading &&
@@ -351,7 +341,6 @@ class _PinterestWebviewScreenState extends State<PinterestWebviewScreen> {
       }
     });
 
-    // Second fallback timer
     Timer(const Duration(seconds: 15), () async {
       if (mounted &&
           isLoading &&
@@ -380,7 +369,6 @@ class _PinterestWebviewScreenState extends State<PinterestWebviewScreen> {
       }
     });
 
-    // Third fallback timer for stuck progress
     Timer(const Duration(seconds: 12), () async {
       if (mounted &&
           isLoading &&
@@ -405,9 +393,6 @@ class _PinterestWebviewScreenState extends State<PinterestWebviewScreen> {
   Widget build(BuildContext context) {
     print(
         'Pinterest WebView - Build: isLoading=$isLoading, hasError=$hasError, hasLoadedSuccessfully=$hasLoadedSuccessfully, progress=$loadingProgress%, isNavigatingToApp=$isNavigatingToApp');
-
-    // Allow adding friends from any page (no restrictions due to Pinterest limitations)
-    bool canAddFriend = currentUrl != null && currentUrl!.length > 10;
 
     return Scaffold(
       appBar: AppBar(
@@ -679,7 +664,6 @@ class _PinterestWebviewScreenState extends State<PinterestWebviewScreen> {
     controller.addFriendToCategory(
         friendName, widget.iconName, finalProfileUrl);
 
-    // Only close the dialog, not the whole screen
     Get.back();
 
     Get.snackbar(
