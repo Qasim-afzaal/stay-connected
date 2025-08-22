@@ -1,9 +1,11 @@
-import 'package:flutter/material.dart';
-import 'package:flutter/cupertino.dart';
-import 'package:get/get.dart';
-import 'package:webview_flutter/webview_flutter.dart';
 import 'dart:async';
 import 'dart:io';
+
+import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
+
+import 'package:get/get.dart';
+import 'package:webview_flutter/webview_flutter.dart';
 
 import 'package:stay_connected/Platform/reddit/reddit_controller.dart';
 
@@ -13,11 +15,11 @@ class RedditWebviewScreen extends StatefulWidget {
   final String platformName;
 
   const RedditWebviewScreen({
-    Key? key,
+    super.key,
     required this.searchQuery,
     required this.iconName,
     required this.platformName,
-  }) : super(key: key);
+  });
 
   @override
   State<RedditWebviewScreen> createState() => _RedditWebviewScreenState();
@@ -128,11 +130,9 @@ class _RedditWebviewScreenState extends State<RedditWebviewScreen> {
   }
 
   bool _isExpectedError(WebResourceError error) {
-    // These are expected errors that don't indicate a real problem
-    return error.errorCode == -1002 || // unsupported URL (reddit:// protocol)
-        error.errorCode == -999 || // cancelled navigation
-        error.errorCode ==
-            -1001; // timed out (sometimes happens during redirects)
+    return error.errorCode == -1002 ||
+        error.errorCode == -999 ||
+        error.errorCode == -1001;
   }
 
   @override
@@ -144,7 +144,6 @@ class _RedditWebviewScreenState extends State<RedditWebviewScreen> {
   void _initializeWebView() {
     print('Reddit WebView - Initializing WebView controller');
 
-    // Platform-specific user agent for better compatibility
     String userAgent = Platform.isIOS
         ? 'Mozilla/5.0 (iPhone; CPU iPhone OS 15_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/15.0 Mobile/15E148 Safari/604.1'
         : 'Mozilla/5.0 (Linux; Android 10; SM-G975F) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.120 Mobile Safari/537.36';
@@ -157,7 +156,6 @@ class _RedditWebviewScreenState extends State<RedditWebviewScreen> {
           onPageStarted: (String url) {
             print('Reddit WebView - Page Started: $url');
 
-            // Check if this is a Reddit app redirect
             if (url.startsWith('reddit://')) {
               print('Reddit WebView - Detected Reddit app redirect, ignoring');
               setState(() {
@@ -184,7 +182,6 @@ class _RedditWebviewScreenState extends State<RedditWebviewScreen> {
           onPageFinished: (String url) async {
             print('Reddit WebView - Page Finished: $url');
 
-            // Don't process app redirects
             if (url.startsWith('reddit://')) {
               print('Reddit WebView - Ignoring app redirect completion');
               return;
@@ -208,7 +205,6 @@ class _RedditWebviewScreenState extends State<RedditWebviewScreen> {
           onNavigationRequest: (NavigationRequest request) {
             print('Reddit WebView - Navigation Request: ${request.url}');
 
-            // Handle Reddit app redirects
             if (request.url.startsWith('reddit://')) {
               print('Reddit WebView - Blocking Reddit app redirect');
               setState(() {
@@ -229,7 +225,6 @@ class _RedditWebviewScreenState extends State<RedditWebviewScreen> {
             if (change.url != null && mounted) {
               print('Reddit WebView - URL Changed: ${change.url}');
 
-              // Handle Reddit app redirects
               if (change.url!.startsWith('reddit://')) {
                 print('Reddit WebView - Detected app redirect URL change');
                 setState(() {
@@ -249,7 +244,6 @@ class _RedditWebviewScreenState extends State<RedditWebviewScreen> {
             print('Reddit WebView - Error Code: ${error.errorCode}');
             print('Reddit WebView - Error URL: ${error.url}');
 
-            // Only show error if it's not an expected error and we haven't loaded successfully
             if (!_isExpectedError(error) &&
                 !hasLoadedSuccessfully &&
                 !isNavigatingToApp) {
@@ -275,7 +269,6 @@ class _RedditWebviewScreenState extends State<RedditWebviewScreen> {
               lastProgressUpdate = DateTime.now().millisecondsSinceEpoch;
             });
 
-            // If progress is high enough, consider it loaded
             if (progress >= 85 &&
                 isLoading &&
                 !hasLoadedSuccessfully &&
@@ -293,7 +286,6 @@ class _RedditWebviewScreenState extends State<RedditWebviewScreen> {
                 isLoading &&
                 !hasLoadedSuccessfully &&
                 !isNavigatingToApp) {
-              // Start a timer to check if progress gets stuck
               _startProgressStuckTimer();
             }
           },
@@ -320,7 +312,6 @@ class _RedditWebviewScreenState extends State<RedditWebviewScreen> {
         },
       );
 
-    // Add multiple fallback timers to check if page is actually loaded
     _fallbackTimer = Timer(const Duration(seconds: 8), () async {
       if (mounted &&
           isLoading &&
@@ -349,7 +340,6 @@ class _RedditWebviewScreenState extends State<RedditWebviewScreen> {
       }
     });
 
-    // Second fallback timer
     Timer(const Duration(seconds: 15), () async {
       if (mounted &&
           isLoading &&
@@ -378,7 +368,6 @@ class _RedditWebviewScreenState extends State<RedditWebviewScreen> {
       }
     });
 
-    // Third fallback timer for stuck progress
     Timer(const Duration(seconds: 12), () async {
       if (mounted &&
           isLoading &&
@@ -401,12 +390,6 @@ class _RedditWebviewScreenState extends State<RedditWebviewScreen> {
 
   @override
   Widget build(BuildContext context) {
-    print(
-        'Reddit WebView - Build: isLoading=$isLoading, hasError=$hasError, hasLoadedSuccessfully=$hasLoadedSuccessfully, progress=$loadingProgress%, isNavigatingToApp=$isNavigatingToApp');
-
-    // Allow adding friends from any page (no restrictions due to Reddit limitations)
-    bool canAddFriend = currentUrl != null && currentUrl!.length > 10;
-
     return Scaffold(
       appBar: AppBar(
         title: Text('Search: ${widget.searchQuery}'),
