@@ -1,9 +1,11 @@
-import 'package:flutter/material.dart';
-import 'package:flutter/cupertino.dart';
-import 'package:webview_flutter/webview_flutter.dart';
-import 'package:get/get.dart';
 import 'dart:async';
 import 'dart:io';
+
+import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
+
+import 'package:get/get.dart';
+import 'package:webview_flutter/webview_flutter.dart';
 
 import 'package:stay_connected/Platform/snapchat/snapchat_controller.dart';
 
@@ -13,11 +15,11 @@ class SnapchatWebviewScreen extends StatefulWidget {
   final String platformName;
 
   const SnapchatWebviewScreen({
-    Key? key,
+    super.key,
     required this.searchQuery,
     required this.iconName,
     required this.platformName,
-  }) : super(key: key);
+  });
 
   @override
   State<SnapchatWebviewScreen> createState() => _SnapchatWebviewScreenState();
@@ -94,11 +96,9 @@ class _SnapchatWebviewScreenState extends State<SnapchatWebviewScreen> {
   }
 
   bool _isExpectedError(WebResourceError error) {
-    // These are expected errors that don't indicate a real problem
-    return error.errorCode == -1002 || // unsupported URL (snapchat:// protocol)
-        error.errorCode == -999 || // cancelled navigation
-        error.errorCode ==
-            -1001; // timed out (sometimes happens during redirects)
+    return error.errorCode == -1002 ||
+        error.errorCode == -999 ||
+        error.errorCode == -1001;
   }
 
   @override
@@ -110,7 +110,6 @@ class _SnapchatWebviewScreenState extends State<SnapchatWebviewScreen> {
   void _initializeWebView() {
     print('Snapchat WebView - Initializing WebView controller');
 
-    // iOS-specific user agent for better compatibility
     String userAgent = Platform.isIOS
         ? 'Mozilla/5.0 (iPhone; CPU iPhone OS 15_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/15.0 Mobile/15E148 Safari/604.1'
         : 'Mozilla/5.0 (Linux; Android 10; SM-G975F) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.120 Mobile Safari/537.36';
@@ -169,7 +168,6 @@ class _SnapchatWebviewScreenState extends State<SnapchatWebviewScreen> {
             print('Snapchat WebView - Error Code: ${error.errorCode}');
             print('Snapchat WebView - Error URL: ${error.url}');
 
-            // Only show error if it's not an expected error and we haven't loaded successfully
             if (!_isExpectedError(error) && !hasLoadedSuccessfully) {
               if (mounted) {
                 setState(() {
@@ -210,7 +208,6 @@ class _SnapchatWebviewScreenState extends State<SnapchatWebviewScreen> {
         },
       );
 
-    // Add a fallback timer to check if page is actually loaded
     Timer(const Duration(seconds: 5), () async {
       if (mounted && isLoading && !hasLoadedSuccessfully) {
         print(
