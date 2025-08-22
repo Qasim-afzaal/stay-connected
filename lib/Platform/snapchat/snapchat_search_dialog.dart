@@ -1,17 +1,18 @@
-import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
+
 import 'package:get/get.dart';
-import 'package:stay_connected/Platform/snapchat/snapchat_webview_screen.dart';
+
+import 'package:stay_connected/Platform/shared/profile_webview_screen.dart';
 
 class SnapchatSearchDialog extends StatelessWidget {
   final String iconName;
   final String platformName;
 
   const SnapchatSearchDialog({
-    Key? key,
+    super.key,
     required this.iconName,
     required this.platformName,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -20,40 +21,25 @@ class SnapchatSearchDialog extends StatelessWidget {
     return CupertinoAlertDialog(
       title: Row(
         children: [
-          Container(
-            padding: const EdgeInsets.all(8),
-            decoration: BoxDecoration(
-              color: CupertinoColors.systemBlue.withOpacity(0.1),
-              borderRadius: BorderRadius.circular(8),
-            ),
-            child: Icon(
-              CupertinoIcons.search,
-              color: CupertinoColors.systemBlue,
-              size: 20,
-            ),
+          const Icon(
+            CupertinoIcons.search,
+            color: CupertinoColors.systemBlue,
+            size: 20,
           ),
-          const SizedBox(width: 12),
+          const SizedBox(width: 8),
           Text(
             'Search for $iconName',
             style: const TextStyle(
-              fontSize: 18,
+              fontSize: 16,
               fontWeight: FontWeight.w600,
             ),
           ),
         ],
       ),
       content: Padding(
-        padding: const EdgeInsets.only(top: 16),
+        padding: const EdgeInsets.only(top: 12),
         child: Column(
           children: [
-            const Text(
-              'Search and add friends to your category',
-              style: TextStyle(
-                fontSize: 14,
-                color: CupertinoColors.systemGrey,
-              ),
-            ),
-            const SizedBox(height: 16),
             CupertinoTextField(
               controller: searchController,
               autofocus: true,
@@ -65,11 +51,19 @@ class SnapchatSearchDialog extends StatelessWidget {
               ),
               padding: const EdgeInsets.symmetric(
                 horizontal: 12,
-                vertical: 12,
+                vertical: 8,
               ),
               style: const TextStyle(
-                fontSize: 16,
+                fontSize: 14,
                 fontWeight: FontWeight.w500,
+              ),
+            ),
+            const SizedBox(height: 8),
+            const Text(
+              'Search and add friends to your category',
+              style: TextStyle(
+                fontSize: 12,
+                color: CupertinoColors.systemGrey,
               ),
             ),
           ],
@@ -90,10 +84,10 @@ class SnapchatSearchDialog extends StatelessWidget {
           onPressed: () {
             if (searchController.text.trim().isNotEmpty) {
               Navigator.of(context).pop();
-              Get.to(() => SnapchatWebviewScreen(
+              Get.to(() => ProfileWebViewScreen(
+                    platform: platformName,
                     searchQuery: searchController.text.trim(),
                     iconName: iconName,
-                    platformName: platformName,
                   ));
             }
           },
