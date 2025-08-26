@@ -6,7 +6,6 @@ import 'package:get/get.dart';
 import 'package:stay_connected/Platform/youtube/youtube_controller.dart';
 import 'package:stay_connected/Platform/youtube/youtube_icon_screen.dart';
 import 'package:stay_connected/widget/custom_drwaer.dart';
-import 'package:stay_connected/widget/icon_selector.dart';
 
 class YouTubePage extends StatelessWidget {
   YouTubePage({Key? key}) : super(key: key);
@@ -15,7 +14,6 @@ class YouTubePage extends StatelessWidget {
   Widget build(BuildContext context) {
     return GetBuilder<YouTubeController>(
       builder: (controller) {
-        // Only show category icons (no profileUrl)
         final categoryIcons = controller.icons
             .where((icon) =>
                 icon['profileUrl'] == null || icon['profileUrl']!.isEmpty)
@@ -94,7 +92,7 @@ class YouTubePage extends StatelessWidget {
                   crossAxisCount: 4,
                   mainAxisSpacing: 16,
                   crossAxisSpacing: 16,
-                  childAspectRatio: 0.8,
+                  childAspectRatio: 0.7,
                 ),
                 itemBuilder: (context, index) {
                   if (index == categoryIcons.length) {
@@ -107,12 +105,12 @@ class YouTubePage extends StatelessWidget {
                             padding: const EdgeInsets.all(12),
                             child: Image.asset(
                               'assets/images/platform_icons/add.png',
-                              width: 32,
-                              height: 32,
+                              width: 50,
+                              height: 50,
                               errorBuilder: (context, error, stackTrace) {
                                 return Icon(
                                   Icons.add,
-                                  size: 32,
+                                  size: 44,
                                   color: Colors.grey,
                                 );
                               },
@@ -158,78 +156,76 @@ class YouTubePage extends StatelessWidget {
                             context, controller, index, iconData['name']!);
                       }
                     },
-                    child: Container(
-                      child: Stack(
-                        children: [
-                          Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Container(
-                                padding: const EdgeInsets.all(12),
-                                child: iconData['icon']!.endsWith('.svg')
-                                    ? Image.asset(
-                                        iconData['icon']!,
-                                        width: 32,
-                                        height: 32,
-                                        color: Colors.grey.shade700,
-                                        errorBuilder:
-                                            (context, error, stackTrace) {
-                                          return Icon(
-                                            Icons.favorite,
-                                            size: 32,
-                                            color: Colors.grey.shade700,
-                                          );
-                                        },
-                                      )
-                                    : Image.asset(
-                                        iconData['icon']!,
-                                        width: 32,
-                                        height: 32,
-                                        errorBuilder:
-                                            (context, error, stackTrace) {
-                                          return Icon(
-                                            Icons.favorite,
-                                            size: 32,
-                                            color: Colors.grey.shade700,
-                                          );
-                                        },
-                                      ),
-                              ),
-                              const SizedBox(height: 8),
-                              Padding(
-                                padding:
-                                    const EdgeInsets.symmetric(horizontal: 8),
-                                child: Text(
-                                  iconData['name']!,
-                                  style: const TextStyle(
-                                    fontSize: 11,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                  textAlign: TextAlign.center,
-                                  maxLines: 2,
-                                  overflow: TextOverflow.ellipsis,
+                    child: Stack(
+                      children: [
+                        Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Container(
+                              padding: const EdgeInsets.all(12),
+                              child: iconData['icon']!.endsWith('.svg')
+                                  ? Image.asset(
+                                      iconData['icon']!,
+                                      width: 32,
+                                      height: 32,
+                                      color: Colors.grey.shade700,
+                                      errorBuilder:
+                                          (context, error, stackTrace) {
+                                        return Icon(
+                                          Icons.favorite,
+                                          size: 32,
+                                          color: Colors.grey.shade700,
+                                        );
+                                      },
+                                    )
+                                  : Image.asset(
+                                      iconData['icon']!,
+                                      width: 50,
+                                      height: 50,
+                                      errorBuilder:
+                                          (context, error, stackTrace) {
+                                        return Icon(
+                                          Icons.favorite,
+                                          size: 44,
+                                          color: Colors.grey.shade700,
+                                        );
+                                      },
+                                    ),
+                            ),
+                            const SizedBox(height: 8),
+                            Padding(
+                              padding:
+                                  const EdgeInsets.symmetric(horizontal: 8),
+                              child: Text(
+                                iconData['name']!,
+                                style: const TextStyle(
+                                  fontSize: 11,
+                                  fontWeight: FontWeight.bold,
                                 ),
-                              ),
-                            ],
-                          ),
-                          if (controller.isDeleteMode)
-                            Positioned(
-                              top: 4,
-                              right: 4,
-                              child: Container(
-                                decoration: BoxDecoration(
-                                  color: isSelected ? Colors.red : Colors.grey,
-                                  shape: BoxShape.circle,
-                                ),
-                                child: Icon(
-                                  isSelected ? Icons.check : Icons.close,
-                                  size: 16,
-                                  color: Colors.white,
-                                ),
+                                textAlign: TextAlign.center,
+                                maxLines: 2,
+                                overflow: TextOverflow.ellipsis,
                               ),
                             ),
-                        ],
-                      ),
+                          ],
+                        ),
+                        if (controller.isDeleteMode)
+                          Positioned(
+                            top: 4,
+                            right: 4,
+                            child: Container(
+                              decoration: BoxDecoration(
+                                color: isSelected ? Colors.red : Colors.grey,
+                                shape: BoxShape.circle,
+                              ),
+                              child: Icon(
+                                isSelected ? Icons.check : Icons.close,
+                                size: 16,
+                                color: Colors.white,
+                              ),
+                            ),
+                          ),
+                      ],
                     ),
                   );
                 },
@@ -243,130 +239,240 @@ class YouTubePage extends StatelessWidget {
 
   void _showAddIconDialog(BuildContext context, YouTubeController controller) {
     final nameController = TextEditingController();
+    final List<Map<String, String>> availableIcons = [
+      {'name': 'Food', 'path': 'assets/images/platform_icons/img_food_12.png'},
+      {'name': 'Health', 'path': 'assets/images/platform_icons/health.png'},
+      {
+        'name': 'Photos',
+        'path': 'assets/images/platform_icons/img_photo_1.png'
+      },
+      {'name': 'Music', 'path': 'assets/images/platform_icons/img_music_1.png'},
+      {'name': 'Pets', 'path': 'assets/images/platform_icons/img_pets_1.png'},
+      {
+        'name': 'Games',
+        'path': 'assets/images/platform_icons/img_gamepad_1.png'
+      },
+      {
+        'name': 'Entertainment',
+        'path': 'assets/images/platform_icons/ic_entertainment.png'
+      },
+      {'name': 'Auto', 'path': 'assets/images/platform_icons/auto.png'},
+      {'name': 'Fashion', 'path': 'assets/images/platform_icons/fashion.png'},
+      {
+        'name': 'Desserts',
+        'path': 'assets/images/platform_icons/img_desserts_1_64x64.png'
+      },
+      {
+        'name': 'Favorites',
+        'path': 'assets/images/platform_icons/img_favorite_1.png'
+      },
+      {
+        'name': 'Fitness',
+        'path': 'assets/images/platform_icons/img_fitness_1.png'
+      },
+      {
+        'name': 'Travel',
+        'path': 'assets/images/platform_icons/img_travel_1.png'
+      },
+      {'name': 'News', 'path': 'assets/images/platform_icons/news.png'},
 
+      {'name': 'Cupid', 'path': 'assets/images/custom_icons/cupid_1.png'},
+      {'name': 'Garden', 'path': 'assets/images/custom_icons/garden_3.png'},
+      {'name': 'Heart', 'path': 'assets/images/custom_icons/heart_2.png'},
+      {'name': 'Heart 2', 'path': 'assets/images/custom_icons/heart_3.png'},
+      {
+        'name': 'Lifestyle',
+        'path': 'assets/images/custom_icons/lifestyle_1.png'
+      },
+      {'name': 'Plane', 'path': 'assets/images/custom_icons/plane_5.png'},
+      {'name': 'Recipe', 'path': 'assets/images/custom_icons/recipe_3.png'},
+      {
+        'name': 'Recipe Book',
+        'path': 'assets/images/custom_icons/recipe_book.png'
+      },
+      {'name': 'Reel', 'path': 'assets/images/custom_icons/reel_2.png'},
+      {'name': 'Rest', 'path': 'assets/images/custom_icons/rest_2.png'},
+      {'name': 'Rest 2', 'path': 'assets/images/custom_icons/rest_3.png'},
+      {'name': 'Tele', 'path': 'assets/images/custom_icons/tele_1.png'},
+      {
+        'name': 'Checkmark',
+        'path': 'assets/images/custom_icons/checkmark_blue.png'
+      },
+      {
+        'name': 'Blue Apron',
+        'path': 'assets/images/custom_icons/blue_apron.png'
+      },
+      {'name': 'Circle', 'path': 'assets/images/custom_icons/circle_2.png'},
+      {'name': 'Play', 'path': 'assets/images/custom_icons/play.png'},
+      {'name': 'Circle 2', 'path': 'assets/images/custom_icons/circle.png'},
+      {'name': 'Square', 'path': 'assets/images/custom_icons/square.png'},
+      {'name': 'Money', 'path': 'assets/images/custom_icons/money.png'},
+      {'name': 'Twitter', 'path': 'assets/images/custom_icons/twitter.png'},
+      {'name': 'Tick Mark', 'path': 'assets/images/custom_icons/tick_mark.png'},
+      {'name': 'Folder', 'path': 'assets/images/custom_icons/folder.png'},
+      {'name': 'Correct', 'path': 'assets/images/custom_icons/correct.png'},
+      {
+        'name': 'Egg Decoration',
+        'path': 'assets/images/custom_icons/egg_decoration.png'
+      },
+      {
+        'name': 'Easter Egg',
+        'path': 'assets/images/custom_icons/easter_egg.png'
+      },
+      {
+        'name': 'Easter Day',
+        'path': 'assets/images/custom_icons/easter_day.png'
+      },
+      {
+        'name': 'Electric Kettle',
+        'path': 'assets/images/custom_icons/electric_kettle.png'
+      },
+      {'name': 'Necklace', 'path': 'assets/images/custom_icons/necklace.png'},
+      {
+        'name': 'Viennese Coffee',
+        'path': 'assets/images/custom_icons/viennese_coffee.png'
+      },
+      {'name': 'Dislike', 'path': 'assets/images/custom_icons/dislike.png'},
+      {
+        'name': 'Favorite Chart',
+        'path': 'assets/images/custom_icons/favorite_chart.png'
+      },
+      {'name': 'Koran', 'path': 'assets/images/custom_icons/koran.png'},
+      {'name': 'Pets', 'path': 'assets/images/custom_icons/img_pets_12.png'},
+      // Add icon at the end
+      {'name': 'Add', 'path': 'assets/images/platform_icons/add.png'},
+    ];
     showCupertinoDialog(
       context: context,
       builder: (BuildContext context) {
-        return CupertinoAlertDialog(
-          title: Row(
-            children: [
-              Container(
-                padding: const EdgeInsets.all(8),
-                decoration: BoxDecoration(
-                  color: CupertinoColors.systemRed.withOpacity(0.1),
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: Icon(
-                  CupertinoIcons.add_circled,
-                  color: CupertinoColors.systemRed,
-                  size: 20,
-                ),
+        bool showAllIcons = false;
+        return StatefulBuilder(
+          builder: (context, setState) {
+            return CupertinoAlertDialog(
+              content: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  SizedBox(
+                    width: 240,
+                    child: CupertinoTextField(
+                      controller: nameController,
+                      autofocus: true,
+                      placeholder: 'Icon name',
+                      maxLength: 10,
+                      decoration: BoxDecoration(
+                        color: CupertinoColors.systemGrey6,
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 12,
+                        vertical: 12,
+                      ),
+                      style: const TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  if (!showAllIcons) ...[
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: List.generate(3, (i) {
+                        final icon = availableIcons[i];
+                        return GestureDetector(
+                          onTap: () {
+                            if (nameController.text.isNotEmpty) {
+                              Navigator.of(context).pop();
+                              controller.addIcon(
+                                nameController.text,
+                                icon['path']!,
+                              );
+                            }
+                          },
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 8),
+                            child: Image.asset(
+                              icon['path']!,
+                              width: 40,
+                              height: 40,
+                              errorBuilder: (context, error, stackTrace) =>
+                                  Icon(CupertinoIcons.photo, size: 32),
+                            ),
+                          ),
+                        );
+                      }),
+                    ),
+                    const SizedBox(height: 12),
+                    CupertinoButton(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 8, vertical: 4),
+                      minSize: 28,
+                      child: const Text('See more'),
+                      onPressed: () {
+                        setState(() {
+                          showAllIcons = true;
+                        });
+                      },
+                    ),
+                  ] else ...[
+                    SizedBox(
+                      height: 300,
+                      width: 300,
+                      child: GridView.builder(
+                        shrinkWrap: true,
+                        gridDelegate:
+                            const SliverGridDelegateWithFixedCrossAxisCount(
+                          crossAxisCount: 4,
+                          crossAxisSpacing: 8,
+                          mainAxisSpacing: 8,
+                        ),
+                        itemCount: availableIcons.length,
+                        itemBuilder: (context, index) {
+                          final icon = availableIcons[index];
+                          return GestureDetector(
+                            onTap: () {
+                              if (nameController.text.isNotEmpty) {
+                                Navigator.of(context).pop();
+                                controller.addIcon(
+                                  nameController.text,
+                                  icon['path']!,
+                                );
+                              }
+                            },
+                            child: Container(
+                              decoration: BoxDecoration(
+                                color: CupertinoColors.systemGrey6,
+                                borderRadius: BorderRadius.circular(8),
+                                border: Border.all(
+                                  color: CupertinoColors.systemGrey4,
+                                  width: 1,
+                                ),
+                              ),
+                              child: Center(
+                                child: Image.asset(
+                                  icon['path']!,
+                                  width: 32,
+                                  height: 32,
+                                  errorBuilder: (context, error, stackTrace) =>
+                                      Icon(CupertinoIcons.photo, size: 32),
+                                ),
+                              ),
+                            ),
+                          );
+                        },
+                      ),
+                    ),
+                  ],
+                ],
               ),
-              const SizedBox(width: 12),
-              const Text(
-                'Add Custom Icon',
-                style: TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-            ],
-          ),
-          content: Padding(
-            padding: const EdgeInsets.only(top: 16),
-            child: Column(
-              children: [
-                const Text(
-                  'Create a new custom icon',
-                  style: TextStyle(
-                    fontSize: 14,
-                    color: CupertinoColors.systemGrey,
-                  ),
-                ),
-                const SizedBox(height: 16),
-                CupertinoTextField(
-                  controller: nameController,
-                  autofocus: true,
-                  placeholder: 'Enter icon name (max 10 chars)',
-                  maxLength: 10,
-                  decoration: BoxDecoration(
-                    color: CupertinoColors.systemGrey6,
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 12,
-                    vertical: 12,
-                  ),
-                  style: const TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w500,
-                  ),
+              actions: [
+                CupertinoDialogAction(
+                  onPressed: () => Navigator.of(context).pop(),
+                  child: const Text('Cancel'),
                 ),
               ],
-            ),
-          ),
-          actions: [
-            CupertinoDialogAction(
-              onPressed: () => Navigator.of(context).pop(),
-              child: const Text(
-                'Cancel',
-                style: TextStyle(
-                  color: CupertinoColors.systemGrey,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-            ),
-            CupertinoDialogAction(
-              onPressed: () {
-                if (nameController.text.isNotEmpty) {
-                  Navigator.of(context).pop();
-                  showCupertinoDialog(
-                    context: context,
-                    builder: (BuildContext context) {
-                      return CupertinoAlertDialog(
-                        title: const Text('Select Icon'),
-                        content: const Text(
-                            'Choose an icon for your custom category'),
-                        actions: [
-                          CupertinoDialogAction(
-                            onPressed: () => Navigator.of(context).pop(),
-                            child: const Text('Cancel'),
-                          ),
-                          CupertinoDialogAction(
-                            onPressed: () {
-                              Navigator.of(context).pop();
-                              Get.dialog(
-                                IconSelector(
-                                  onIconSelected: (iconPath, iconName) {
-                                    if (nameController.text.isNotEmpty) {
-                                      controller.addIcon(
-                                        nameController.text,
-                                        iconPath,
-                                      );
-                                    }
-                                  },
-                                ),
-                              );
-                            },
-                            isDefaultAction: true,
-                            child: const Text('Select'),
-                          ),
-                        ],
-                      );
-                    },
-                  );
-                }
-              },
-              isDefaultAction: true,
-              child: const Text(
-                'Next',
-                style: TextStyle(
-                  color: CupertinoColors.systemRed,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-            ),
-          ],
+            );
+          },
         );
       },
     );
@@ -380,73 +486,34 @@ class YouTubePage extends StatelessWidget {
       context: context,
       builder: (BuildContext context) {
         return CupertinoAlertDialog(
-          title: Row(
-            children: [
-              Container(
-                padding: const EdgeInsets.all(8),
+          content: Padding(
+            padding: const EdgeInsets.only(top: 8),
+            child: SizedBox(
+              width: 240,
+              child: CupertinoTextField(
+                controller: nameController,
+                autofocus: true,
+                placeholder: 'Rename icon',
+                maxLength: 10,
                 decoration: BoxDecoration(
-                  color: CupertinoColors.systemRed.withOpacity(0.1),
+                  color: CupertinoColors.systemGrey6,
                   borderRadius: BorderRadius.circular(8),
                 ),
-                child: Icon(
-                  CupertinoIcons.pencil,
-                  color: CupertinoColors.systemRed,
-                  size: 20,
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 12,
+                ),
+                style: const TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w500,
                 ),
               ),
-              const SizedBox(width: 12),
-              const Text(
-                'Rename Icon',
-                style: TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-            ],
-          ),
-          content: Padding(
-            padding: const EdgeInsets.only(top: 16),
-            child: Column(
-              children: [
-                const Text(
-                  'Update the icon name',
-                  style: TextStyle(
-                    fontSize: 14,
-                    color: CupertinoColors.systemGrey,
-                  ),
-                ),
-                const SizedBox(height: 16),
-                CupertinoTextField(
-                  controller: nameController,
-                  autofocus: true,
-                  placeholder: 'Enter icon name (max 10 chars)',
-                  maxLength: 10,
-                  decoration: BoxDecoration(
-                    color: CupertinoColors.systemGrey6,
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 12,
-                    vertical: 12,
-                  ),
-                  style: const TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
-              ],
             ),
           ),
           actions: [
             CupertinoDialogAction(
               onPressed: () => Navigator.of(context).pop(),
-              child: const Text(
-                'Cancel',
-                style: TextStyle(
-                  color: CupertinoColors.systemGrey,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
+              child: const Text('Cancel'),
             ),
             CupertinoDialogAction(
               onPressed: () {
@@ -456,13 +523,7 @@ class YouTubePage extends StatelessWidget {
                 }
               },
               isDefaultAction: true,
-              child: const Text(
-                'Save',
-                style: TextStyle(
-                  color: CupertinoColors.systemRed,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
+              child: const Text('OK'),
             ),
           ],
         );
