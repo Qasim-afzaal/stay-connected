@@ -12,16 +12,15 @@ class YouTubeIconScreen extends StatelessWidget {
   final String platformName;
 
   const YouTubeIconScreen({
-    Key? key,
+    super.key,
     required this.iconName,
     required this.platformName,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
     return GetBuilder<YouTubeController>(
       builder: (controller) {
-        // Filter friends that belong to this specific category AND have a profileUrl (actual friends, not category icons)
         final categoryFriends = controller.icons
             .where((icon) =>
                 icon['category'] == iconName &&
@@ -29,7 +28,6 @@ class YouTubeIconScreen extends StatelessWidget {
                 icon['profileUrl']!.isNotEmpty)
             .toList();
 
-        // Debug: Print all icons to see what's being stored
         print('YouTube - Current category: $iconName');
         print('YouTube - Total icons: ${controller.icons.length}');
         print('YouTube - Category friends: ${categoryFriends.length}');
@@ -109,8 +107,7 @@ class YouTubeIconScreen extends StatelessWidget {
                                 padding: const EdgeInsets.all(4),
                                 child: Image.asset(
                                   'assets/images/iconnew_nbg.png',
-                                  width: 50,
-                                  height: 50,
+                                  scale: 0.1,
                                   errorBuilder: (context, error, stackTrace) {
                                     return Icon(
                                       Icons.person,
@@ -226,10 +223,8 @@ class YouTubeIconScreen extends StatelessWidget {
             ),
             CupertinoDialogAction(
               onPressed: () async {
-                // Get the controller and remove the friend
                 final controller = Get.find<YouTubeController>();
 
-                // Find the friend in the category and remove it - use the same filtering logic as in build method
                 final categoryFriends = controller.icons
                     .where((icon) =>
                         icon['category'] == iconName &&
@@ -244,7 +239,6 @@ class YouTubeIconScreen extends StatelessWidget {
                       icon['category'] == friendToDelete['category'] &&
                       icon['profileUrl'] == friendToDelete['profileUrl']);
 
-                  // Save the changes to SharedPreferences
                   await controller.saveToPrefs();
                   controller.update();
                 }
@@ -275,7 +269,6 @@ class YouTubeIconScreen extends StatelessWidget {
   }
 }
 
-// Custom WebView for opening friend profiles
 class _FriendProfileWebView extends StatefulWidget {
   final String profileUrl;
   final String friendName;
