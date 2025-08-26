@@ -1,12 +1,4 @@
-import 'dart:async';
-import 'dart:io';
-
-import 'package:flutter/material.dart';
-
 import 'package:get/get.dart';
-import 'package:get/get.dart';
-import 'package:webview_flutter/webview_flutter.dart';
-import 'package:webview_flutter/webview_flutter.dart';
 
 import 'package:stay_connected/Platform/facebook/facebook_binding.dart';
 import 'package:stay_connected/Platform/facebook/facebook_page.dart';
@@ -17,33 +9,8 @@ import 'package:stay_connected/Platform/pinterest/pinterest_page.dart';
 import 'package:stay_connected/Platform/reddit/reddit_binding.dart';
 import 'package:stay_connected/Platform/reddit/reddit_page.dart';
 import 'package:stay_connected/Platform/snapchat/snapchat_binding.dart';
-import 'package:stay_connected/Platform/snapchat/snapchat_controller.dart';
-import 'package:stay_connected/Platform/snapchat/snapchat_controller.dart';
-import 'package:stay_connected/Platform/snapchat/snapchat_controller.dart';
-import 'package:stay_connected/Platform/snapchat/snapchat_controller.dart';
-import 'package:stay_connected/Platform/snapchat/snapchat_controller.dart';
-import 'package:stay_connected/Platform/snapchat/snapchat_controller.dart';
-import 'package:stay_connected/Platform/snapchat/snapchat_controller.dart';
-import 'package:stay_connected/Platform/snapchat/snapchat_controller.dart';
-import 'package:stay_connected/Platform/snapchat/snapchat_controller.dart';
-import 'package:stay_connected/Platform/snapchat/snapchat_controller.dart';
-import 'package:stay_connected/Platform/snapchat/snapchat_controller.dart';
-import 'package:stay_connected/Platform/snapchat/snapchat_controller.dart';
-import 'package:stay_connected/Platform/snapchat/snapchat_controller.dart';
-import 'package:stay_connected/Platform/snapchat/snapchat_controller.dart';
-import 'package:stay_connected/Platform/snapchat/snapchat_controller.dart';
-import 'package:stay_connected/Platform/snapchat/snapchat_controller.dart';
-import 'package:stay_connected/Platform/snapchat/snapchat_controller.dart';
-import 'package:stay_connected/Platform/snapchat/snapchat_controller.dart';
-import 'package:stay_connected/Platform/snapchat/snapchat_controller.dart';
-import 'package:stay_connected/Platform/snapchat/snapchat_controller.dart';
-import 'package:stay_connected/Platform/snapchat/snapchat_controller.dart';
-import 'package:stay_connected/Platform/snapchat/snapchat_controller.dart';
-import 'package:stay_connected/Platform/snapchat/snapchat_controller.dart';
-import 'package:stay_connected/Platform/snapchat/snapchat_controller.dart';
 import 'package:stay_connected/Platform/snapchat/snapchat_page.dart';
 import 'package:stay_connected/Platform/tiktok/tiktok_binding.dart';
-import 'package:stay_connected/Platform/tiktok/tiktok_controller.dart';
 import 'package:stay_connected/Platform/tiktok/tiktok_page.dart';
 import 'package:stay_connected/Platform/twitter/twitter_binding.dart';
 import 'package:stay_connected/Platform/twitter/twitter_page.dart';
@@ -51,17 +18,10 @@ import 'package:stay_connected/Platform/youtube/youtube_binding.dart';
 import 'package:stay_connected/Platform/youtube/youtube_page.dart';
 import 'package:stay_connected/home/home.dart';
 import 'package:stay_connected/home/home_binding.dart';
-import 'package:stay_connected/native_webview_widget.dart';
-import 'package:stay_connected/native_webview_widget.dart';
 import 'package:stay_connected/splash/splash.dart';
 import 'package:stay_connected/splash/splash_binding.dart';
-import 'package:stay_connected/test_webview.dart';
 import 'package:stay_connected/webview/webview_binding.dart';
 import 'package:stay_connected/webview/webview_page.dart';
-import 'package:stay_connected/widget/custom_drwaer.dart';
-import 'package:stay_connected/widget/custom_drwaer.dart';
-import 'package:stay_connected/widget/icon_selector.dart';
-import 'package:stay_connected/widget/icon_selector.dart';
 
 part 'app_routes.dart';
 
