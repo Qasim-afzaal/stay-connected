@@ -1,7 +1,4 @@
-// twitter_controller.dart
 import 'dart:convert';
-
-import 'package:flutter/material.dart';
 
 import 'package:get/get.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -12,7 +9,6 @@ class TwitterController extends GetxController {
   bool isDeleteMode = false;
   Set<int> selectedIcons = {};
 
-  // Platform-specific SharedPreferences key
   String get _sharedPrefsKey => 'platform_icons_${platformName.toLowerCase()}';
 
   TwitterController(this.platformName);
@@ -25,20 +21,8 @@ class TwitterController extends GetxController {
 
   @override
   void onClose() {
-    // Save data when controller is disposed
     _saveToPrefs();
     super.onClose();
-  }
-
-  // Clear existing corrupted data
-  Future<void> _clearExistingData() async {
-    try {
-      final prefs = await SharedPreferences.getInstance();
-      await prefs.remove(_sharedPrefsKey);
-      print('Cleared existing data for $platformName');
-    } catch (e) {
-      print('Error clearing data for $platformName: $e');
-    }
   }
 
   Future<void> loadIcons() async {
@@ -63,7 +47,6 @@ class TwitterController extends GetxController {
           }
         }).toList();
 
-        // Filter out invalid entries
         icons = icons
             .where(
                 (icon) => icon['name']!.isNotEmpty && icon['icon']!.isNotEmpty)
@@ -75,13 +58,12 @@ class TwitterController extends GetxController {
               'Twitter - Loaded icon: ${icon['name']}, Category: ${icon['category']}, ProfileUrl: ${icon['profileUrl']}');
         }
       } else {
-        // Initialize with default icons if no data exists for this platform
         icons = _getDefaultIcons();
         await _saveToPrefs(); // Save default icons
       }
     } catch (e) {
       print('Error loading icons for $platformName: $e');
-      // Fallback to default icons if there's an error
+
       icons = _getDefaultIcons();
     }
     update();
@@ -186,7 +168,6 @@ class TwitterController extends GetxController {
 
   void deleteSelectedIcons() async {
     try {
-      // Sort indices in descending order to avoid index shifting issues
       final sortedIndices = selectedIcons.toList()
         ..sort((a, b) => b.compareTo(a));
 
