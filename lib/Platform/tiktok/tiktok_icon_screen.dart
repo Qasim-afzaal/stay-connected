@@ -12,16 +12,15 @@ class TikTokIconScreen extends StatelessWidget {
   final String platformName;
 
   const TikTokIconScreen({
-    Key? key,
+    super.key,
     required this.iconName,
     required this.platformName,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
     return GetBuilder<TikTokController>(
       builder: (controller) {
-        // Filter friends that belong to this specific category AND have a profileUrl (actual friends, not category icons)
         final categoryFriends = controller.icons
             .where((icon) =>
                 icon['category'] == iconName &&
@@ -29,7 +28,6 @@ class TikTokIconScreen extends StatelessWidget {
                 icon['profileUrl']!.isNotEmpty)
             .toList();
 
-        // Debug: Print all icons to see what's being stored
         print('TikTok - Current category: $iconName');
         print('TikTok - Total icons: ${controller.icons.length}');
         print('TikTok - Category friends: ${categoryFriends.length}');
@@ -89,7 +87,6 @@ class TikTokIconScreen extends StatelessWidget {
                         final friend = categoryFriends[index];
                         return GestureDetector(
                           onTap: () {
-                            // Open the friend's profile in WebView
                             if (friend['profileUrl'] != null) {
                               Get.to(() => _FriendProfileWebView(
                                     profileUrl: friend['profileUrl']!,
@@ -98,7 +95,6 @@ class TikTokIconScreen extends StatelessWidget {
                             }
                           },
                           onLongPress: () {
-                            // Show delete dialog on long press
                             _showDeleteDialog(
                                 context, friend['name'] ?? 'Unknown', index);
                           },
@@ -109,8 +105,7 @@ class TikTokIconScreen extends StatelessWidget {
                                 padding: const EdgeInsets.all(4),
                                 child: Image.asset(
                                   'assets/images/img_tiktok.png',
-                                  width: 50,
-                                  height: 50,
+                                  scale: 0.1,
                                   errorBuilder: (context, error, stackTrace) {
                                     return Icon(
                                       Icons.person,
@@ -225,10 +220,8 @@ class TikTokIconScreen extends StatelessWidget {
             ),
             CupertinoDialogAction(
               onPressed: () async {
-                // Get the controller and remove the friend
                 final controller = Get.find<TikTokController>();
 
-                // Find the friend in the category and remove it - use the same filtering logic as in build method
                 final categoryFriends = controller.icons
                     .where((icon) =>
                         icon['category'] == iconName &&
@@ -243,7 +236,6 @@ class TikTokIconScreen extends StatelessWidget {
                       icon['category'] == friendToDelete['category'] &&
                       icon['profileUrl'] == friendToDelete['profileUrl']);
 
-                  // Save the changes to SharedPreferences
                   await controller.saveToPrefs();
                   controller.update();
                 }
@@ -274,7 +266,6 @@ class TikTokIconScreen extends StatelessWidget {
   }
 }
 
-// Custom WebView for opening friend profiles
 class _FriendProfileWebView extends StatefulWidget {
   final String profileUrl;
   final String friendName;
