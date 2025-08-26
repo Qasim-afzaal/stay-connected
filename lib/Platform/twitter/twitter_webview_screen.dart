@@ -1,9 +1,11 @@
-import 'package:flutter/material.dart';
-import 'package:flutter/cupertino.dart';
-import 'package:get/get.dart';
-import 'package:webview_flutter/webview_flutter.dart';
 import 'dart:async';
 import 'dart:io';
+
+import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
+
+import 'package:get/get.dart';
+import 'package:webview_flutter/webview_flutter.dart';
 
 import 'package:stay_connected/Platform/twitter/twitter_controller.dart';
 
@@ -13,11 +15,11 @@ class TwitterWebviewScreen extends StatefulWidget {
   final String platformName;
 
   const TwitterWebviewScreen({
-    Key? key,
+    super.key,
     required this.searchQuery,
     required this.iconName,
     required this.platformName,
-  }) : super(key: key);
+  });
 
   @override
   State<TwitterWebviewScreen> createState() => _TwitterWebviewScreenState();
@@ -128,11 +130,9 @@ class _TwitterWebviewScreenState extends State<TwitterWebviewScreen> {
   }
 
   bool _isExpectedError(WebResourceError error) {
-    // These are expected errors that don't indicate a real problem
-    return error.errorCode == -1002 || // unsupported URL (twitter:// protocol)
-        error.errorCode == -999 || // cancelled navigation
-        error.errorCode ==
-            -1001; // timed out (sometimes happens during redirects)
+    return error.errorCode == -1002 ||
+        error.errorCode == -999 ||
+        error.errorCode == -1001;
   }
 
   @override
@@ -144,7 +144,6 @@ class _TwitterWebviewScreenState extends State<TwitterWebviewScreen> {
   void _initializeWebView() {
     print('Twitter WebView - Initializing WebView controller');
 
-    // Platform-specific user agent for better compatibility
     String userAgent = Platform.isIOS
         ? 'Mozilla/5.0 (iPhone; CPU iPhone OS 15_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/15.0 Mobile/15E148 Safari/604.1'
         : 'Mozilla/5.0 (Linux; Android 10; SM-G975F) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.120 Mobile Safari/537.36';
@@ -157,7 +156,6 @@ class _TwitterWebviewScreenState extends State<TwitterWebviewScreen> {
           onPageStarted: (String url) {
             print('Twitter WebView - Page Started: $url');
 
-            // Check if this is a Twitter app redirect
             if (url.startsWith('twitter://')) {
               print(
                   'Twitter WebView - Detected Twitter app redirect, ignoring');
@@ -185,7 +183,6 @@ class _TwitterWebviewScreenState extends State<TwitterWebviewScreen> {
           onPageFinished: (String url) async {
             print('Twitter WebView - Page Finished: $url');
 
-            // Don't process app redirects
             if (url.startsWith('twitter://')) {
               print('Twitter WebView - Ignoring app redirect completion');
               return;
@@ -209,7 +206,6 @@ class _TwitterWebviewScreenState extends State<TwitterWebviewScreen> {
           onNavigationRequest: (NavigationRequest request) {
             print('Twitter WebView - Navigation Request: ${request.url}');
 
-            // Handle Twitter app redirects
             if (request.url.startsWith('twitter://')) {
               print('Twitter WebView - Blocking Twitter app redirect');
               setState(() {
@@ -230,7 +226,6 @@ class _TwitterWebviewScreenState extends State<TwitterWebviewScreen> {
             if (change.url != null && mounted) {
               print('Twitter WebView - URL Changed: ${change.url}');
 
-              // Handle Twitter app redirects
               if (change.url!.startsWith('twitter://')) {
                 print('Twitter WebView - Detected app redirect URL change');
                 setState(() {
@@ -250,7 +245,6 @@ class _TwitterWebviewScreenState extends State<TwitterWebviewScreen> {
             print('Twitter WebView - Error Code: ${error.errorCode}');
             print('Twitter WebView - Error URL: ${error.url}');
 
-            // Only show error if it's not an expected error and we haven't loaded successfully
             if (!_isExpectedError(error) &&
                 !hasLoadedSuccessfully &&
                 !isNavigatingToApp) {
@@ -276,7 +270,6 @@ class _TwitterWebviewScreenState extends State<TwitterWebviewScreen> {
               lastProgressUpdate = DateTime.now().millisecondsSinceEpoch;
             });
 
-            // If progress is high enough, consider it loaded
             if (progress >= 85 &&
                 isLoading &&
                 !hasLoadedSuccessfully &&
@@ -294,7 +287,6 @@ class _TwitterWebviewScreenState extends State<TwitterWebviewScreen> {
                 isLoading &&
                 !hasLoadedSuccessfully &&
                 !isNavigatingToApp) {
-              // Start a timer to check if progress gets stuck
               _startProgressStuckTimer();
             }
           },
@@ -350,7 +342,6 @@ class _TwitterWebviewScreenState extends State<TwitterWebviewScreen> {
       }
     });
 
-    // Second fallback timer
     Timer(const Duration(seconds: 15), () async {
       if (mounted &&
           isLoading &&
@@ -379,7 +370,6 @@ class _TwitterWebviewScreenState extends State<TwitterWebviewScreen> {
       }
     });
 
-    // Third fallback timer for stuck progress
     Timer(const Duration(seconds: 12), () async {
       if (mounted &&
           isLoading &&
@@ -404,9 +394,6 @@ class _TwitterWebviewScreenState extends State<TwitterWebviewScreen> {
   Widget build(BuildContext context) {
     print(
         'Twitter WebView - Build: isLoading=$isLoading, hasError=$hasError, hasLoadedSuccessfully=$hasLoadedSuccessfully, progress=$loadingProgress%, isNavigatingToApp=$isNavigatingToApp');
-
-    // Allow adding friends from any page (no restrictions due to Twitter limitations)
-    bool canAddFriend = currentUrl != null && currentUrl!.length > 10;
 
     return Scaffold(
       appBar: AppBar(
@@ -678,7 +665,6 @@ class _TwitterWebviewScreenState extends State<TwitterWebviewScreen> {
     controller.addFriendToCategory(
         friendName, widget.iconName, finalProfileUrl);
 
-    // Only close the dialog, not the whole screen
     Get.back();
 
     Get.snackbar(
@@ -694,11 +680,9 @@ class _TwitterWebviewScreenState extends State<TwitterWebviewScreen> {
   }
 
   String? _extractNameFromUrl(String url) {
-    // Try to extract name from Twitter URL
     if (url.contains('twitter.com/')) {
       String path = url.split('twitter.com/')[1];
       if (path.isNotEmpty) {
-        // Remove query parameters and get the username
         String username = path.split('?')[0].split('/')[0];
         if (username != 'home' &&
             username != 'explore' &&
