@@ -48,7 +48,7 @@ Organize your connections with intuitive categories:
 
 ```bash
 # Clone the repository
-git clone https://github.com/yourusername/stayconnected.git
+git clone https://github.com/Qasim-afzaal/stayconnected.git
 
 # Navigate to the project directory
 cd stayconnected
