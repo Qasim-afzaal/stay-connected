@@ -1,7 +1,5 @@
 # 🌐 StayConnected - Your Social Universe, Organized
 
-![StayConnected Banner](https://via.placeholder.com/800x200?text=StayConnected+-+All+Your+Social+Profiles+in+One+Place)
-
 Welcome to **StayConnected**, the ultimate app for managing and accessing all your social connections across multiple platforms in one seamless experience!
 
 ## ✨ Features
@@ -45,12 +43,6 @@ Organize your connections with intuitive categories:
 4. **Organize** - View your saved connections by platform or category
 5. **Revisit** - Quickly access your curated social universe anytime!
 
-## 📱 Screenshots
-
-*(Placeholder for app screenshots)*
-![Home Screen](https://via.placeholder.com/300x600?text=Home+Screen)
-![Search](https://via.placeholder.com/300x600?text=Search+View)
-![Categories](https://via.placeholder.com/300x600?text=Category+View)
 
 ## 🛠️ Installation
 
