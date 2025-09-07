@@ -211,6 +211,63 @@ class SnapchatController extends GetxController {
     }
   }
 
+  Future<void> moveFriendToCategory(
+      String friendName, String oldCategory, String newCategory, String profileUrl) async {
+    try {
+      // Find and update the friend's category
+      for (int i = 0; i < icons.length; i++) {
+        if (icons[i]['name'] == friendName &&
+            icons[i]['category'] == oldCategory &&
+            icons[i]['profileUrl'] == profileUrl) {
+          icons[i]['category'] = newCategory;
+          break;
+        }
+      }
+      await _saveToPrefs();
+      update();
+    } catch (e) {
+      print('Error moving friend to category for $platformName: $e');
+    }
+  }
+
+  List<String> getAvailableCategories() {
+    Set<String> categories = {};
+    print('Snapchat - Getting available categories from ${icons.length} icons');
+    for (var icon in icons) {
+      if (icon['category'] != null && icon['category']!.isNotEmpty) {
+        categories.add(icon['category']!);
+        print('Snapchat - Found category: ${icon['category']}');
+      }
+    }
+    final result = categories.toList()..sort();
+    print('Snapchat - Available categories: $result');
+    return result;
+  }
+
+  List<String> getCategoriesWithFriends() {
+    Set<String> categories = {};
+    for (var icon in icons) {
+      if (icon['category'] != null && 
+          icon['category']!.isNotEmpty &&
+          icon['profileUrl'] != null &&
+          icon['profileUrl']!.isNotEmpty) {
+        categories.add(icon['category']!);
+      }
+    }
+    return categories.toList()..sort();
+  }
+
+  Future<void> resetToDefaults() async {
+    try {
+      icons = _getDefaultIcons();
+      await _saveToPrefs();
+      update();
+      print('Snapchat - Reset to default icons');
+    } catch (e) {
+      print('Error resetting icons for $platformName: $e');
+    }
+  }
+
   Future<void> removeIcon(int index) async {
     try {
       if (index >= 0 && index < icons.length) {
