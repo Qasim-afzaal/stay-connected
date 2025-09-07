@@ -57,6 +57,24 @@ class FaceBookController extends GetxController {
           print(
               'Facebook - Loaded icon: ${icon['name']}, Category: ${icon['category']}, ProfileUrl: ${icon['profileUrl']}');
         }
+        
+        // Check if we have all default categories, if not, merge with defaults
+        final defaultIcons = _getDefaultIcons();
+        final defaultCategories = defaultIcons.map((icon) => icon['category']!).toSet();
+        final currentCategories = icons.map((icon) => icon['category']!).toSet();
+        
+        final missingDefaultCategories = defaultCategories.difference(currentCategories);
+        if (missingDefaultCategories.isNotEmpty) {
+          print('Facebook - Missing default categories: $missingDefaultCategories');
+          // Add missing default categories
+          for (var defaultIcon in defaultIcons) {
+            if (missingDefaultCategories.contains(defaultIcon['category'])) {
+              icons.add(defaultIcon);
+              print('Facebook - Added missing default icon: ${defaultIcon['name']}');
+            }
+          }
+          await _saveToPrefs(); // Save updated icons
+        }
       } else {
         icons = _getDefaultIcons();
         await _saveToPrefs(); // Save default icons
@@ -212,6 +230,52 @@ class FaceBookController extends GetxController {
     }
   }
 
+  Future<void> moveFriendToCategory(
+      String friendName, String oldCategory, String newCategory, String profileUrl) async {
+    try {
+      // Find and update the friend's category
+      for (int i = 0; i < icons.length; i++) {
+        if (icons[i]['name'] == friendName &&
+            icons[i]['category'] == oldCategory &&
+            icons[i]['profileUrl'] == profileUrl) {
+          icons[i]['category'] = newCategory;
+          break;
+        }
+      }
+      await _saveToPrefs();
+      update();
+    } catch (e) {
+      print('Error moving friend to category for $platformName: $e');
+    }
+  }
+
+  List<String> getAvailableCategories() {
+    Set<String> categories = {};
+    print('Facebook - Getting available categories from ${icons.length} icons');
+    for (var icon in icons) {
+      if (icon['category'] != null && icon['category']!.isNotEmpty) {
+        categories.add(icon['category']!);
+        print('Facebook - Found category: ${icon['category']}');
+      }
+    }
+    final result = categories.toList()..sort();
+    print('Facebook - Available categories: $result');
+    return result;
+  }
+
+  List<String> getCategoriesWithFriends() {
+    Set<String> categories = {};
+    for (var icon in icons) {
+      if (icon['category'] != null && 
+          icon['category']!.isNotEmpty &&
+          icon['profileUrl'] != null &&
+          icon['profileUrl']!.isNotEmpty) {
+        categories.add(icon['category']!);
+      }
+    }
+    return categories.toList()..sort();
+  }
+
   Future<void> removeIcon(int index) async {
     try {
       if (index >= 0 && index < icons.length) {
@@ -251,6 +315,17 @@ class FaceBookController extends GetxController {
       await prefs.setString(_sharedPrefsKey, jsonEncode(icons));
     } catch (e) {
       print('Error saving icons for $platformName: $e');
+    }
+  }
+
+  Future<void> resetToDefaults() async {
+    try {
+      icons = _getDefaultIcons();
+      await _saveToPrefs();
+      update();
+      print('Facebook - Reset to default icons');
+    } catch (e) {
+      print('Error resetting icons for $platformName: $e');
     }
   }
 }
