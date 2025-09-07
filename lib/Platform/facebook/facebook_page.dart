@@ -24,6 +24,19 @@ class FacebookPage extends StatelessWidget {
             foregroundColor: Colors.black,
             elevation: 0,
             actions: [
+              // Temporary reset button for debugging
+              IconButton(
+                icon: const Icon(Icons.refresh, color: Colors.blue),
+                onPressed: () {
+                  controller.resetToDefaults();
+                  Get.snackbar(
+                    'Reset',
+                    'Icons reset to defaults',
+                    snackPosition: SnackPosition.BOTTOM,
+                    duration: const Duration(seconds: 2),
+                  );
+                },
+              ),
               IconButton(
                 icon: controller.isDeleteMode
                     ? Image.asset(
@@ -387,7 +400,7 @@ class FacebookPage extends StatelessWidget {
                       controller: nameController,
                       autofocus: true,
                       placeholder: 'Icon name',
-                      maxLength: 10,
+                      // maxLength: 10,
                       decoration: BoxDecoration(
                         color: CupertinoColors.systemGrey6,
                         borderRadius: BorderRadius.circular(8),
@@ -523,7 +536,7 @@ class FacebookPage extends StatelessWidget {
                 controller: nameController,
                 autofocus: true,
                 placeholder: 'Rename icon',
-                maxLength: 10,
+                // maxLength: 10,
                 decoration: BoxDecoration(
                   color: CupertinoColors.systemGrey6,
                   borderRadius: BorderRadius.circular(8),
