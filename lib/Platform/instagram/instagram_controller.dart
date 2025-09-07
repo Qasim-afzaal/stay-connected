@@ -57,6 +57,24 @@ class InstagramController extends GetxController {
           print(
               'Instagram - Loaded icon: ${icon['name']}, Category: ${icon['category']}, ProfileUrl: ${icon['profileUrl']}');
         }
+        
+        // Check if we have all default categories, if not, merge with defaults
+        final defaultIcons = _getDefaultIcons();
+        final defaultCategories = defaultIcons.map((icon) => icon['category']!).toSet();
+        final currentCategories = icons.map((icon) => icon['category']!).toSet();
+        
+        final missingDefaultCategories = defaultCategories.difference(currentCategories);
+        if (missingDefaultCategories.isNotEmpty) {
+          print('Instagram - Missing default categories: $missingDefaultCategories');
+          // Add missing default categories
+          for (var defaultIcon in defaultIcons) {
+            if (missingDefaultCategories.contains(defaultIcon['category'])) {
+              icons.add(defaultIcon);
+              print('Instagram - Added missing default icon: ${defaultIcon['name']}');
+            }
+          }
+          await _saveToPrefs(); // Save updated icons
+        }
       } else {
         icons = _getDefaultIcons();
         await _saveToPrefs(); // Save default icons
@@ -208,6 +226,63 @@ class InstagramController extends GetxController {
       update();
     } catch (e) {
       print('Error adding friend to category for $platformName: $e');
+    }
+  }
+
+  Future<void> moveFriendToCategory(
+      String friendName, String oldCategory, String newCategory, String profileUrl) async {
+    try {
+      // Find and update the friend's category
+      for (int i = 0; i < icons.length; i++) {
+        if (icons[i]['name'] == friendName &&
+            icons[i]['category'] == oldCategory &&
+            icons[i]['profileUrl'] == profileUrl) {
+          icons[i]['category'] = newCategory;
+          break;
+        }
+      }
+      await _saveToPrefs();
+      update();
+    } catch (e) {
+      print('Error moving friend to category for $platformName: $e');
+    }
+  }
+
+  List<String> getAvailableCategories() {
+    Set<String> categories = {};
+    print('Instagram - Getting available categories from ${icons.length} icons');
+    for (var icon in icons) {
+      if (icon['category'] != null && icon['category']!.isNotEmpty) {
+        categories.add(icon['category']!);
+        print('Instagram - Found category: ${icon['category']}');
+      }
+    }
+    final result = categories.toList()..sort();
+    print('Instagram - Available categories: $result');
+    return result;
+  }
+
+  List<String> getCategoriesWithFriends() {
+    Set<String> categories = {};
+    for (var icon in icons) {
+      if (icon['category'] != null && 
+          icon['category']!.isNotEmpty &&
+          icon['profileUrl'] != null &&
+          icon['profileUrl']!.isNotEmpty) {
+        categories.add(icon['category']!);
+      }
+    }
+    return categories.toList()..sort();
+  }
+
+  Future<void> resetToDefaults() async {
+    try {
+      icons = _getDefaultIcons();
+      await _saveToPrefs();
+      update();
+      print('Instagram - Reset to default icons');
+    } catch (e) {
+      print('Error resetting icons for $platformName: $e');
     }
   }
 
