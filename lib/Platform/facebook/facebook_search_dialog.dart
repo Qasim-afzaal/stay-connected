@@ -35,6 +35,7 @@ class FacebookSearchDialog extends StatelessWidget {
             TextField(
               controller: searchController,
               decoration: InputDecoration(
+                
                 hintText: 'Enter name to search...',
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(8),
