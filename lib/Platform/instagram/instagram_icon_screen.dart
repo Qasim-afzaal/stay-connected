@@ -6,6 +6,8 @@ import 'package:get/get.dart';
 
 import 'package:stay_connected/Platform/instagram/instagram_controller.dart';
 import 'package:stay_connected/Platform/instagram/instagram_search_dialog.dart';
+// import 'package:url_launcher/url_launcher.dart';
+import 'package:webview_flutter/webview_flutter.dart';
 
 class InstagramIconScreen extends StatelessWidget {
   final String iconName;
@@ -81,15 +83,15 @@ class InstagramIconScreen extends StatelessWidget {
                           onTap: () {
                             // Open the friend's profile in WebView
                             if (friend['profileUrl'] != null) {
-                              Get.to(() => _FriendProfileWebView(
+                              Get.to(() => FriendProfileScreen(
                                     profileUrl: friend['profileUrl']!,
                                     friendName: friend['name'] ?? 'Unknown',
                                   ));
                             }
                           },
                           onLongPress: () {
-                            // Show delete dialog on long press
-                            _showDeleteDialog(
+                            // Show action dialog on long press
+                            _showActionDialog(
                                 context, friend['name'] ?? 'Unknown', index);
                           },
                           child: Stack(
@@ -175,7 +177,250 @@ class InstagramIconScreen extends StatelessWidget {
     );
   }
 
-  void _showDeleteDialog(BuildContext context, String friendName, int index) {
+  void _showActionDialog(BuildContext context, String friendName, int index) {
+    showCupertinoDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return CupertinoAlertDialog(
+          title: Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: CupertinoColors.systemBlue.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Icon(
+                  CupertinoIcons.person_2,
+                  color: CupertinoColors.systemBlue,
+                  size: 20,
+                ),
+              ),
+              const SizedBox(width: 12),
+              const Text(
+                'Friend Options',
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ],
+          ),
+          content: Padding(
+            padding: const EdgeInsets.only(top: 16),
+            child: Text(
+              'What would you like to do with $friendName?',
+              style: const TextStyle(
+                fontSize: 14,
+                color: CupertinoColors.systemGrey,
+              ),
+            ),
+          ),
+          actions: [
+            CupertinoDialogAction(
+              onPressed: () => Navigator.of(context).pop(),
+              child: const Text(
+                'Cancel',
+                style: TextStyle(
+                  color: CupertinoColors.systemGrey,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ),
+            CupertinoDialogAction(
+              onPressed: () {
+                Navigator.of(context).pop();
+                _showMoveDialog(context, friendName, index, iconName);
+              },
+              child: const Text(
+                'Move',
+                style: TextStyle(
+                  color: CupertinoColors.systemBlue,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ),
+            CupertinoDialogAction(
+              onPressed: () {
+                Navigator.of(context).pop();
+                _showDeleteConfirmationDialog(context, friendName, index);
+              },
+              isDestructiveAction: true,
+              child: const Text(
+                'Delete',
+                style: TextStyle(
+                  color: CupertinoColors.systemRed,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+void _showMoveDialog(BuildContext context, String friendName, int index, String iconName) {
+  final controller = Get.find<InstagramController>();
+
+  // Always use loadIcons result (which merges defaults + saved)
+final allCategories = controller.icons
+    .map((icon) {
+      final cat = icon['category'];
+      if (cat == null || cat.isEmpty) return null;
+      if (cat == 'Entertainment') return 'Ent'; // fix name
+      if (cat == 'Audio') return null;          // remove Audio
+      return cat;
+    })
+    .where((cat) => cat != null)
+    .cast<String>()
+    .toSet()
+    .toList()
+  ..sort();
+
+print('Facebook - Normalized Categories: $allCategories');
+
+
+  print('Facebook - Categories from loadIcons: $allCategories');
+  print('Facebook - Current category: $iconName');
+
+  if (allCategories.isEmpty) {
+    Get.snackbar(
+      'No Categories Available',
+      'There are no categories to move this friend to.',
+      snackPosition: SnackPosition.BOTTOM,
+      duration: const Duration(seconds: 2),
+      backgroundColor: Colors.orange.shade100,
+      colorText: Colors.orange.shade800,
+    );
+    return;
+  }
+
+  int selectedCategoryIndex = 0; // Default first
+
+  showCupertinoDialog(
+    context: context,
+    builder: (BuildContext context) {
+      return CupertinoAlertDialog(
+        title: Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: CupertinoColors.systemGreen.withOpacity(0.1),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: const Icon(
+                CupertinoIcons.arrow_right_arrow_left,
+                color: CupertinoColors.systemGreen,
+                size: 20,
+              ),
+            ),
+            const SizedBox(width: 12),
+            const Text(
+              'Move Friend',
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ],
+        ),
+        content: Padding(
+          padding: const EdgeInsets.only(top: 16),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                'Move $friendName to which category?',
+                style: const TextStyle(
+                  fontSize: 14,
+                  color: CupertinoColors.systemGrey,
+                ),
+              ),
+              const SizedBox(height: 16),
+              SizedBox(
+                height: 200,
+                child: CupertinoPicker(
+                  itemExtent: 40,
+                  onSelectedItemChanged: (int selectedIndex) {
+                    selectedCategoryIndex = selectedIndex;
+                  },
+                  children: allCategories.map((category) {
+                    return Center(
+                      child: Text(
+                        category,
+                        style: const TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    );
+                  }).toList(),
+                ),
+              ),
+            ],
+          ),
+        ),
+        actions: [
+          CupertinoDialogAction(
+            onPressed: () => Navigator.of(context).pop(),
+            child: const Text(
+              'Cancel',
+              style: TextStyle(
+                color: CupertinoColors.systemGrey,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ),
+          CupertinoDialogAction(
+            onPressed: () async {
+              if (selectedCategoryIndex < allCategories.length) {
+                final newCategory = allCategories[selectedCategoryIndex];
+
+                final categoryFriends = controller.icons
+                    .where((icon) =>
+                        icon['category'] == iconName &&
+                        icon['profileUrl'] != null &&
+                        icon['profileUrl']!.isNotEmpty)
+                    .toList();
+
+                if (index < categoryFriends.length) {
+                  final friendToMove = categoryFriends[index];
+                  await controller.moveFriendToCategory(
+                    friendToMove['name']!,
+                    friendToMove['category']!,
+                    newCategory,
+                    friendToMove['profileUrl']!,
+                  );
+                }
+
+                Navigator.of(context).pop();
+                Get.snackbar(
+                  'Friend Moved',
+                  '$friendName has been moved to $newCategory',
+                  snackPosition: SnackPosition.BOTTOM,
+                  duration: const Duration(seconds: 2),
+                  backgroundColor: Colors.green.shade100,
+                  colorText: Colors.green.shade800,
+                );
+              }
+            },
+            child: const Text(
+              'Move',
+              style: TextStyle(
+                color: CupertinoColors.systemGreen,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ),
+        ],
+      );
+    },
+  );
+}
+
+  void _showDeleteConfirmationDialog(BuildContext context, String friendName, int index) {
     showCupertinoDialog(
       context: context,
       builder: (BuildContext context) {
@@ -273,25 +518,63 @@ class InstagramIconScreen extends StatelessWidget {
   }
 }
 
-class _FriendProfileWebView extends StatefulWidget {
+class FriendProfileScreen extends StatefulWidget {
   final String profileUrl;
   final String friendName;
 
-  const _FriendProfileWebView({
+  const FriendProfileScreen({
+    super.key,
     required this.profileUrl,
     required this.friendName,
   });
 
   @override
-  State<_FriendProfileWebView> createState() => _FriendProfileWebViewState();
+  State<FriendProfileScreen> createState() => _FriendProfileScreenState();
 }
 
-class _FriendProfileWebViewState extends State<_FriendProfileWebView> {
+class _FriendProfileScreenState extends State<FriendProfileScreen> {
   bool isLoading = true;
-  bool isBlocked = false;
 
-  static const String userAgent =
-      'Mozilla/5.0 (iPhone; CPU iPhone OS 14_6 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/14.1 Mobile/15E148 Safari/604.1';
+  static const String iosUserAgent =
+      'Mozilla/5.0 (iPhone; CPU iPhone OS 15_0 like Mac OS X) '
+      'AppleWebKit/605.1.15 (KHTML, like Gecko) Version/15.0 '
+      'Mobile/15E148 Safari/604.1';
+
+  late final WebViewController _webviewFlutterController;
+
+  @override
+  void initState() {
+    super.initState();
+
+    if (_isInstagram(widget.profileUrl)) {
+      _webviewFlutterController = WebViewController()
+        ..setJavaScriptMode(JavaScriptMode.unrestricted)
+        ..setUserAgent(iosUserAgent)
+        ..setNavigationDelegate(
+          NavigationDelegate(
+            onPageFinished: (_) => setState(() => isLoading = false),
+            // onWebResourceError: (_) => _openInExternal(),
+          ),
+        )
+        ..loadRequest(Uri.parse(widget.profileUrl), headers: {
+          'User-Agent': iosUserAgent,
+          'Accept':
+              'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
+          'Accept-Language': 'en-US,en;q=0.9',
+          'Referer': 'https://www.instagram.com/',
+        });
+    }
+  }
+
+  bool _isInstagram(String url) => url.contains("instagram.com");
+
+  // Future<void> _openInExternal() async {
+  //   final uri = Uri.parse(widget.profileUrl);
+  //   if (await canLaunchUrl(uri)) {
+  //     await launchUrl(uri, mode: LaunchMode.externalApplication);
+  //   }
+  //   if (mounted) Navigator.pop(context); // close screen after fallback
+  // }
 
   @override
   Widget build(BuildContext context) {
@@ -304,75 +587,39 @@ class _FriendProfileWebViewState extends State<_FriendProfileWebView> {
       ),
       body: Stack(
         children: [
-          InAppWebView(
-            initialUrlRequest: URLRequest(
-              url: WebUri(widget.profileUrl),
-              headers: {
-                'Referer': 'https://www.instagram.com/',
-                'Accept-Language': 'en-US,en;q=0.9',
-              },
-            ),
-            initialSettings: InAppWebViewSettings(
-              userAgent: userAgent,
-              javaScriptEnabled: true,
-              useShouldOverrideUrlLoading: true,
-              mediaPlaybackRequiresUserGesture: false,
-              allowsInlineMediaPlayback: true,
-            ),
-            onWebViewCreated: (controller) {},
-            onLoadStart: (controller, url) {
-              setState(() {
-                isLoading = true;
-                isBlocked = false;
-              });
-            },
-            onLoadStop: (controller, url) async {
-              setState(() {
-                isLoading = false;
-              });
-              String? title = await controller.getTitle();
-              if (title != null &&
-                  (title.toLowerCase().contains('not supported') ||
-                      title.toLowerCase().contains('browser not supported'))) {
-                setState(() {
-                  isBlocked = true;
-                });
-              }
-              if (url != null &&
-                  url.toString().contains('browser_not_supported')) {
-                setState(() {
-                  isBlocked = true;
-                });
-              }
-            },
-            onLoadError: (controller, url, code, message) {
-              setState(() {
-                isLoading = false;
-                isBlocked = true;
-              });
-            },
-            onReceivedHttpError: (controller, url, response) {
-              setState(() {
-                isBlocked = true;
-              });
-            },
-          ),
-          if (isLoading) const Center(child: CircularProgressIndicator()),
-          if (isBlocked)
-            Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  const Icon(Icons.block, size: 64, color: Colors.red),
-                  const SizedBox(height: 16),
-                  const Text(
-                    'Instagram blocks embedded browsers for security.',
-                    style: TextStyle(fontSize: 16, color: Colors.red),
-                    textAlign: TextAlign.center,
+          _isInstagram(widget.profileUrl)
+              ? WebViewWidget(controller: _webviewFlutterController)
+              : InAppWebView(
+                  initialUrlRequest: URLRequest(
+                    url: WebUri(widget.profileUrl),
+                    headers: {
+                      'User-Agent': iosUserAgent,
+                      'Accept':
+                          'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
+                      'Accept-Language': 'en-US,en;q=0.9',
+                      'DNT': '1',
+                      'Connection': 'keep-alive',
+                      'Referer': 'https://www.instagram.com/',
+                    },
                   ),
-                ],
-              ),
-            ),
+                  initialSettings: InAppWebViewSettings(
+                    userAgent: iosUserAgent,
+                    javaScriptEnabled: true,
+                    allowsInlineMediaPlayback: true,
+                    mediaPlaybackRequiresUserGesture: false,
+                    useShouldOverrideUrlLoading: true,
+                  ),
+                  onLoadStart: (controller, url) =>
+                      setState(() => isLoading = true),
+                  onLoadStop: (controller, url) async =>
+                      setState(() => isLoading = false),
+                  onLoadError: (controller, url, code, message) =>{},
+                      // _openInExternal(),
+                  onReceivedHttpError: (controller, url, response) =>{}
+                      // _openInExternal(),
+                ),
+          if (isLoading)
+            const Center(child: CircularProgressIndicator()),
         ],
       ),
     );
