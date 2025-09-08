@@ -87,7 +87,7 @@ class PinterestIconScreen extends StatelessWidget {
                             }
                           },
                           onLongPress: () {
-                            _showDeleteDialog(
+                            _showActionDialog(
                                 context, friend['name'] ?? 'Unknown', index);
                           },
                           child: Column(
@@ -160,7 +160,250 @@ class PinterestIconScreen extends StatelessWidget {
     );
   }
 
-  void _showDeleteDialog(BuildContext context, String friendName, int index) {
+  void _showActionDialog(BuildContext context, String friendName, int index) {
+    showCupertinoDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return CupertinoAlertDialog(
+          title: Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: CupertinoColors.systemBlue.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Icon(
+                  CupertinoIcons.person_2,
+                  color: CupertinoColors.systemBlue,
+                  size: 20,
+                ),
+              ),
+              const SizedBox(width: 12),
+              const Text(
+                'Friend Options',
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ],
+          ),
+          content: Padding(
+            padding: const EdgeInsets.only(top: 16),
+            child: Text(
+              'What would you like to do with $friendName?',
+              style: const TextStyle(
+                fontSize: 14,
+                color: CupertinoColors.systemGrey,
+              ),
+            ),
+          ),
+          actions: [
+            CupertinoDialogAction(
+              onPressed: () => Navigator.of(context).pop(),
+              child: const Text(
+                'Cancel',
+                style: TextStyle(
+                  color: CupertinoColors.systemGrey,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ),
+            CupertinoDialogAction(
+              onPressed: () {
+                Navigator.of(context).pop();
+               _showMoveDialog(context, friendName, index, iconName);
+              },
+              child: const Text(
+                'Move',
+                style: TextStyle(
+                  color: CupertinoColors.systemBlue,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ),
+            CupertinoDialogAction(
+              onPressed: () {
+                Navigator.of(context).pop();
+                _showDeleteConfirmationDialog(context, friendName, index);
+              },
+              isDestructiveAction: true,
+              child: const Text(
+                'Delete',
+                style: TextStyle(
+                  color: CupertinoColors.systemRed,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+void _showMoveDialog(BuildContext context, String friendName, int index, String iconName) {
+  final controller = Get.find<PinterestController>();
+
+  // Always use loadIcons result (which merges defaults + saved)
+final allCategories = controller.icons
+    .map((icon) {
+      final cat = icon['category'];
+      if (cat == null || cat.isEmpty) return null;
+      if (cat == 'Entertainment') return 'Ent'; // fix name
+      if (cat == 'Audio') return null;          // remove Audio
+      return cat;
+    })
+    .where((cat) => cat != null)
+    .cast<String>()
+    .toSet()
+    .toList()
+  ..sort();
+
+print('Facebook - Normalized Categories: $allCategories');
+
+
+  print('Facebook - Categories from loadIcons: $allCategories');
+  print('Facebook - Current category: $iconName');
+
+  if (allCategories.isEmpty) {
+    Get.snackbar(
+      'No Categories Available',
+      'There are no categories to move this friend to.',
+      snackPosition: SnackPosition.BOTTOM,
+      duration: const Duration(seconds: 2),
+      backgroundColor: Colors.orange.shade100,
+      colorText: Colors.orange.shade800,
+    );
+    return;
+  }
+
+  int selectedCategoryIndex = 0; // Default first
+
+  showCupertinoDialog(
+    context: context,
+    builder: (BuildContext context) {
+      return CupertinoAlertDialog(
+        title: Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: CupertinoColors.systemGreen.withOpacity(0.1),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: const Icon(
+                CupertinoIcons.arrow_right_arrow_left,
+                color: CupertinoColors.systemGreen,
+                size: 20,
+              ),
+            ),
+            const SizedBox(width: 12),
+            const Text(
+              'Move Friend',
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ],
+        ),
+        content: Padding(
+          padding: const EdgeInsets.only(top: 16),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                'Move $friendName to which category?',
+                style: const TextStyle(
+                  fontSize: 14,
+                  color: CupertinoColors.systemGrey,
+                ),
+              ),
+              const SizedBox(height: 16),
+              SizedBox(
+                height: 200,
+                child: CupertinoPicker(
+                  itemExtent: 40,
+                  onSelectedItemChanged: (int selectedIndex) {
+                    selectedCategoryIndex = selectedIndex;
+                  },
+                  children: allCategories.map((category) {
+                    return Center(
+                      child: Text(
+                        category,
+                        style: const TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    );
+                  }).toList(),
+                ),
+              ),
+            ],
+          ),
+        ),
+        actions: [
+          CupertinoDialogAction(
+            onPressed: () => Navigator.of(context).pop(),
+            child: const Text(
+              'Cancel',
+              style: TextStyle(
+                color: CupertinoColors.systemGrey,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ),
+          CupertinoDialogAction(
+            onPressed: () async {
+              if (selectedCategoryIndex < allCategories.length) {
+                final newCategory = allCategories[selectedCategoryIndex];
+
+                final categoryFriends = controller.icons
+                    .where((icon) =>
+                        icon['category'] == iconName &&
+                        icon['profileUrl'] != null &&
+                        icon['profileUrl']!.isNotEmpty)
+                    .toList();
+
+                if (index < categoryFriends.length) {
+                  final friendToMove = categoryFriends[index];
+                  await controller.moveFriendToCategory(
+                    friendToMove['name']!,
+                    friendToMove['category']!,
+                    newCategory,
+                    friendToMove['profileUrl']!,
+                  );
+                }
+
+                Navigator.of(context).pop();
+                Get.snackbar(
+                  'Friend Moved',
+                  '$friendName has been moved to $newCategory',
+                  snackPosition: SnackPosition.BOTTOM,
+                  duration: const Duration(seconds: 2),
+                  backgroundColor: Colors.green.shade100,
+                  colorText: Colors.green.shade800,
+                );
+              }
+            },
+            child: const Text(
+              'Move',
+              style: TextStyle(
+                color: CupertinoColors.systemGreen,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ),
+        ],
+      );
+    },
+  );
+}
+
+  void _showDeleteConfirmationDialog(BuildContext context, String friendName, int index) {
     showCupertinoDialog(
       context: context,
       builder: (BuildContext context) {
