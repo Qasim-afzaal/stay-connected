@@ -362,7 +362,7 @@ class PinterestPage extends StatelessWidget {
                       controller: nameController,
                       autofocus: true,
                       placeholder: 'Icon name',
-                      maxLength: 10,
+                      // maxLength: 10,
                       decoration: BoxDecoration(
                         color: CupertinoColors.systemGrey6,
                         borderRadius: BorderRadius.circular(8),
@@ -498,7 +498,7 @@ class PinterestPage extends StatelessWidget {
                 controller: nameController,
                 autofocus: true,
                 placeholder: 'Rename icon',
-                maxLength: 10,
+                // maxLength: 10,
                 decoration: BoxDecoration(
                   color: CupertinoColors.systemGrey6,
                   borderRadius: BorderRadius.circular(8),
