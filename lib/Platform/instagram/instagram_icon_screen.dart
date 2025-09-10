@@ -228,6 +228,19 @@ class InstagramIconScreen extends StatelessWidget {
               ),
             ),
             CupertinoDialogAction(
+  onPressed: () {
+    Navigator.of(context).pop();
+    _showRenameDialog(context, friendName, index);
+  },
+  child: const Text(
+    'Rename',
+    style: TextStyle(
+      color: CupertinoColors.activeBlue,
+      fontWeight: FontWeight.w600,
+    ),
+  ),
+),
+            CupertinoDialogAction(
               onPressed: () {
                 Navigator.of(context).pop();
                 _showMoveDialog(context, friendName, index, iconName);
@@ -415,6 +428,101 @@ print('Facebook - Normalized Categories: $allCategories');
             ),
           ),
         ],
+      );
+    },
+  );
+}
+void _showRenameDialog(BuildContext context, String oldName, int index) {
+  final controller = Get.find<InstagramController>();
+  final renameController = TextEditingController(text: oldName);
+
+  showCupertinoDialog(
+    context: context,
+    builder: (BuildContext context) {
+      return Material( // ✅ Needed so Cupertino dialog renders properly
+        color: Colors.transparent,
+        child: Center(
+          child: Container(
+            padding: const EdgeInsets.all(20),
+            margin: const EdgeInsets.symmetric(horizontal: 24),
+            decoration: BoxDecoration(
+              color: CupertinoColors.systemBackground,
+              borderRadius: BorderRadius.circular(16),
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min, // ✅ prevents unnecessary scrolling
+              children: [
+                const Text(
+                  "Rename Friend",
+                  style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+                const SizedBox(height: 12),
+                CupertinoTextField(
+                  controller: renameController,
+                  autofocus: true,
+                  placeholder: "Enter new name",
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: CupertinoColors.systemGrey6,
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                ),
+                const SizedBox(height: 20),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    CupertinoButton(
+                      padding: const EdgeInsets.symmetric(horizontal: 12),
+                      onPressed: () => Navigator.of(context).pop(),
+                      child: const Text("Cancel"),
+                    ),
+                    CupertinoButton(
+                      padding: const EdgeInsets.symmetric(horizontal: 12),
+                      onPressed: () async {
+                        final newName = renameController.text.trim();
+                        if (newName.isNotEmpty) {
+                          final categoryFriends = controller.icons
+                              .where((icon) =>
+                                  icon['category'] == iconName &&
+                                  icon['profileUrl'] != null &&
+                                  icon['profileUrl']!.isNotEmpty)
+                              .toList();
+
+                          if (index < categoryFriends.length) {
+                            final friendToRename = categoryFriends[index];
+                            final originalIndex =
+                                controller.icons.indexOf(friendToRename);
+
+                            await controller.renameIcon(originalIndex, newName);
+                          }
+
+                          Navigator.of(context).pop();
+                          Get.snackbar(
+                            'Friend Renamed',
+                            '$oldName has been renamed to $newName',
+                            snackPosition: SnackPosition.BOTTOM,
+                            duration: const Duration(seconds: 2),
+                            backgroundColor: Colors.blue.shade100,
+                            colorText: Colors.blue.shade800,
+                          );
+                        }
+                      },
+                      child: const Text(
+                        "Save",
+                        style: TextStyle(
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        ),
       );
     },
   );
