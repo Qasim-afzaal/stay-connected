@@ -43,7 +43,7 @@ class YouTubeSearchDialog extends StatelessWidget {
               controller: searchController,
               autofocus: true,
               placeholder: 'Enter name to search...',
-              maxLength: 10,
+             
               decoration: BoxDecoration(
                 color: CupertinoColors.systemGrey6,
                 borderRadius: BorderRadius.circular(8),
