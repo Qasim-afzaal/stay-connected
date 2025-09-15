@@ -243,7 +243,7 @@ class _ProfileWebViewScreenState extends State<ProfileWebViewScreen> {
                   controller: nameController,
                   autofocus: true,
                   placeholder: 'Friend Name',
-                  maxLength: 10,
+                 
                   decoration: BoxDecoration(
                     color: CupertinoColors.systemGrey6,
                     borderRadius: BorderRadius.circular(8),
