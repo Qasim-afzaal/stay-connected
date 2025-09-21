@@ -1,4 +1,4 @@
-# 🌐 StayConnected - Your Social Universe, Organized Your Network
+# 🌐 StayConnected - Your Social Universe, Organized Your Networks
 
 Welcome to **StayConnected**, the ultimate app for managing and accessing all your social connections across multiple platforms in one seamless experience!
 
