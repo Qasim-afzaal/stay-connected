@@ -60,13 +60,6 @@ npm install
 npm start
 ```
 
-## 🏗️ Technical Overview
-
-- **Framework**: React Native (iOS & Android compatible)
-- **Navigation**: React Navigation
-- **Web Integration**: React Native WebView
-- **Storage**: AsyncStorage/Local Database
-- **State Management**: Context API/Redux
 
 ## 🤝 Contributing
 
