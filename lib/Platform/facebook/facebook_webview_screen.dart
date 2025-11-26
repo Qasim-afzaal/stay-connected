@@ -1,9 +1,11 @@
+import 'dart:io';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import 'package:flutter_inappwebview/flutter_inappwebview.dart';
+import 'package:stay_connected/Platform/facebook/facebook_controller.dart';
 
-import 'package:stay_connected/Platform/shared/profile_webview_screen.dart';
-
-class FacebookWebviewScreen extends StatelessWidget {
+class FacebookWebviewScreen extends StatefulWidget {
   final String searchQuery;
   final String iconName;
   final String platformName;
@@ -16,11 +18,562 @@ class FacebookWebviewScreen extends StatelessWidget {
   });
 
   @override
+  State<FacebookWebviewScreen> createState() => _FacebookWebviewScreenState();
+}
+
+class _FacebookWebviewScreenState extends State<FacebookWebviewScreen> {
+  bool isLoading = true;
+  String? currentUrl;
+  InAppWebViewController? webViewController;
+  int loadingProgress = 0;
+
+  String _getInitialUrl() {
+    String query = widget.searchQuery;
+    if (query.isNotEmpty) {
+      query = '$query site:facebook.com';
+    }
+    return 'https://www.google.com/search?q=${Uri.encodeComponent(query)}';
+  }
+
+  @override
   Widget build(BuildContext context) {
-    return ProfileWebViewScreen(
-      platform: platformName,
-      searchQuery: searchQuery,
-      iconName: iconName,
+    String userAgent = Platform.isIOS
+        ? 'Mozilla/5.0 (iPhone; CPU iPhone OS 17_5 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.5 Mobile/15E148 Safari/604.1'
+        : 'Mozilla/5.0 (Linux; Android 14; SM-G998B) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Mobile Safari/537.36';
+
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(widget.iconName),
+        centerTitle: true,
+        backgroundColor: Colors.blue,
+        foregroundColor: Colors.white,
+      ),
+      body: Stack(
+        children: [
+          InAppWebView(
+            initialUrlRequest: URLRequest(
+              url: WebUri(_getInitialUrl()),
+              headers: {
+                'User-Agent': userAgent,
+                'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+                'Accept-Language': 'en-US,en;q=0.9',
+              },
+            ),
+            initialSettings: InAppWebViewSettings(
+              userAgent: userAgent,
+              javaScriptEnabled: true,
+              allowsInlineMediaPlayback: true,
+              mediaPlaybackRequiresUserGesture: false,
+              useShouldOverrideUrlLoading: true,
+            ),
+            onWebViewCreated: (controller) {
+              webViewController = controller;
+              
+              // Inject blocking script at document start
+              controller.addUserScript(
+                userScript: UserScript(
+                  source: '''
+                    (function() {
+                      if (window.facebookBlockingLoaded) return;
+                      window.facebookBlockingLoaded = true;
+                      
+                      // Block all clicks that would open Facebook app
+                      document.addEventListener('click', function(e) {
+                        let target = e.target;
+                        let depth = 0;
+                        while (target && target !== document && depth < 10) {
+                          if (target.tagName === 'A' && target.href) {
+                            const href = target.href.toLowerCase();
+                            if (href.startsWith('fb://') ||
+                                href.startsWith('fbapi://') ||
+                                href.startsWith('fbauth2://') ||
+                                href.includes('applink.facebook.com') ||
+                                href.includes('apps.apple.com') ||
+                                href.includes('itunes.apple.com') ||
+                                href.startsWith('itms://') ||
+                                href.startsWith('itms-apps://') ||
+                                href.includes('play.google.com/store') ||
+                                href.startsWith('market://')) {
+                              e.preventDefault();
+                              e.stopPropagation();
+                              e.stopImmediatePropagation();
+                              return false;
+                            }
+                          }
+                          target = target.parentElement;
+                          depth++;
+                        }
+                      }, true);
+                      
+                      // Override window.open
+                      const originalOpen = window.open;
+                      window.open = function(url, target, features) {
+                        if (url) {
+                          const urlLower = url.toLowerCase();
+                          if (urlLower.startsWith('fb://') ||
+                              urlLower.startsWith('fbapi://') ||
+                              urlLower.startsWith('fbauth2://') ||
+                              urlLower.includes('applink.facebook.com') ||
+                              urlLower.includes('apps.apple.com') ||
+                              urlLower.includes('itunes.apple.com')) {
+                            return null;
+                          }
+                        }
+                        return originalOpen.call(window, url, target, features);
+                      };
+                    })();
+                  ''',
+                  injectionTime: UserScriptInjectionTime.AT_DOCUMENT_START,
+                ),
+              );
+            },
+            onLoadStart: (controller, url) {
+              setState(() {
+                isLoading = true;
+                loadingProgress = 0;
+                currentUrl = url?.toString();
+              });
+              
+              // Inject blocking script early
+              controller.evaluateJavascript(source: '''
+                (function() {
+                  // Block all clicks that would open Facebook app
+                  document.addEventListener('click', function(e) {
+                    let target = e.target;
+                    let depth = 0;
+                    while (target && target !== document && depth < 10) {
+                      if (target.tagName === 'A' && target.href) {
+                        const href = target.href.toLowerCase();
+                        if (href.startsWith('fb://') ||
+                            href.startsWith('fbapi://') ||
+                            href.startsWith('fbauth2://') ||
+                            href.includes('applink.facebook.com') ||
+                            href.includes('apps.apple.com') ||
+                            href.includes('itunes.apple.com') ||
+                            href.startsWith('itms://') ||
+                            href.startsWith('itms-apps://') ||
+                            href.includes('play.google.com/store') ||
+                            href.startsWith('market://')) {
+                          e.preventDefault();
+                          e.stopPropagation();
+                          e.stopImmediatePropagation();
+                          return false;
+                        }
+                      }
+                      target = target.parentElement;
+                      depth++;
+                    }
+                  }, true);
+                })();
+              ''');
+            },
+            onLoadStop: (controller, url) async {
+              setState(() {
+                isLoading = false;
+                loadingProgress = 100;
+                currentUrl = url?.toString();
+              });
+              
+              // Inject blocking script again after page loads
+              await controller.evaluateJavascript(source: '''
+                (function() {
+                  // Block all clicks that would open Facebook app
+                  document.addEventListener('click', function(e) {
+                    let target = e.target;
+                    let depth = 0;
+                    while (target && target !== document && depth < 10) {
+                      if (target.tagName === 'A' && target.href) {
+                        const href = target.href.toLowerCase();
+                        if (href.startsWith('fb://') ||
+                            href.startsWith('fbapi://') ||
+                            href.startsWith('fbauth2://') ||
+                            href.includes('applink.facebook.com') ||
+                            href.includes('apps.apple.com') ||
+                            href.includes('itunes.apple.com') ||
+                            href.startsWith('itms://') ||
+                            href.startsWith('itms-apps://') ||
+                            href.includes('play.google.com/store') ||
+                            href.startsWith('market://')) {
+                          e.preventDefault();
+                          e.stopPropagation();
+                          e.stopImmediatePropagation();
+                          return false;
+                        }
+                      }
+                      target = target.parentElement;
+                      depth++;
+                    }
+                  }, true);
+                  
+                  // Override window.open
+                  const originalOpen = window.open;
+                  window.open = function(url, target, features) {
+                    if (url) {
+                      const urlLower = url.toLowerCase();
+                      if (urlLower.startsWith('fb://') ||
+                          urlLower.startsWith('fbapi://') ||
+                          urlLower.startsWith('fbauth2://') ||
+                          urlLower.includes('applink.facebook.com') ||
+                          urlLower.includes('apps.apple.com') ||
+                          urlLower.includes('itunes.apple.com')) {
+                        return null;
+                      }
+                    }
+                    return originalOpen.call(window, url, target, features);
+                  };
+                })();
+              ''');
+            },
+            onProgressChanged: (controller, progress) {
+              setState(() {
+                loadingProgress = progress.toInt();
+                if (progress >= 100) {
+                  isLoading = false;
+                }
+              });
+            },
+            shouldOverrideUrlLoading: (controller, navigationAction) async {
+              final url = navigationAction.request.url?.toString() ?? '';
+              final urlLower = url.toLowerCase();
+              
+              print('Facebook WebView - Navigation request to: $url');
+              
+              // Block applink.facebook.com URLs (Universal Links)
+              if (urlLower.contains('applink.facebook.com')) {
+                print('Facebook WebView - Blocking applink URL: $url');
+                return NavigationActionPolicy.CANCEL;
+              }
+              
+              // Block URLs with launch_app_store parameter
+              if (urlLower.contains('launch_app_store=true')) {
+                print('Facebook WebView - Blocking URL with launch_app_store: $url');
+                return NavigationActionPolicy.CANCEL;
+              }
+              
+              // Block app schemes and App Store URLs
+              if (urlLower.startsWith('fb://') ||
+                  urlLower.startsWith('fbapi://') ||
+                  urlLower.startsWith('fbauth2://') ||
+                  urlLower.contains('apps.apple.com') ||
+                  urlLower.contains('itunes.apple.com') ||
+                  urlLower.startsWith('itms://') ||
+                  urlLower.startsWith('itms-apps://') ||
+                  urlLower.contains('play.google.com/store') ||
+                  urlLower.startsWith('market://')) {
+                print('Facebook WebView - Blocking app scheme/App Store URL: $url');
+                return NavigationActionPolicy.CANCEL;
+              }
+              
+              // Block tracking URLs (fbsbx.com) - these are just analytics pixels
+              if (urlLower.contains('fbsbx.com') || urlLower.contains('facebook.com/tr/')) {
+                print('Facebook WebView - Blocking tracking URL: $url');
+                return NavigationActionPolicy.CANCEL;
+              }
+              
+              // For Facebook URLs, ensure _webview=1&noapp=1 parameters are present
+              if (urlLower.contains('facebook.com') &&
+                  !urlLower.contains('_webview=1') &&
+                  !urlLower.contains('noapp=1')) {
+                print('Facebook WebView - Modifying URL to prevent Universal Links: $url');
+                final modifiedUrl = url.contains('?')
+                    ? '$url&_webview=1&noapp=1'
+                    : '$url?_webview=1&noapp=1';
+                Future.microtask(() async {
+                  await controller.loadUrl(urlRequest: URLRequest(url: WebUri(modifiedUrl)));
+                });
+                return NavigationActionPolicy.CANCEL;
+              }
+              
+              // Allow all other navigation
+              return NavigationActionPolicy.ALLOW;
+            },
+            onReceivedServerTrustAuthRequest: (controller, challenge) async {
+              return ServerTrustAuthResponse(action: ServerTrustAuthResponseAction.PROCEED);
+            },
+          ),
+          if (isLoading)
+            Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const CircularProgressIndicator(),
+                  const SizedBox(height: 16),
+                  Text(
+                    'Loading: $loadingProgress%',
+                    style: const TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w500,
+                      color: Colors.grey,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          // Always show Add Friend button at bottom
+          Positioned(
+            bottom: 0,
+            left: 0,
+            right: 0,
+            child: Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.1),
+                    blurRadius: 4,
+                    offset: const Offset(0, -2),
+                  ),
+                ],
+              ),
+              child: SafeArea(
+                child: ElevatedButton(
+                  onPressed: _isOnGoogleSearch() || isLoading
+                      ? null
+                      : () => _showAddFriendDialog(),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.black,
+                    foregroundColor: Colors.white,
+                    disabledBackgroundColor: Colors.grey.shade400,
+                    disabledForegroundColor: Colors.grey.shade600,
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 24,
+                      vertical: 16,
+                    ),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    elevation: 0,
+                  ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(
+                        Icons.person_add,
+                        color: (_isOnGoogleSearch() || isLoading)
+                            ? Colors.grey.shade600
+                            : Colors.white,
+                      ),
+                      const SizedBox(width: 8),
+                      Text(
+                        isLoading
+                            ? 'Loading: $loadingProgress%'
+                            : 'Add Friend',
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w600,
+                          color: (_isOnGoogleSearch() || isLoading)
+                              ? Colors.grey.shade600
+                              : Colors.white,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
     );
+  }
+
+
+  bool _isOnGoogleSearch() {
+    final url = currentUrl?.toLowerCase() ?? '';
+    return url.contains('google.com') || url.contains('googleapis.com');
+  }
+
+  void _showAddFriendDialog() async {
+    // Don't show dialog if on Google search page
+    if (_isOnGoogleSearch()) {
+      Get.snackbar(
+        'Error',
+        'Please navigate to a Facebook profile page first',
+        snackPosition: SnackPosition.BOTTOM,
+        duration: const Duration(seconds: 2),
+        backgroundColor: Colors.red,
+        colorText: Colors.white,
+      );
+      return;
+    }
+
+    final nameController = TextEditingController();
+
+    String? actualCurrentUrl;
+    try {
+      if (webViewController != null) {
+        actualCurrentUrl = (await webViewController!.getUrl())?.toString();
+      } else {
+        actualCurrentUrl = currentUrl;
+      }
+    } catch (e) {
+      actualCurrentUrl = currentUrl;
+    }
+
+    // Double check it's not a Google search page
+    if (_isOnGoogleSearch()) {
+      Get.snackbar(
+        'Error',
+        'Please navigate to a Facebook profile page first',
+        snackPosition: SnackPosition.BOTTOM,
+        duration: const Duration(seconds: 2),
+        backgroundColor: Colors.red,
+        colorText: Colors.white,
+      );
+      return;
+    }
+
+    String extractedName = '';
+    if (actualCurrentUrl != null) {
+      extractedName =
+          _extractNameFromUrl(actualCurrentUrl) ?? widget.searchQuery;
+    } else {
+      extractedName = widget.searchQuery;
+    }
+
+    nameController.text = extractedName;
+
+    showCupertinoDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return CupertinoAlertDialog(
+          title: Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: CupertinoColors.systemBlue.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Icon(
+                  CupertinoIcons.person_add,
+                  color: CupertinoColors.systemBlue,
+                  size: 20,
+                ),
+              ),
+              const SizedBox(width: 12),
+              const Text(
+                'Add Friend',
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ],
+          ),
+          content: Padding(
+            padding: const EdgeInsets.only(top: 16),
+            child: Column(
+              children: [
+                Text(
+                  'Add this person to your ${widget.iconName} list?',
+                  style: const TextStyle(
+                    fontSize: 14,
+                    color: CupertinoColors.systemGrey,
+                  ),
+                ),
+                const SizedBox(height: 16),
+                CupertinoTextField(
+                  controller: nameController,
+                  autofocus: true,
+                  placeholder: 'Friend Name',
+                  maxLength: 10,
+                  decoration: BoxDecoration(
+                    color: CupertinoColors.systemGrey6,
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 12,
+                  ),
+                  style: const TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  'Current URL: ${actualCurrentUrl ?? "Loading..."}',
+                  style: const TextStyle(
+                    fontSize: 10,
+                    color: CupertinoColors.systemGrey2,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          actions: [
+            CupertinoDialogAction(
+              onPressed: () => Navigator.of(context).pop(),
+              child: const Text(
+                'Cancel',
+                style: TextStyle(
+                  color: CupertinoColors.systemGrey,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ),
+            CupertinoDialogAction(
+              onPressed: () {
+                if (nameController.text.trim().isNotEmpty) {
+                  Navigator.of(context).pop();
+                  _addFriendToIcon(
+                      nameController.text.trim(), actualCurrentUrl);
+                }
+              },
+              isDefaultAction: true,
+              child: const Text(
+                'Add',
+                style: TextStyle(
+                  color: CupertinoColors.systemBlue,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  void _addFriendToIcon(String friendName, String? profileUrl) {
+    String finalProfileUrl = profileUrl ??
+        'https://www.facebook.com/search/top?q=${Uri.encodeComponent(friendName)}';
+
+    final controller = Get.find<FaceBookController>();
+    controller.addFriendToCategory(
+        friendName, widget.iconName, finalProfileUrl);
+
+    Get.back();
+
+    Get.snackbar(
+      'Friend Added Successfully!',
+      '$friendName has been added to your ${widget.iconName} list',
+      snackPosition: SnackPosition.BOTTOM,
+      duration: const Duration(seconds: 2),
+      backgroundColor: Colors.green,
+      colorText: Colors.white,
+      margin: const EdgeInsets.all(10),
+      borderRadius: 10,
+    );
+  }
+
+  String? _extractNameFromUrl(String url) {
+    if (url.contains('facebook.com/')) {
+      String path = url.split('facebook.com/')[1];
+      if (path.isNotEmpty) {
+        String username = path.split('?')[0].split('/')[0];
+        if (username != 'search' &&
+            username != 'pages' &&
+            username != 'groups' &&
+            username != 'events' &&
+            username != 'watch' &&
+            username != 'marketplace') {
+          return username.replaceAll('-', ' ').replaceAll('_', ' ');
+        }
+      }
+    }
+    return null;
   }
 }

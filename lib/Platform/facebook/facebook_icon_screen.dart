@@ -1,8 +1,9 @@
+import 'dart:io';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
 import 'package:get/get.dart';
-import 'package:webview_flutter/webview_flutter.dart';
+import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 
 import 'package:stay_connected/Platform/facebook/facebook_controller.dart';
 import 'package:stay_connected/Platform/facebook/facebook_webview_screen.dart';
@@ -451,25 +452,21 @@ class FacebookIconScreen extends StatelessWidget {
       BuildContext context, String friendName, int index, String iconName) {
     final controller = Get.find<FaceBookController>();
 
-    // Always use loadIcons result (which merges defaults + saved)
-    final allCategories = controller.icons
-        .map((icon) {
-          final cat = icon['category'];
-          if (cat == null || cat.isEmpty) return null;
-          if (cat == 'Entertainment') return 'Ent'; // fix name
-          if (cat == 'Audio') return null; // remove Audio
-          return cat;
-        })
-        .where((cat) => cat != null)
-        .cast<String>()
-        .toSet()
-        .toList()
-      ..sort();
+    // Get all available categories including custom ones
+    final allCategories = controller.getAvailableCategories();
+    
+    // Also get categories that have friends (for debugging)
+    final categoriesWithFriends = controller.getCategoriesWithFriends();
 
-    print('Facebook - Normalized Categories: $allCategories');
-
-    print('Facebook - Categories from loadIcons: $allCategories');
+    print('Facebook - All Categories: $allCategories');
+    print('Facebook - Categories with Friends: $categoriesWithFriends');
     print('Facebook - Current category: $iconName');
+    print('Facebook - Total icons in controller: ${controller.icons.length}');
+    
+    // Debug: Print all icons to see what's stored
+    for (var icon in controller.icons) {
+      print('Facebook - Icon: ${icon['name']}, Category: ${icon['category']}, ProfileUrl: ${icon['profileUrl']}');
+    }
 
     if (allCategories.isEmpty) {
       Get.snackbar(
@@ -563,7 +560,7 @@ class FacebookIconScreen extends StatelessWidget {
             CupertinoDialogAction(
               onPressed: () async {
                 if (selectedCategoryIndex < allCategories.length) {
-                  final newCategory = allCategories[selectedCategoryIndex];
+                  final selectedCategory = allCategories[selectedCategoryIndex];
 
                   final categoryFriends = controller.icons
                       .where((icon) =>
@@ -577,7 +574,7 @@ class FacebookIconScreen extends StatelessWidget {
                     await controller.moveFriendToCategory(
                       friendToMove['name']!,
                       friendToMove['category']!,
-                      newCategory,
+                      selectedCategory,
                       friendToMove['profileUrl']!,
                     );
                   }
@@ -585,7 +582,7 @@ class FacebookIconScreen extends StatelessWidget {
                   Navigator.of(context).pop();
                   Get.snackbar(
                     'Friend Moved',
-                    '$friendName has been moved to $newCategory',
+                    '$friendName has been moved to $selectedCategory',
                     snackPosition: SnackPosition.BOTTOM,
                     duration: const Duration(seconds: 2),
                     backgroundColor: Colors.green.shade100,
@@ -720,33 +717,24 @@ class _FriendProfileWebView extends StatefulWidget {
 }
 
 class _FriendProfileWebViewState extends State<_FriendProfileWebView> {
-  late WebViewController _controller;
+  InAppWebViewController? webViewController;
   bool isLoading = true;
 
-  @override
-  void initState() {
-    super.initState();
-    _controller = WebViewController()
-      ..setJavaScriptMode(JavaScriptMode.unrestricted)
-      ..setNavigationDelegate(
-        NavigationDelegate(
-          onPageStarted: (String url) {
-            setState(() {
-              isLoading = true;
-            });
-          },
-          onPageFinished: (String url) {
-            setState(() {
-              isLoading = false;
-            });
-          },
-        ),
-      )
-      ..loadRequest(Uri.parse(widget.profileUrl));
+  String _getProfileUrl() {
+    String url = widget.profileUrl;
+    // Add parameters to prevent Universal Links if not already present
+    if (!url.contains('_webview=1') && !url.contains('noapp=1')) {
+      url = url.contains('?') ? '$url&_webview=1&noapp=1' : '$url?_webview=1&noapp=1';
+    }
+    return url;
   }
 
   @override
   Widget build(BuildContext context) {
+    String userAgent = Platform.isIOS
+        ? 'Mozilla/5.0 (iPhone; CPU iPhone OS 17_5 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.5 Mobile/15E148 Safari/604.1'
+        : 'Mozilla/5.0 (Linux; Android 14; SM-G998B) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Mobile Safari/537.36';
+
     return Scaffold(
       appBar: AppBar(
         title: Text(widget.friendName),
@@ -756,7 +744,276 @@ class _FriendProfileWebViewState extends State<_FriendProfileWebView> {
       ),
       body: Stack(
         children: [
-          WebViewWidget(controller: _controller),
+          InAppWebView(
+            initialUrlRequest: URLRequest(
+              url: WebUri(_getProfileUrl()),
+              headers: {
+                'User-Agent': userAgent,
+                'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+                'Accept-Language': 'en-US,en;q=0.9',
+              },
+            ),
+            initialSettings: InAppWebViewSettings(
+              userAgent: userAgent,
+              javaScriptEnabled: true,
+              allowsInlineMediaPlayback: true,
+              mediaPlaybackRequiresUserGesture: false,
+              useShouldOverrideUrlLoading: true,
+            ),
+            onWebViewCreated: (controller) {
+              webViewController = controller;
+              
+              // Inject blocking script at document start
+              controller.addUserScript(
+                userScript: UserScript(
+                  source: '''
+                    (function() {
+                      if (window.facebookBlockingLoaded) return;
+                      window.facebookBlockingLoaded = true;
+                      
+                      // Block all clicks that would open Facebook app
+                      document.addEventListener('click', function(e) {
+                        let target = e.target;
+                        let depth = 0;
+                        while (target && target !== document && depth < 10) {
+                          if (target.tagName === 'A' && target.href) {
+                            const href = target.href.toLowerCase();
+                            if (href.startsWith('fb://') ||
+                                href.startsWith('fbapi://') ||
+                                href.startsWith('fbauth2://') ||
+                                href.includes('applink.facebook.com') ||
+                                href.includes('apps.apple.com') ||
+                                href.includes('itunes.apple.com') ||
+                                href.startsWith('itms://') ||
+                                href.startsWith('itms-apps://') ||
+                                href.includes('play.google.com/store') ||
+                                href.startsWith('market://')) {
+                              e.preventDefault();
+                              e.stopPropagation();
+                              e.stopImmediatePropagation();
+                              return false;
+                            }
+                          }
+                          target = target.parentElement;
+                          depth++;
+                        }
+                      }, true);
+                      
+                      // Override window.open
+                      const originalOpen = window.open;
+                      window.open = function(url, target, features) {
+                        if (url) {
+                          const urlLower = url.toLowerCase();
+                          if (urlLower.startsWith('fb://') ||
+                              urlLower.startsWith('fbapi://') ||
+                              urlLower.startsWith('fbauth2://') ||
+                              urlLower.includes('applink.facebook.com') ||
+                              urlLower.includes('apps.apple.com') ||
+                              urlLower.includes('itunes.apple.com')) {
+                            return null;
+                          }
+                        }
+                        return originalOpen.call(window, url, target, features);
+                      };
+                      
+                      // Override location methods
+                      const originalHref = Object.getOwnPropertyDescriptor(window, 'location').get;
+                      Object.defineProperty(window, 'location', {
+                        get: function() {
+                          const loc = originalHref.call(window);
+                          const originalAssign = loc.assign;
+                          const originalReplace = loc.replace;
+                          
+                          loc.assign = function(url) {
+                            const urlLower = (url || '').toLowerCase();
+                            if (urlLower.startsWith('fb://') ||
+                                urlLower.startsWith('fbapi://') ||
+                                urlLower.startsWith('fbauth2://') ||
+                                urlLower.includes('applink.facebook.com')) {
+                              return;
+                            }
+                            return originalAssign.call(loc, url);
+                          };
+                          
+                          loc.replace = function(url) {
+                            const urlLower = (url || '').toLowerCase();
+                            if (urlLower.startsWith('fb://') ||
+                                urlLower.startsWith('fbapi://') ||
+                                urlLower.startsWith('fbauth2://') ||
+                                urlLower.includes('applink.facebook.com')) {
+                              return;
+                            }
+                            return originalReplace.call(loc, url);
+                          };
+                          
+                          return loc;
+                        }
+                      });
+                    })();
+                  ''',
+                  injectionTime: UserScriptInjectionTime.AT_DOCUMENT_START,
+                ),
+              );
+            },
+            onLoadStart: (controller, url) {
+              setState(() {
+                isLoading = true;
+              });
+              
+              // Inject blocking script early
+              controller.evaluateJavascript(source: '''
+                (function() {
+                  // Block all clicks that would open Facebook app
+                  document.addEventListener('click', function(e) {
+                    let target = e.target;
+                    let depth = 0;
+                    while (target && target !== document && depth < 10) {
+                      if (target.tagName === 'A' && target.href) {
+                        const href = target.href.toLowerCase();
+                        if (href.startsWith('fb://') ||
+                            href.startsWith('fbapi://') ||
+                            href.startsWith('fbauth2://') ||
+                            href.includes('applink.facebook.com') ||
+                            href.includes('apps.apple.com') ||
+                            href.includes('itunes.apple.com') ||
+                            href.startsWith('itms://') ||
+                            href.startsWith('itms-apps://') ||
+                            href.includes('play.google.com/store') ||
+                            href.startsWith('market://')) {
+                          e.preventDefault();
+                          e.stopPropagation();
+                          e.stopImmediatePropagation();
+                          return false;
+                        }
+                      }
+                      target = target.parentElement;
+                      depth++;
+                    }
+                  }, true);
+                })();
+              ''');
+            },
+            onLoadStop: (controller, url) async {
+              setState(() {
+                isLoading = false;
+              });
+              
+              // Inject blocking script again after page loads
+              await controller.evaluateJavascript(source: '''
+                (function() {
+                  // Block all clicks that would open Facebook app
+                  document.addEventListener('click', function(e) {
+                    let target = e.target;
+                    let depth = 0;
+                    while (target && target !== document && depth < 10) {
+                      if (target.tagName === 'A' && target.href) {
+                        const href = target.href.toLowerCase();
+                        if (href.startsWith('fb://') ||
+                            href.startsWith('fbapi://') ||
+                            href.startsWith('fbauth2://') ||
+                            href.includes('applink.facebook.com') ||
+                            href.includes('apps.apple.com') ||
+                            href.includes('itunes.apple.com') ||
+                            href.startsWith('itms://') ||
+                            href.startsWith('itms-apps://') ||
+                            href.includes('play.google.com/store') ||
+                            href.startsWith('market://')) {
+                          e.preventDefault();
+                          e.stopPropagation();
+                          e.stopImmediatePropagation();
+                          return false;
+                        }
+                      }
+                      target = target.parentElement;
+                      depth++;
+                    }
+                  }, true);
+                  
+                  // Override window.open
+                  const originalOpen = window.open;
+                  window.open = function(url, target, features) {
+                    if (url) {
+                      const urlLower = url.toLowerCase();
+                      if (urlLower.startsWith('fb://') ||
+                          urlLower.startsWith('fbapi://') ||
+                          urlLower.startsWith('fbauth2://') ||
+                          urlLower.includes('applink.facebook.com') ||
+                          urlLower.includes('apps.apple.com') ||
+                          urlLower.includes('itunes.apple.com')) {
+                        return null;
+                      }
+                    }
+                    return originalOpen.call(window, url, target, features);
+                  };
+                })();
+              ''');
+            },
+            onProgressChanged: (controller, progress) {
+              if (progress >= 100) {
+                setState(() {
+                  isLoading = false;
+                });
+              }
+            },
+            shouldOverrideUrlLoading: (controller, navigationAction) async {
+              final url = navigationAction.request.url?.toString() ?? '';
+              final urlLower = url.toLowerCase();
+              
+              print('Facebook Profile - Navigation request to: $url');
+              
+              // Block applink.facebook.com URLs (Universal Links)
+              if (urlLower.contains('applink.facebook.com')) {
+                print('Facebook Profile - Blocking applink URL: $url');
+                return NavigationActionPolicy.CANCEL;
+              }
+              
+              // Block URLs with launch_app_store parameter
+              if (urlLower.contains('launch_app_store=true')) {
+                print('Facebook Profile - Blocking URL with launch_app_store: $url');
+                return NavigationActionPolicy.CANCEL;
+              }
+              
+              // Block Facebook app schemes and App Store URLs
+              if (urlLower.startsWith('fb://') ||
+                  urlLower.startsWith('fbapi://') ||
+                  urlLower.startsWith('fbauth2://') ||
+                  urlLower.contains('apps.apple.com') ||
+                  urlLower.contains('itunes.apple.com') ||
+                  urlLower.startsWith('itms://') ||
+                  urlLower.startsWith('itms-apps://') ||
+                  urlLower.contains('play.google.com/store') ||
+                  urlLower.startsWith('market://')) {
+                print('Facebook Profile - Blocking app scheme/App Store URL: $url');
+                return NavigationActionPolicy.CANCEL;
+              }
+              
+              // Block tracking URLs (fbsbx.com) - redirect back to main profile
+              if (urlLower.contains('fbsbx.com') || urlLower.contains('facebook.com/tr/')) {
+                print('Facebook Profile - Blocking tracking URL, staying on profile');
+                return NavigationActionPolicy.CANCEL;
+              }
+              
+              // For Facebook URLs, ensure _webview=1&noapp=1 parameters are present
+              if (urlLower.contains('facebook.com') &&
+                  !urlLower.contains('_webview=1') &&
+                  !urlLower.contains('noapp=1')) {
+                print('Facebook Profile - Modifying URL to prevent Universal Links: $url');
+                final modifiedUrl = url.contains('?')
+                    ? '$url&_webview=1&noapp=1'
+                    : '$url?_webview=1&noapp=1';
+                Future.microtask(() async {
+                  await controller.loadUrl(urlRequest: URLRequest(url: WebUri(modifiedUrl)));
+                });
+                return NavigationActionPolicy.CANCEL;
+              }
+              
+              // Allow all other navigation
+              return NavigationActionPolicy.ALLOW;
+            },
+            onReceivedServerTrustAuthRequest: (controller, challenge) async {
+              return ServerTrustAuthResponse(action: ServerTrustAuthResponseAction.PROCEED);
+            },
+          ),
           if (isLoading)
             const Center(
               child: CircularProgressIndicator(),

@@ -205,10 +205,13 @@ class FaceBookController extends GetxController {
 
   Future<void> addIcon(String name, String iconUrl, {String? category}) async {
     try {
+      // If no category is specified, use the name as the category (for custom categories)
+      final categoryName = category ?? name;
       icons.add(
-          {'name': name, 'icon': iconUrl, 'category': category ?? 'General'});
+          {'name': name, 'icon': iconUrl, 'category': categoryName});
       await _saveToPrefs();
       update();
+      print('Facebook - Added icon: $name with category: $categoryName');
     } catch (e) {
       print('Error adding icon for $platformName: $e');
     }
@@ -252,6 +255,22 @@ class FaceBookController extends GetxController {
   List<String> getAvailableCategories() {
     Set<String> categories = {};
     print('Facebook - Getting available categories from ${icons.length} icons');
+    
+    // Fix existing "test" category that was incorrectly stored as "General"
+    bool needsSave = false;
+    for (var icon in icons) {
+      if (icon['name'] == 'test' && icon['category'] == 'General') {
+        icon['category'] = 'test';
+        needsSave = true;
+        print('Facebook - Fixed test category from General to test');
+      }
+    }
+    
+    // Save the fix if needed
+    if (needsSave) {
+      _saveToPrefs();
+    }
+    
     for (var icon in icons) {
       if (icon['category'] != null && icon['category']!.isNotEmpty) {
         categories.add(icon['category']!);
