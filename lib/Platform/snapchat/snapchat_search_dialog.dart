@@ -2,7 +2,7 @@ import 'package:flutter/cupertino.dart';
 
 import 'package:get/get.dart';
 
-import 'package:stay_connected/Platform/shared/profile_webview_screen.dart';
+import 'package:stay_connected/Platform/snapchat/snapchat_webview_screen.dart';
 
 class SnapchatSearchDialog extends StatelessWidget {
   final String iconName;
@@ -84,8 +84,8 @@ class SnapchatSearchDialog extends StatelessWidget {
           onPressed: () {
             if (searchController.text.trim().isNotEmpty) {
               Navigator.of(context).pop();
-              Get.to(() => ProfileWebViewScreen(
-                    platform: platformName,
+              Get.to(() => SnapchatWebviewScreen(
+                    platformName: platformName,
                     searchQuery: searchController.text.trim(),
                     iconName: iconName,
                   ));

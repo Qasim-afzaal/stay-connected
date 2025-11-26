@@ -1,12 +1,8 @@
-import 'dart:async';
 import 'dart:io';
-
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-
 import 'package:get/get.dart';
-import 'package:webview_flutter/webview_flutter.dart';
-
+import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 import 'package:stay_connected/Platform/snapchat/snapchat_controller.dart';
 
 class SnapchatWebviewScreen extends StatefulWidget {
@@ -26,317 +22,396 @@ class SnapchatWebviewScreen extends StatefulWidget {
 }
 
 class _SnapchatWebviewScreenState extends State<SnapchatWebviewScreen> {
-  late WebViewController _controller;
-  String? currentUrl;
+  InAppWebViewController? webViewController;
   bool isLoading = true;
-  bool hasError = false;
-  String? errorMessage;
-  bool isBlocked = false;
-  Timer? _loaderTimer;
-  bool hasLoadedSuccessfully = false;
+  String? currentUrl;
+  int loadingProgress = 0;
 
-  @override
-  void dispose() {
-    _loaderTimer?.cancel();
-    super.dispose();
-  }
-
-  void _startLoaderTimeout() {
-    _loaderTimer?.cancel();
-    print('Snapchat WebView - Starting 15 second timeout timer');
-    _loaderTimer = Timer(const Duration(seconds: 15), () {
-      print('Snapchat WebView - TIMEOUT: Loading took longer than 15 seconds');
-      print('Snapchat WebView - Current URL: $currentUrl');
-      print('Snapchat WebView - Is Loading: $isLoading');
-      print('Snapchat WebView - Has Error: $hasError');
-      if (mounted && isLoading && !hasLoadedSuccessfully) {
-        setState(() {
-          isLoading = false;
-          hasError = true;
-          errorMessage =
-              'Loading timed out. Snapchat may be blocking this browser.';
-        });
-        print('Snapchat WebView - Set timeout error state');
-      }
-    });
-  }
-
-  Future<void> _checkBlockOrCaptcha() async {
-    print('Snapchat WebView - Checking for block/captcha...');
-    try {
-      String? title = await _controller.getTitle();
-      String url = currentUrl ?? '';
-      print('Snapchat WebView - Page title: $title');
-      print('Snapchat WebView - Current URL: $url');
-
-      if ((title != null &&
-              (title.toLowerCase().contains('not supported') ||
-                  title.toLowerCase().contains('captcha') ||
-                  title.toLowerCase().contains('challenge') ||
-                  title.toLowerCase().contains('blocked'))) ||
-          url.contains('challenge') ||
-          url.contains('captcha') ||
-          url.contains('blocked') ||
-          url.contains('unsupported')) {
-        print(
-            'Snapchat WebView - BLOCK DETECTED: Title or URL contains block indicators');
-        setState(() {
-          isBlocked = true;
-          isLoading = false;
-          hasError = true;
-          errorMessage =
-              'Snapchat is blocking this browser or showing a captcha.';
-        });
-      } else {
-        print('Snapchat WebView - No block detected, page appears normal');
-      }
-    } catch (e) {
-      print('Snapchat WebView - Error checking block/captcha: $e');
+  String _getInitialUrl() {
+    String query = widget.searchQuery;
+    if (query.isNotEmpty) {
+      query = '$query site:snapchat.com';
     }
-  }
-
-  bool _isExpectedError(WebResourceError error) {
-    return error.errorCode == -1002 ||
-        error.errorCode == -999 ||
-        error.errorCode == -1001;
-  }
-
-  @override
-  void initState() {
-    super.initState();
-    _initializeWebView();
-  }
-
-  void _initializeWebView() {
-    print('Snapchat WebView - Initializing WebView controller');
-
-    String userAgent = Platform.isIOS
-        ? 'Mozilla/5.0 (iPhone; CPU iPhone OS 15_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/15.0 Mobile/15E148 Safari/604.1'
-        : 'Mozilla/5.0 (Linux; Android 10; SM-G975F) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.120 Mobile Safari/537.36';
-
-    _controller = WebViewController()
-      ..setJavaScriptMode(JavaScriptMode.unrestricted)
-      ..setUserAgent(userAgent)
-      ..setNavigationDelegate(
-        NavigationDelegate(
-          onPageStarted: (String url) {
-            print('Snapchat WebView - Page Started: $url');
-            print('Snapchat WebView - Starting loader timeout...');
-            if (mounted) {
-              setState(() {
-                isLoading = true;
-                hasError = false;
-                errorMessage = null;
-                isBlocked = false;
-                currentUrl = url;
-              });
-              _startLoaderTimeout();
-            }
-          },
-          onPageFinished: (String url) async {
-            print('Snapchat WebView - Page Finished: $url');
-            print('Snapchat WebView - Cancelling timeout timer');
-            if (mounted) {
-              setState(() {
-                isLoading = false;
-                currentUrl = url;
-                hasLoadedSuccessfully = true;
-              });
-              await _checkBlockOrCaptcha();
-              _loaderTimer?.cancel();
-            }
-          },
-          onNavigationRequest: (NavigationRequest request) {
-            print('Snapchat WebView - Navigation Request: ${request.url}');
-            if (mounted) {
-              setState(() {
-                currentUrl = request.url;
-              });
-            }
-            return NavigationDecision.navigate;
-          },
-          onUrlChange: (UrlChange change) {
-            if (change.url != null && mounted) {
-              print('Snapchat WebView - URL Changed: ${change.url}');
-              setState(() {
-                currentUrl = change.url!;
-              });
-            }
-          },
-          onWebResourceError: (WebResourceError error) {
-            print('Snapchat WebView - Error: ${error.description}');
-            print('Snapchat WebView - Error Code: ${error.errorCode}');
-            print('Snapchat WebView - Error URL: ${error.url}');
-
-            if (!_isExpectedError(error) && !hasLoadedSuccessfully) {
-              if (mounted) {
-                setState(() {
-                  isLoading = false;
-                  hasError = true;
-                  errorMessage = error.description;
-                });
-                _loaderTimer?.cancel();
-              }
-            } else if (_isExpectedError(error)) {
-              print(
-                  'Snapchat WebView - Ignoring expected error: ${error.errorCode}');
-            }
-          },
-          onProgress: (int progress) {
-            print('Snapchat WebView - Loading Progress: $progress%');
-          },
-        ),
-      )
-      ..setBackgroundColor(Colors.white)
-      ..loadRequest(
-        Uri.parse(
-          'https://www.google.com/search?q=${Uri.encodeComponent(widget.searchQuery + " " + widget.platformName)}',
-        ),
-        headers: {
-          'User-Agent': userAgent,
-          'Accept':
-              'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
-          'Accept-Language': 'en-US,en;q=0.5',
-          'Accept-Encoding': 'gzip, deflate, br',
-          'DNT': '1',
-          'Connection': 'keep-alive',
-          'Upgrade-Insecure-Requests': '1',
-          'Sec-Fetch-Dest': 'document',
-          'Sec-Fetch-Mode': 'navigate',
-          'Sec-Fetch-Site': 'none',
-          'Cache-Control': 'max-age=0',
-        },
-      );
-
-    Timer(const Duration(seconds: 5), () async {
-      if (mounted && isLoading && !hasLoadedSuccessfully) {
-        print(
-            'Snapchat WebView - Fallback: Checking if page actually loaded after 5 seconds');
-        try {
-          String? title = await _controller.getTitle();
-          print('Snapchat WebView - Fallback: Page title after 5s: $title');
-          if (title != null && title.isNotEmpty) {
-            print(
-                'Snapchat WebView - Fallback: Page seems loaded, forcing finish');
-            setState(() {
-              isLoading = false;
-              hasLoadedSuccessfully = true;
-            });
-            _loaderTimer?.cancel();
-            await _checkBlockOrCaptcha();
-          }
-        } catch (e) {
-          print('Snapchat WebView - Fallback: Error checking title: $e');
-        }
-      }
-    });
+    return 'https://www.google.com/search?q=${Uri.encodeComponent(query)}';
   }
 
   @override
   Widget build(BuildContext context) {
-    print(
-        'Snapchat WebView - Build: isLoading=$isLoading, hasError=$hasError, hasLoadedSuccessfully=$hasLoadedSuccessfully');
+    String userAgent = Platform.isIOS
+        ? 'Mozilla/5.0 (iPhone; CPU iPhone OS 17_5 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.5 Mobile/15E148 Safari/604.1'
+        : 'Mozilla/5.0 (Linux; Android 14; SM-G998B) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Mobile Safari/537.36';
 
     return Scaffold(
       appBar: AppBar(
-        title: Text('Search: ${widget.searchQuery}'),
+        title: Text(widget.iconName),
         centerTitle: true,
-        backgroundColor: Colors.white,
+        backgroundColor: Colors.yellow,
         foregroundColor: Colors.black,
-        elevation: 0,
-        actions: [
-          IconButton(
-            onPressed: _showAddFriendDialog,
-            icon: const Icon(Icons.person_add),
-            tooltip: 'Add Friend',
-          ),
-        ],
       ),
       body: Stack(
         children: [
-          if (hasError && !hasLoadedSuccessfully)
+          InAppWebView(
+            initialUrlRequest: URLRequest(
+              url: WebUri(_getInitialUrl()),
+              headers: {
+                'User-Agent': userAgent,
+                'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+                'Accept-Language': 'en-US,en;q=0.9',
+              },
+            ),
+            initialSettings: InAppWebViewSettings(
+              userAgent: userAgent,
+              javaScriptEnabled: true,
+              allowsInlineMediaPlayback: true,
+              mediaPlaybackRequiresUserGesture: false,
+              useShouldOverrideUrlLoading: true,
+            ),
+            onWebViewCreated: (controller) {
+              webViewController = controller;
+              
+              // Inject blocking script at document start
+              controller.addUserScript(
+                userScript: UserScript(
+                  source: '''
+                    (function() {
+                      if (window.snapchatBlockingLoaded) return;
+                      window.snapchatBlockingLoaded = true;
+                      
+                      // Block all clicks that would open Snapchat app
+                      document.addEventListener('click', function(e) {
+                        let target = e.target;
+                        let depth = 0;
+                        while (target && target !== document && depth < 10) {
+                          if (target.tagName === 'A' && target.href) {
+                            const href = target.href.toLowerCase();
+                            if (href.startsWith('snapchat://') ||
+                                href.includes('applink.snapchat.com') ||
+                                href.includes('apps.apple.com') ||
+                                href.includes('itunes.apple.com') ||
+                                href.startsWith('itms://') ||
+                                href.startsWith('itms-apps://') ||
+                                href.includes('play.google.com/store') ||
+                                href.startsWith('market://')) {
+                              e.preventDefault();
+                              e.stopPropagation();
+                              e.stopImmediatePropagation();
+                              return false;
+                            }
+                          }
+                          target = target.parentElement;
+                          depth++;
+                        }
+                      }, true);
+                      
+                      // Override window.open
+                      const originalOpen = window.open;
+                      window.open = function(url, target, features) {
+                        if (url) {
+                          const urlLower = url.toLowerCase();
+                          if (urlLower.startsWith('snapchat://') ||
+                              urlLower.includes('applink.snapchat.com') ||
+                              urlLower.includes('apps.apple.com') ||
+                              urlLower.includes('itunes.apple.com')) {
+                            return null;
+                          }
+                        }
+                        return originalOpen.call(window, url, target, features);
+                      };
+                    })();
+                  ''',
+                  injectionTime: UserScriptInjectionTime.AT_DOCUMENT_START,
+                ),
+              );
+            },
+            onLoadStart: (controller, url) {
+              setState(() {
+                isLoading = true;
+                loadingProgress = 0;
+                currentUrl = url?.toString();
+              });
+              
+              // Inject blocking script early
+              controller.evaluateJavascript(source: '''
+                (function() {
+                  // Block all clicks that would open Snapchat app
+                  document.addEventListener('click', function(e) {
+                    let target = e.target;
+                    let depth = 0;
+                    while (target && target !== document && depth < 10) {
+                      if (target.tagName === 'A' && target.href) {
+                        const href = target.href.toLowerCase();
+                        if (href.startsWith('snapchat://') ||
+                            href.includes('applink.snapchat.com') ||
+                            href.includes('apps.apple.com') ||
+                            href.includes('itunes.apple.com') ||
+                            href.startsWith('itms://') ||
+                            href.startsWith('itms-apps://') ||
+                            href.includes('play.google.com/store') ||
+                            href.startsWith('market://')) {
+                          e.preventDefault();
+                          e.stopPropagation();
+                          e.stopImmediatePropagation();
+                          return false;
+                        }
+                      }
+                      target = target.parentElement;
+                      depth++;
+                    }
+                  }, true);
+                })();
+              ''');
+            },
+            onLoadStop: (controller, url) async {
+              setState(() {
+                isLoading = false;
+                loadingProgress = 100;
+                currentUrl = url?.toString();
+              });
+              
+              // Inject blocking script again after page loads
+              await controller.evaluateJavascript(source: '''
+                (function() {
+                  // Block all clicks that would open Snapchat app
+                  document.addEventListener('click', function(e) {
+                    let target = e.target;
+                    let depth = 0;
+                    while (target && target !== document && depth < 10) {
+                      if (target.tagName === 'A' && target.href) {
+                        const href = target.href.toLowerCase();
+                        if (href.startsWith('snapchat://') ||
+                            href.includes('applink.snapchat.com') ||
+                            href.includes('apps.apple.com') ||
+                            href.includes('itunes.apple.com') ||
+                            href.startsWith('itms://') ||
+                            href.startsWith('itms-apps://') ||
+                            href.includes('play.google.com/store') ||
+                            href.startsWith('market://')) {
+                          e.preventDefault();
+                          e.stopPropagation();
+                          e.stopImmediatePropagation();
+                          return false;
+                        }
+                      }
+                      target = target.parentElement;
+                      depth++;
+                    }
+                  }, true);
+                  
+                  // Override window.open
+                  const originalOpen = window.open;
+                  window.open = function(url, target, features) {
+                    if (url) {
+                      const urlLower = url.toLowerCase();
+                      if (urlLower.startsWith('snapchat://') ||
+                          urlLower.includes('applink.snapchat.com') ||
+                          urlLower.includes('apps.apple.com') ||
+                          urlLower.includes('itunes.apple.com')) {
+                        return null;
+                      }
+                    }
+                    return originalOpen.call(window, url, target, features);
+                  };
+                })();
+              ''');
+            },
+            onProgressChanged: (controller, progress) {
+              setState(() {
+                loadingProgress = progress.toInt();
+                if (progress >= 100) {
+                  isLoading = false;
+                }
+              });
+            },
+            shouldOverrideUrlLoading: (controller, navigationAction) async {
+              final url = navigationAction.request.url?.toString() ?? '';
+              final urlLower = url.toLowerCase();
+              
+              print('Snapchat WebView - Navigation request to: $url');
+              
+              // Block applink.snapchat.com URLs (Universal Links)
+              if (urlLower.contains('applink.snapchat.com')) {
+                print('Snapchat WebView - Blocking applink URL: $url');
+                return NavigationActionPolicy.CANCEL;
+              }
+              
+              // Block URLs with launch_app_store parameter
+              if (urlLower.contains('launch_app_store=true')) {
+                print('Snapchat WebView - Blocking URL with launch_app_store: $url');
+                return NavigationActionPolicy.CANCEL;
+              }
+              
+              // Block Snapchat app schemes and App Store URLs
+              if (urlLower.startsWith('snapchat://') ||
+                  urlLower.contains('apps.apple.com') ||
+                  urlLower.contains('itunes.apple.com') ||
+                  urlLower.startsWith('itms://') ||
+                  urlLower.startsWith('itms-apps://') ||
+                  urlLower.contains('play.google.com/store') ||
+                  urlLower.startsWith('market://')) {
+                print('Snapchat WebView - Blocking app scheme/App Store URL: $url');
+                return NavigationActionPolicy.CANCEL;
+              }
+              
+              // For Snapchat URLs, ensure _webview=1&noapp=1 parameters are present
+              if (urlLower.contains('snapchat.com') &&
+                  !urlLower.contains('_webview=1') &&
+                  !urlLower.contains('noapp=1')) {
+                print('Snapchat WebView - Modifying URL to prevent Universal Links: $url');
+                final modifiedUrl = url.contains('?')
+                    ? '$url&_webview=1&noapp=1'
+                    : '$url?_webview=1&noapp=1';
+                Future.microtask(() async {
+                  await controller.loadUrl(urlRequest: URLRequest(url: WebUri(modifiedUrl)));
+                });
+                return NavigationActionPolicy.CANCEL;
+              }
+              
+              // Allow all other navigation
+              return NavigationActionPolicy.ALLOW;
+            },
+            onReceivedServerTrustAuthRequest: (controller, challenge) async {
+              return ServerTrustAuthResponse(action: ServerTrustAuthResponseAction.PROCEED);
+            },
+          ),
+          if (isLoading)
             Center(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(
-                    isBlocked ? Icons.block : Icons.error,
-                    size: 50,
-                    color: Colors.red,
-                  ),
-                  const SizedBox(height: 10),
+                  const CircularProgressIndicator(),
+                  const SizedBox(height: 16),
                   Text(
-                    isBlocked
-                        ? 'Snapchat is blocking this browser or showing a captcha.'
-                        : 'Snapchat blocked the WebView',
-                    style: const TextStyle(fontSize: 16),
-                    textAlign: TextAlign.center,
-                  ),
-                  if (errorMessage != null)
-                    Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: Text(errorMessage!,
-                          textAlign: TextAlign.center,
-                          style: const TextStyle(color: Colors.grey)),
+                    'Loading: $loadingProgress%',
+                    style: const TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w500,
+                      color: Colors.grey,
                     ),
-                  const SizedBox(height: 10),
-                  ElevatedButton(
-                    onPressed: () {
-                      setState(() {
-                        hasError = false;
-                        isLoading = true;
-                        isBlocked = false;
-                        hasLoadedSuccessfully = false;
-                      });
-                      _controller.reload();
-                      _startLoaderTimeout();
-                    },
-                    child: const Text("Retry"),
-                  ),
-                  const SizedBox(height: 8),
-                  TextButton(
-                    onPressed: _showAddFriendDialog,
-                    child: const Text('Add Friend Anyway'),
                   ),
                 ],
               ),
-            )
-          else
-            SizedBox.expand(
-              child: WebViewWidget(controller: _controller),
             ),
-          if (isLoading && !hasError)
-            Positioned.fill(
-              child: Container(
-                color: Colors.white.withOpacity(0.8),
-                child: const Center(
-                  child: CircularProgressIndicator(),
+          // Always show Add Friend button at bottom
+          Positioned(
+            bottom: 0,
+            left: 0,
+            right: 0,
+            child: Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.1),
+                    blurRadius: 4,
+                    offset: const Offset(0, -2),
+                  ),
+                ],
+              ),
+              child: SafeArea(
+                child: ElevatedButton(
+                  onPressed: _isOnGoogleSearch() || isLoading
+                      ? null
+                      : () => _showAddFriendDialog(),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.black,
+                    foregroundColor: Colors.white,
+                    disabledBackgroundColor: Colors.grey.shade400,
+                    disabledForegroundColor: Colors.grey.shade600,
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 24,
+                      vertical: 16,
+                    ),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    elevation: 0,
+                  ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(
+                        Icons.person_add,
+                        color: (_isOnGoogleSearch() || isLoading)
+                            ? Colors.grey.shade600
+                            : Colors.white,
+                      ),
+                      const SizedBox(width: 8),
+                      Text(
+                        isLoading
+                            ? 'Loading: $loadingProgress%'
+                            : 'Add Friend',
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w600,
+                          color: (_isOnGoogleSearch() || isLoading)
+                              ? Colors.grey.shade600
+                              : Colors.white,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
                 ),
               ),
             ),
         ],
       ),
-      floatingActionButton: FloatingActionButton(
-        backgroundColor: Colors.transparent,
-        foregroundColor: Colors.white,
-        elevation: 0,
-        onPressed: _showAddFriendDialog,
-        child: Image.asset(
-          'assets/images/img_person_add_blue.png',
-          width: 48,
-          height: 48,
-          errorBuilder: (context, error, stackTrace) {
-            return Icon(Icons.person_add, size: 48);
-          },
-        ),
-      ),
     );
   }
 
+  bool _isOnGoogleSearch() {
+    final url = currentUrl?.toLowerCase() ?? '';
+    return url.contains('google.com') || url.contains('googleapis.com');
+  }
+
   void _showAddFriendDialog() async {
+    // Don't show dialog if on Google search page
+    if (_isOnGoogleSearch()) {
+      Get.snackbar(
+        'Error',
+        'Please navigate to a Snapchat profile page first',
+        snackPosition: SnackPosition.BOTTOM,
+        duration: const Duration(seconds: 2),
+        backgroundColor: Colors.red,
+        colorText: Colors.white,
+      );
+      return;
+    }
+
     final nameController = TextEditingController();
-    final extractedName =
-        _extractNameFromUrl(currentUrl ?? '') ?? widget.searchQuery;
+
+    String? actualCurrentUrl;
+    try {
+      if (webViewController != null) {
+        actualCurrentUrl = (await webViewController!.getUrl())?.toString();
+      } else {
+        actualCurrentUrl = currentUrl;
+      }
+    } catch (e) {
+      actualCurrentUrl = currentUrl;
+    }
+
+    // Double check it's not a Google search page
+    if (_isOnGoogleSearch()) {
+      Get.snackbar(
+        'Error',
+        'Please navigate to a Snapchat profile page first',
+        snackPosition: SnackPosition.BOTTOM,
+        duration: const Duration(seconds: 2),
+        backgroundColor: Colors.red,
+        colorText: Colors.white,
+      );
+      return;
+    }
+
+    String extractedName = '';
+    if (actualCurrentUrl != null) {
+      extractedName =
+          _extractNameFromUrl(actualCurrentUrl) ?? widget.searchQuery;
+    } else {
+      extractedName = widget.searchQuery;
+    }
 
     nameController.text = extractedName;
 
@@ -349,12 +424,12 @@ class _SnapchatWebviewScreenState extends State<SnapchatWebviewScreen> {
               Container(
                 padding: const EdgeInsets.all(8),
                 decoration: BoxDecoration(
-                  color: CupertinoColors.systemBlue.withOpacity(0.1),
+                  color: CupertinoColors.systemYellow.withOpacity(0.1),
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: Icon(
                   CupertinoIcons.person_add,
-                  color: CupertinoColors.systemBlue,
+                  color: CupertinoColors.systemYellow,
                   size: 20,
                 ),
               ),
@@ -400,7 +475,7 @@ class _SnapchatWebviewScreenState extends State<SnapchatWebviewScreen> {
                 ),
                 const SizedBox(height: 8),
                 Text(
-                  'Current URL: ${currentUrl ?? "Loading..."}',
+                  'Current URL: ${actualCurrentUrl ?? "Loading..."}',
                   style: const TextStyle(
                     fontSize: 10,
                     color: CupertinoColors.systemGrey2,
@@ -424,14 +499,15 @@ class _SnapchatWebviewScreenState extends State<SnapchatWebviewScreen> {
               onPressed: () {
                 if (nameController.text.trim().isNotEmpty) {
                   Navigator.of(context).pop();
-                  _addFriendToIcon(nameController.text.trim(), currentUrl);
+                  _addFriendToIcon(
+                      nameController.text.trim(), actualCurrentUrl);
                 }
               },
               isDefaultAction: true,
               child: const Text(
                 'Add',
                 style: TextStyle(
-                  color: CupertinoColors.systemBlue,
+                  color: CupertinoColors.systemYellow,
                   fontWeight: FontWeight.w600,
                 ),
               ),
@@ -465,11 +541,20 @@ class _SnapchatWebviewScreenState extends State<SnapchatWebviewScreen> {
   }
 
   String? _extractNameFromUrl(String url) {
-    if (url.contains('snapchat.com/add/')) {
-      String path = url.split('snapchat.com/add/')[1];
+    if (url.contains('snapchat.com/')) {
+      String path = url.split('snapchat.com/')[1];
       if (path.isNotEmpty) {
         String username = path.split('?')[0].split('/')[0];
+        if (username != 'add' &&
+            username != 'discover' &&
+            username != 'stories' &&
+            username != 'map' &&
+            username != 'memories' &&
+            username != 'spotlight' &&
+            username != 'games' &&
+            username != 'minis') {
         return username.replaceAll('-', ' ').replaceAll('_', ' ');
+        }
       }
     }
     return null;
