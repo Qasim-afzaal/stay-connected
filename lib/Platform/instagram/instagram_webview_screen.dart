@@ -1,11 +1,10 @@
-import 'dart:async';
 import 'dart:io';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
 import 'package:get/get.dart';
-import 'package:webview_flutter/webview_flutter.dart';
+import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 
 import 'package:stay_connected/Platform/instagram/instagram_controller.dart';
 
@@ -26,521 +25,596 @@ class InstagramWebviewScreen extends StatefulWidget {
 }
 
 class _InstagramWebviewScreenState extends State<InstagramWebviewScreen> {
-  late WebViewController _controller;
+  InAppWebViewController? webViewController;
   bool isLoading = true;
-  bool hasError = false;
-  String? errorMessage;
-  bool isBlocked = false;
-  Timer? _loaderTimer;
-  Timer? _fallbackTimer;
-  Timer? _progressTimer;
-  bool hasLoadedSuccessfully = false;
   String? currentUrl;
   int loadingProgress = 0;
-  int lastProgressUpdate = 0;
-  bool isNavigatingToApp = false;
 
-  @override
-  void dispose() {
-    _loaderTimer?.cancel();
-    _fallbackTimer?.cancel();
-    _progressTimer?.cancel();
-    super.dispose();
-  }
-
-  void _startLoaderTimeout() {
-    _loaderTimer?.cancel();
-    print('Instagram WebView - Starting 25 second timeout timer');
-    _loaderTimer = Timer(const Duration(seconds: 25), () {
-      print('Instagram WebView - TIMEOUT: Loading took longer than 25 seconds');
-      print('Instagram WebView - Current URL: $currentUrl');
-      print('Instagram WebView - Is Loading: $isLoading');
-      print('Instagram WebView - Has Error: $hasError');
-      print('Instagram WebView - Loading Progress: $loadingProgress%');
-      if (mounted &&
-          isLoading &&
-          !hasLoadedSuccessfully &&
-          !isNavigatingToApp) {
-        setState(() {
-          isLoading = false;
-          hasError = true;
-          errorMessage =
-              'Loading timed out. Instagram may be blocking this browser.';
-        });
-        print('Instagram WebView - Set timeout error state');
-      }
-    });
-  }
-
-  void _startProgressStuckTimer() {
-    _progressTimer?.cancel();
-    _progressTimer = Timer(const Duration(seconds: 3), () {
-      if (mounted &&
-          isLoading &&
-          !hasLoadedSuccessfully &&
-          loadingProgress >= 85 &&
-          !isNavigatingToApp) {
-        print(
-            'Instagram WebView - Progress stuck at $loadingProgress%, forcing completion');
-        setState(() {
-          isLoading = false;
-          hasLoadedSuccessfully = true;
-        });
-        _loaderTimer?.cancel();
-        _fallbackTimer?.cancel();
-        _progressTimer?.cancel();
-      }
-    });
-  }
-
-  Future<void> _checkBlockOrCaptcha() async {
-    print('Instagram WebView - Checking for block/captcha...');
-    try {
-      String? title = await _controller.getTitle();
-      String url = currentUrl ?? '';
-      print('Instagram WebView - Page title: $title');
-      print('Instagram WebView - Current URL: $url');
-
-      if ((title != null &&
-              (title.toLowerCase().contains('not supported') ||
-                  title.toLowerCase().contains('captcha') ||
-                  title.toLowerCase().contains('challenge') ||
-                  title.toLowerCase().contains('blocked') ||
-                  title.toLowerCase().contains('checkpoint'))) ||
-          url.contains('challenge') ||
-          url.contains('captcha') ||
-          url.contains('blocked') ||
-          url.contains('unsupported') ||
-          url.contains('checkpoint')) {
-        print(
-            'Instagram WebView - BLOCK DETECTED: Title or URL contains block indicators');
-        setState(() {
-          isBlocked = true;
-          isLoading = false;
-          hasError = true;
-          errorMessage =
-              'Instagram is blocking this browser or showing a captcha.';
-        });
-      } else {
-        print('Instagram WebView - No block detected, page appears normal');
-      }
-    } catch (e) {
-      print('Instagram WebView - Error checking block/captcha: $e');
+  String _getInitialUrl() {
+    String query = widget.searchQuery;
+    if (query.isNotEmpty) {
+      query = '$query site:instagram.com';
     }
-  }
-
-  bool _isExpectedError(WebResourceError error) {
-    return error.errorCode == -1002 ||
-        error.errorCode == -999 ||
-        error.errorCode == -1001;
-  }
-
-  @override
-  void initState() {
-    super.initState();
-    _initializeWebView();
-  }
-
-  void _initializeWebView() {
-    print('Instagram WebView - Initializing WebView controller');
-
-    String userAgent = Platform.isIOS
-        ? 'Mozilla/5.0 (iPhone; CPU iPhone OS 15_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/15.0 Mobile/15E148 Safari/604.1'
-        : 'Mozilla/5.0 (Linux; Android 10; SM-G975F) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.120 Mobile Safari/537.36';
-
-    _controller = WebViewController()
-      ..setJavaScriptMode(JavaScriptMode.unrestricted)
-      ..setUserAgent(userAgent)
-      ..setNavigationDelegate(
-        NavigationDelegate(
-          onPageStarted: (String url) {
-            print('Instagram WebView - Page Started: $url');
-
-            if (url.startsWith('instagram://')) {
-              print(
-                  'Instagram WebView - Detected Instagram app redirect, ignoring');
-              setState(() {
-                isNavigatingToApp = true;
-              });
-              return;
-            }
-
-            print('Instagram WebView - Starting loader timeout...');
-            if (mounted) {
-              setState(() {
-                isLoading = true;
-                hasError = false;
-                errorMessage = null;
-                isBlocked = false;
-                currentUrl = url;
-                loadingProgress = 0;
-                lastProgressUpdate = 0;
-                isNavigatingToApp = false;
-              });
-              _startLoaderTimeout();
-            }
-          },
-          onPageFinished: (String url) async {
-            print('Instagram WebView - Page Finished: $url');
-
-            if (url.startsWith('instagram://')) {
-              print('Instagram WebView - Ignoring app redirect completion');
-              return;
-            }
-
-            print('Instagram WebView - Cancelling timeout timer');
-            if (mounted) {
-              setState(() {
-                isLoading = false;
-                currentUrl = url;
-                hasLoadedSuccessfully = true;
-                loadingProgress = 100;
-                isNavigatingToApp = false;
-              });
-              await _checkBlockOrCaptcha();
-              _loaderTimer?.cancel();
-              _fallbackTimer?.cancel();
-              _progressTimer?.cancel();
-            }
-          },
-          onNavigationRequest: (NavigationRequest request) {
-            print('Instagram WebView - Navigation Request: ${request.url}');
-
-            if (request.url.startsWith('instagram://')) {
-              print('Instagram WebView - Blocking Instagram app redirect');
-              setState(() {
-                isNavigatingToApp = true;
-              });
-              return NavigationDecision.prevent;
-            }
-
-            if (mounted) {
-              setState(() {
-                currentUrl = request.url;
-                isNavigatingToApp = false;
-              });
-            }
-            return NavigationDecision.navigate;
-          },
-          onUrlChange: (UrlChange change) {
-            if (change.url != null && mounted) {
-              print('Instagram WebView - URL Changed: ${change.url}');
-
-              if (change.url!.startsWith('instagram://')) {
-                print('Instagram WebView - Detected app redirect URL change');
-                setState(() {
-                  isNavigatingToApp = true;
-                });
-                return;
-              }
-
-              setState(() {
-                currentUrl = change.url!;
-                isNavigatingToApp = false;
-              });
-            }
-          },
-          onWebResourceError: (WebResourceError error) {
-            print('Instagram WebView - Error: ${error.description}');
-            print('Instagram WebView - Error Code: ${error.errorCode}');
-            print('Instagram WebView - Error URL: ${error.url}');
-
-            if (!_isExpectedError(error) &&
-                !hasLoadedSuccessfully &&
-                !isNavigatingToApp) {
-              if (mounted) {
-                setState(() {
-                  isLoading = false;
-                  hasError = true;
-                  errorMessage = error.description;
-                });
-                _loaderTimer?.cancel();
-                _fallbackTimer?.cancel();
-                _progressTimer?.cancel();
-              }
-            } else if (_isExpectedError(error)) {
-              print(
-                  'Instagram WebView - Ignoring expected error: ${error.errorCode}');
-            }
-          },
-          onProgress: (int progress) {
-            print('Instagram WebView - Loading Progress: $progress%');
-            setState(() {
-              loadingProgress = progress;
-              lastProgressUpdate = DateTime.now().millisecondsSinceEpoch;
-            });
-
-            if (progress >= 85 &&
-                isLoading &&
-                !hasLoadedSuccessfully &&
-                !isNavigatingToApp) {
-              print(
-                  'Instagram WebView - High progress detected ($progress%), considering loaded');
-              setState(() {
-                isLoading = false;
-                hasLoadedSuccessfully = true;
-              });
-              _loaderTimer?.cancel();
-              _fallbackTimer?.cancel();
-              _progressTimer?.cancel();
-            } else if (progress >= 80 &&
-                isLoading &&
-                !hasLoadedSuccessfully &&
-                !isNavigatingToApp) {
-              _startProgressStuckTimer();
-            }
-          },
-        ),
-      )
-      ..setBackgroundColor(Colors.white)
-      ..loadRequest(
-        Uri.parse(
-          'https://www.google.com/search?q=${Uri.encodeComponent(widget.searchQuery + " " + widget.platformName)}',
-        ),
-        headers: {
-          'User-Agent': userAgent,
-          'Accept':
-              'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
-          'Accept-Language': 'en-US,en;q=0.5',
-          'Accept-Encoding': 'gzip, deflate, br',
-          'DNT': '1',
-          'Connection': 'keep-alive',
-          'Upgrade-Insecure-Requests': '1',
-          'Sec-Fetch-Dest': 'document',
-          'Sec-Fetch-Mode': 'navigate',
-          'Sec-Fetch-Site': 'none',
-          'Cache-Control': 'max-age=0',
-        },
-      );
-
-    _fallbackTimer = Timer(const Duration(seconds: 8), () async {
-      if (mounted &&
-          isLoading &&
-          !hasLoadedSuccessfully &&
-          !isNavigatingToApp) {
-        print(
-            'Instagram WebView - Fallback 1: Checking if page actually loaded after 8 seconds');
-        try {
-          String? title = await _controller.getTitle();
-          print('Instagram WebView - Fallback 1: Page title after 8s: $title');
-          if (title != null && title.isNotEmpty && title != 'Google') {
-            print(
-                'Instagram WebView - Fallback 1: Page seems loaded, forcing finish');
-            setState(() {
-              isLoading = false;
-              hasLoadedSuccessfully = true;
-            });
-            _loaderTimer?.cancel();
-            _fallbackTimer?.cancel();
-            _progressTimer?.cancel();
-            await _checkBlockOrCaptcha();
-          }
-        } catch (e) {
-          print('Instagram WebView - Fallback 1: Error checking title: $e');
-        }
-      }
-    });
-
-    Timer(const Duration(seconds: 15), () async {
-      if (mounted &&
-          isLoading &&
-          !hasLoadedSuccessfully &&
-          !isNavigatingToApp) {
-        print(
-            'Instagram WebView - Fallback 2: Checking if page actually loaded after 15 seconds');
-        try {
-          String? title = await _controller.getTitle();
-          print('Instagram WebView - Fallback 2: Page title after 15s: $title');
-          if (title != null && title.isNotEmpty) {
-            print(
-                'Instagram WebView - Fallback 2: Page seems loaded, forcing finish');
-            setState(() {
-              isLoading = false;
-              hasLoadedSuccessfully = true;
-            });
-            _loaderTimer?.cancel();
-            _fallbackTimer?.cancel();
-            _progressTimer?.cancel();
-            await _checkBlockOrCaptcha();
-          }
-        } catch (e) {
-          print('Instagram WebView - Fallback 2: Error checking title: $e');
-        }
-      }
-    });
-
-    Timer(const Duration(seconds: 12), () async {
-      if (mounted &&
-          isLoading &&
-          !hasLoadedSuccessfully &&
-          loadingProgress >= 85 &&
-          !isNavigatingToApp) {
-        print(
-            'Instagram WebView - Fallback 3: Progress stuck at $loadingProgress%, forcing completion');
-        setState(() {
-          isLoading = false;
-          hasLoadedSuccessfully = true;
-        });
-        _loaderTimer?.cancel();
-        _fallbackTimer?.cancel();
-        _progressTimer?.cancel();
-        await _checkBlockOrCaptcha();
-      }
-    });
+    return 'https://www.google.com/search?q=${Uri.encodeComponent(query)}';
   }
 
   @override
   Widget build(BuildContext context) {
-    print(
-        'Instagram WebView - Build: isLoading=$isLoading, hasError=$hasError, hasLoadedSuccessfully=$hasLoadedSuccessfully, progress=$loadingProgress%, isNavigatingToApp=$isNavigatingToApp');
+    String userAgent = Platform.isIOS
+        ? 'Mozilla/5.0 (iPhone; CPU iPhone OS 17_5 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.5 Mobile/15E148 Safari/604.1'
+        : 'Mozilla/5.0 (Linux; Android 14; SM-G998B) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Mobile Safari/537.36';
 
     return Scaffold(
       appBar: AppBar(
-        title: Text('Search: ${widget.searchQuery}'),
+        title: Text(widget.iconName),
         centerTitle: true,
-        backgroundColor: Colors.white,
-        foregroundColor: Colors.black,
-        elevation: 0,
-        actions: [
-          IconButton(
-            onPressed: () => _showAddFriendDialog(),
-            icon: const Icon(Icons.person_add),
-            tooltip: 'Add Friend',
-          ),
-        ],
+        backgroundColor: Colors.purple,
+        foregroundColor: Colors.white,
       ),
       body: Stack(
         children: [
-          if (hasError && !hasLoadedSuccessfully)
+          InAppWebView(
+            initialUrlRequest: URLRequest(
+              url: WebUri(_getInitialUrl()),
+              headers: {
+                'User-Agent': userAgent,
+                'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
+                'Accept-Language': 'en-US,en;q=0.5',
+                'Accept-Encoding': 'gzip, deflate, br',
+                'DNT': '1',
+                'Connection': 'keep-alive',
+                'Upgrade-Insecure-Requests': '1',
+                'Sec-Fetch-Dest': 'document',
+                'Sec-Fetch-Mode': 'navigate',
+                'Sec-Fetch-Site': 'none',
+                'Cache-Control': 'max-age=0',
+              },
+            ),
+            initialSettings: InAppWebViewSettings(
+              userAgent: userAgent,
+              javaScriptEnabled: true,
+              allowsInlineMediaPlayback: true,
+              mediaPlaybackRequiresUserGesture: false,
+              useShouldOverrideUrlLoading: true,
+            ),
+            onWebViewCreated: (controller) {
+              webViewController = controller;
+              
+              // Register JavaScript handler for post capture
+              controller.addJavaScriptHandler(
+                handlerName: 'InstagramPostCapture',
+                callback: (args) async {
+                  if (args.isNotEmpty) {
+                    String postUrl = args[0].toString();
+                    if (postUrl.isNotEmpty && postUrl.startsWith('http')) {
+                      // Clean the URL: decode HTML entities and remove query parameters
+                      postUrl = postUrl
+                          .replaceAll('&amp;', '&')
+                          .replaceAll('&amp;amp;', '&')
+                          .replaceAll('&amp;amp;amp;', '&');
+                      
+                      // Remove all query parameters (everything after ?)
+                      if (postUrl.contains('?')) {
+                        postUrl = postUrl.split('?')[0];
+                      }
+                      
+                      // Get current URL to prevent infinite loop
+                      final currentUrl = await controller.getUrl();
+                      final currentUrlString = currentUrl?.toString() ?? '';
+                      
+                      // Clean current URL too
+                      String cleanCurrentUrl = currentUrlString;
+                      if (cleanCurrentUrl.contains('?')) {
+                        cleanCurrentUrl = cleanCurrentUrl.split('?')[0];
+                      }
+                      cleanCurrentUrl = cleanCurrentUrl.replaceAll('&amp;', '&');
+                      
+                      // Only load if it's different from current URL
+                      if (postUrl != cleanCurrentUrl && (postUrl.contains('/p/') || postUrl.contains('/reel/') || postUrl.contains('/tv/') || postUrl.contains('/reels/'))) {
+                        print('Instagram WebView - Captured post URL: $postUrl');
+                        Future.microtask(() {
+                          controller.loadUrl(urlRequest: URLRequest(url: WebUri(postUrl)));
+                        });
+                      } else {
+                        print('Instagram WebView - Ignoring duplicate URL: $postUrl');
+                      }
+                    }
+                  }
+                },
+              );
+              
+              // Inject blocking and post capture script at document start
+              controller.addUserScript(
+                userScript: UserScript(
+                  source: '''
+                    (function() {
+                      if (window.instagramBlockingLoaded) return;
+                      window.instagramBlockingLoaded = true;
+                      
+                      // Allow normal navigation for posts/reels/images - just ensure URLs have _webview=1&noapp=1
+                      function ensureWebViewParams(e) {
+                        try {
+                          let target = e.target;
+                          let depth = 0;
+                          while (target && target !== document && depth < 10) {
+                            if (target.tagName === 'A' && target.href) {
+                              const href = target.href;
+                              if (href.includes('instagram.com') && (href.includes('/p/') || href.includes('/reel/') || href.includes('/tv/') || href.includes('/reels/'))) {
+                                if (!href.includes('_webview=1') || !href.includes('noapp=1')) {
+                                  const separator = href.includes('?') ? '&' : '?';
+                                  target.href = href + separator + '_webview=1&noapp=1';
+                                }
+                                return;
+                              }
+                            }
+                            target = target.parentElement;
+                            depth++;
+                          }
+                        } catch(err) {}
+                      }
+                      
+                      // Allow app scheme redirects for Instagram content (posts, reels, images) - let them open in native app
+                      // Only block App Store URLs
+                      document.addEventListener('click', function(e) {
+                        let target = e.target;
+                        let depth = 0;
+                        while (target && target !== document && depth < 10) {
+                          if (target.tagName === 'A' && target.href) {
+                            const href = target.href.toLowerCase();
+                            // Block only App Store URLs - allow everything else including app schemes
+                            if (href.includes('apps.apple.com') ||
+                                href.includes('itunes.apple.com') ||
+                                href.startsWith('itms://') ||
+                                href.startsWith('itms-apps://') ||
+                                href.includes('play.google.com/store') ||
+                                href.startsWith('market://')) {
+                              e.preventDefault();
+                              e.stopPropagation();
+                              e.stopImmediatePropagation();
+                              return false;
+                            }
+                            // Allow all other navigation (including app schemes for Instagram content)
+                            return;
+                          }
+                          target = target.parentElement;
+                          depth++;
+                        }
+                      }, false);
+                      
+                      // Allow normal navigation for posts/reels/images - just ensure URLs have _webview=1&noapp=1
+                      function ensureWebViewParams(e) {
+                        try {
+                          let target = e.target;
+                          let depth = 0;
+                          while (target && target !== document && depth < 10) {
+                            if (target.tagName === 'A' && target.href) {
+                              const href = target.href;
+                              if (href.includes('instagram.com') && (href.includes('/p/') || href.includes('/reel/') || href.includes('/tv/') || href.includes('/reels/'))) {
+                                if (!href.includes('_webview=1') || !href.includes('noapp=1')) {
+                                  const separator = href.includes('?') ? '&' : '?';
+                                  target.href = href + separator + '_webview=1&noapp=1';
+                                }
+              return;
+            }
+                            }
+                            target = target.parentElement;
+                            depth++;
+                          }
+                        } catch(err) {}
+                      }
+                      
+                      document.addEventListener('click', ensureWebViewParams, true);
+                      document.addEventListener('touchend', ensureWebViewParams, true);
+                      
+                      // Override window.open
+                      const originalOpen = window.open;
+                      window.open = function(url, target, features) {
+                        if (url) {
+                          const urlLower = url.toLowerCase();
+                          if (urlLower.startsWith('instagram://') ||
+                              urlLower.startsWith('fb://') ||
+                              urlLower.startsWith('fbapi://') ||
+                              urlLower.includes('applink.instagram.com') ||
+                              urlLower.includes('apps.apple.com') ||
+                              urlLower.includes('itunes.apple.com')) {
+                            return null;
+                          }
+                        }
+                        return originalOpen.call(window, url, target, features);
+                      };
+                })();
+                  ''',
+                  injectionTime: UserScriptInjectionTime.AT_DOCUMENT_START,
+                ),
+              );
+            },
+            onLoadStart: (controller, url) {
+              print('Instagram WebView - Page Started: $url');
+
+              if (url?.toString().startsWith('instagram://') ?? false) {
+                print('Instagram WebView - Detected Instagram app redirect, ignoring');
+                return;
+              }
+
+            if (mounted) {
+              setState(() {
+                isLoading = true;
+                  currentUrl = url?.toString();
+                loadingProgress = 0;
+                });
+              }
+              
+              // Inject blocking and post capture script early
+              controller.evaluateJavascript(source: '''
+                (function() {
+                  // Allow normal navigation for posts/reels/images - just ensure URLs have _webview=1&noapp=1
+                  function ensureWebViewParams(e) {
+                    try {
+                      let target = e.target;
+                      let depth = 0;
+                      while (target && target !== document && depth < 10) {
+                        if (target.tagName === 'A' && target.href) {
+                          const href = target.href;
+                          if (href.includes('instagram.com') && (href.includes('/p/') || href.includes('/reel/') || href.includes('/tv/') || href.includes('/reels/'))) {
+                            if (!href.includes('_webview=1') || !href.includes('noapp=1')) {
+                              const separator = href.includes('?') ? '&' : '?';
+                              target.href = href + separator + '_webview=1&noapp=1';
+                            }
+                            return;
+                          }
+                        }
+                        target = target.parentElement;
+                        depth++;
+                      }
+                    } catch(err) {}
+                  }
+                  
+                  document.addEventListener('click', ensureWebViewParams, true);
+                  document.addEventListener('touchend', ensureWebViewParams, true);
+                  
+                  // Block only app scheme redirects - allow all normal navigation including posts/reels
+                  document.addEventListener('click', function(e) {
+                    let target = e.target;
+                    let depth = 0;
+                    while (target && target !== document && depth < 10) {
+                      if (target.tagName === 'A' && target.href) {
+                        const href = target.href.toLowerCase();
+                        if (href.startsWith('instagram://') ||
+                            href.startsWith('fb://') ||
+                            href.startsWith('fbapi://') ||
+                            href.includes('applink.instagram.com') ||
+                            href.includes('apps.apple.com') ||
+                            href.includes('itunes.apple.com') ||
+                            href.startsWith('itms://') ||
+                            href.startsWith('itms-apps://') ||
+                            href.includes('play.google.com/store') ||
+                            href.startsWith('market://')) {
+                          e.preventDefault();
+                          e.stopPropagation();
+                          e.stopImmediatePropagation();
+                          return false;
+                        }
+                      }
+                      target = target.parentElement;
+                      depth++;
+                    }
+                  }, true);
+                })();
+              ''');
+            },
+            onLoadStop: (controller, url) async {
+              print('Instagram WebView - Page Finished: $url');
+
+              if (url?.toString().startsWith('instagram://') ?? false) {
+                print('Instagram WebView - Ignoring app redirect completion');
+                return;
+              }
+
+            if (mounted) {
+              setState(() {
+                isLoading = false;
+                  currentUrl = url?.toString();
+                loadingProgress = 100;
+                });
+              }
+              
+              // Inject blocking and post capture script again after page loads
+              await controller.evaluateJavascript(source: '''
+                (function() {
+                  // Allow normal navigation for posts/reels/images - just ensure URLs have _webview=1&noapp=1
+                  function ensureWebViewParams(e) {
+                    try {
+                      let target = e.target;
+                      let depth = 0;
+                      while (target && target !== document && depth < 10) {
+                        if (target.tagName === 'A' && target.href) {
+                          const href = target.href;
+                          if (href.includes('instagram.com') && (href.includes('/p/') || href.includes('/reel/') || href.includes('/tv/') || href.includes('/reels/'))) {
+                            if (!href.includes('_webview=1') || !href.includes('noapp=1')) {
+                              const separator = href.includes('?') ? '&' : '?';
+                              target.href = href + separator + '_webview=1&noapp=1';
+                            }
+                return;
+              }
+                        }
+                        target = target.parentElement;
+                        depth++;
+                      }
+                    } catch(err) {}
+                  }
+                  
+                  document.addEventListener('click', ensureWebViewParams, true);
+                  document.addEventListener('touchend', ensureWebViewParams, true);
+                  
+                  // Block only app scheme redirects - allow all normal navigation including posts/reels
+                  document.addEventListener('click', function(e) {
+                    let target = e.target;
+                    let depth = 0;
+                    while (target && target !== document && depth < 10) {
+                      if (target.tagName === 'A' && target.href) {
+                        const href = target.href.toLowerCase();
+                        if (href.startsWith('instagram://') ||
+                            href.startsWith('fb://') ||
+                            href.startsWith('fbapi://') ||
+                            href.includes('applink.instagram.com') ||
+                            href.includes('apps.apple.com') ||
+                            href.includes('itunes.apple.com') ||
+                            href.startsWith('itms://') ||
+                            href.startsWith('itms-apps://') ||
+                            href.includes('play.google.com/store') ||
+                            href.startsWith('market://')) {
+                          e.preventDefault();
+                          e.stopPropagation();
+                          e.stopImmediatePropagation();
+                          return false;
+                        }
+                      }
+                      target = target.parentElement;
+                      depth++;
+                    }
+                  }, true);
+                  
+                  // Override window.open - allow app schemes for Instagram content
+                  const originalOpen = window.open;
+                  window.open = function(url, target, features) {
+                    if (url) {
+                      const urlLower = url.toLowerCase();
+                      // Block only App Store URLs - allow app schemes for Instagram content
+                      if (urlLower.includes('apps.apple.com') ||
+                          urlLower.includes('itunes.apple.com')) {
+                        return null;
+                      }
+                    }
+                    return originalOpen.call(window, url, target, features);
+                  };
+                })();
+              ''');
+            },
+            onProgressChanged: (controller, progress) {
+            print('Instagram WebView - Loading Progress: $progress%');
+            setState(() {
+                loadingProgress = progress.toInt();
+                if (progress >= 100) {
+                isLoading = false;
+                }
+              });
+            },
+            shouldOverrideUrlLoading: (controller, navigationAction) async {
+              final url = navigationAction.request.url?.toString() ?? '';
+              final urlLower = url.toLowerCase();
+              final isMainFrame = navigationAction.targetFrame?.isMainFrame ?? true;
+              
+              print('Instagram WebView - Navigation request to: $url (isMainFrame: $isMainFrame)');
+
+              // Block Google OAuth/iframe URLs that cause white screens
+              if (urlLower.contains('accounts.google.com') ||
+                  urlLower.contains('google.com/gsi/') ||
+                  urlLower.contains('google.com/oauth2/')) {
+                print('Instagram WebView - Blocking Google OAuth/iframe URL: $url');
+                return NavigationActionPolicy.CANCEL;
+              }
+              
+              // Block applink.instagram.com URLs (Universal Links)
+              if (urlLower.contains('applink.instagram.com')) {
+                print('Instagram WebView - Blocking applink URL: $url');
+                return NavigationActionPolicy.CANCEL;
+              }
+              
+              // Block URLs with launch_app_store parameter
+              if (urlLower.contains('launch_app_store=true')) {
+                print('Instagram WebView - Blocking URL with launch_app_store: $url');
+                return NavigationActionPolicy.CANCEL;
+              }
+              
+              // Allow app schemes for Instagram content (posts, reels, profiles, images)
+              // Let them redirect to the native app
+              if (urlLower.startsWith('instagram://') ||
+                  urlLower.startsWith('fb://') ||
+                  urlLower.startsWith('fbapi://')) {
+                print('Instagram WebView - Allowing app redirect for Instagram content: $url');
+                return NavigationActionPolicy.ALLOW;
+              }
+              
+              // Block only App Store URLs and other non-Instagram app schemes
+              if (urlLower.startsWith('itms://') ||
+                  urlLower.startsWith('itms-apps://') ||
+                  urlLower.startsWith('market://')) {
+                print('Instagram WebView - Blocking App Store/market URL: $url');
+                return NavigationActionPolicy.CANCEL;
+              }
+              
+              // Block App Store URLs only if they're direct (not in redirect parameters)
+              if ((urlLower.startsWith('apps.apple.com') ||
+                  urlLower.startsWith('itunes.apple.com') ||
+                  urlLower.startsWith('play.google.com/store')) &&
+                  !urlLower.contains('instagram.com') &&
+                  !urlLower.contains('/p/') &&
+                  !urlLower.contains('/reel/') &&
+                  !urlLower.contains('/tv/')) {
+                print('Instagram WebView - Blocking App Store URL: $url');
+                return NavigationActionPolicy.CANCEL;
+              }
+              
+              // For main frame Instagram URLs only, ensure _webview=1&noapp=1 parameters are present
+              // Don't modify iframe URLs or OAuth URLs
+              if (isMainFrame &&
+                  urlLower.contains('instagram.com') &&
+                  !urlLower.contains('accounts.google.com') &&
+                  !urlLower.contains('google.com/gsi/') &&
+                  !urlLower.contains('google.com/oauth2/') &&
+                  !urlLower.contains('_webview=1') &&
+                  !urlLower.contains('noapp=1')) {
+                print('Instagram WebView - Modifying URL to prevent Universal Links: $url');
+                final modifiedUrl = url.contains('?')
+                    ? '$url&_webview=1&noapp=1'
+                    : '$url?_webview=1&noapp=1';
+                Future.microtask(() async {
+                  await controller.loadUrl(urlRequest: URLRequest(url: WebUri(modifiedUrl)));
+                });
+                return NavigationActionPolicy.CANCEL;
+              }
+              
+              if (mounted) {
+        setState(() {
+                  currentUrl = url;
+                });
+              }
+              return NavigationActionPolicy.ALLOW;
+            },
+            onReceivedServerTrustAuthRequest: (controller, challenge) async {
+              return ServerTrustAuthResponse(action: ServerTrustAuthResponseAction.PROCEED);
+            },
+          ),
+          if (isLoading)
             Center(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(
-                    isBlocked ? Icons.block : Icons.error,
-                    size: 50,
-                    color: Colors.red,
-                  ),
-                  const SizedBox(height: 10),
+                  const CircularProgressIndicator(),
+                  const SizedBox(height: 16),
                   Text(
-                    isBlocked
-                        ? 'Instagram is blocking this browser or showing a captcha.'
-                        : 'Instagram blocks WebView access',
-                    style: const TextStyle(fontSize: 16),
-                    textAlign: TextAlign.center,
-                  ),
-                  const SizedBox(height: 8),
-                  const Text(
-                      'This is normal - Instagram doesn\'t allow WebView access',
-                      style: TextStyle(fontSize: 14, color: Colors.grey),
-                      textAlign: TextAlign.center),
-                  if (errorMessage != null)
-                    Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: Text(errorMessage!,
-                          textAlign: TextAlign.center,
-                          style: const TextStyle(color: Colors.grey)),
+                    'Loading: $loadingProgress%',
+                    style: const TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w500,
+                      color: Colors.grey,
                     ),
-                  const SizedBox(height: 10),
-                  ElevatedButton(
-                    onPressed: () {
-                      setState(() {
-                        hasError = false;
-                        isLoading = true;
-                        isBlocked = false;
-                        hasLoadedSuccessfully = false;
-                        loadingProgress = 0;
-                        isNavigatingToApp = false;
-                      });
-                      _controller.reload();
-                      _startLoaderTimeout();
-                    },
-                    child: const Text("Retry"),
-                  ),
-                  const SizedBox(height: 8),
-                  TextButton(
-                    onPressed: () => _showAddFriendDialog(),
-                    child: const Text('Add Friend Anyway'),
                   ),
                 ],
               ),
-            )
-          else
-            SizedBox.expand(
-              child: WebViewWidget(controller: _controller),
             ),
-          if (isLoading && !hasError && !isNavigatingToApp)
-            Positioned.fill(
-              child: Container(
-                color: Colors.white.withOpacity(0.8),
-                child: Center(
-                  child: Column(
+          // Always show Add Friend button at bottom
+          Positioned(
+            bottom: 0,
+            left: 0,
+            right: 0,
+            child: Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.1),
+                    blurRadius: 4,
+                    offset: const Offset(0, -2),
+                  ),
+                ],
+              ),
+              child: SafeArea(
+                child: ElevatedButton(
+                  onPressed: _isOnGoogleSearch() || isLoading
+                      ? null
+                      : () => _showAddFriendDialog(),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.black,
+                    foregroundColor: Colors.white,
+                    disabledBackgroundColor: Colors.grey.shade400,
+                    disabledForegroundColor: Colors.grey.shade600,
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 24,
+                      vertical: 16,
+                    ),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    elevation: 0,
+                  ),
+                  child: Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      CircularProgressIndicator(
-                        value: loadingProgress / 100,
-                        backgroundColor: Colors.grey[300],
+                      Icon(
+                        Icons.person_add,
+                        color: (_isOnGoogleSearch() || isLoading)
+                            ? Colors.grey.shade600
+                            : Colors.white,
                       ),
-                      const SizedBox(height: 16),
+                      const SizedBox(width: 8),
                       Text(
-                        'Loading Instagram...',
-                        style: const TextStyle(fontSize: 16),
-                      ),
-                      const SizedBox(height: 8),
-                      Text(
-                        '$loadingProgress%',
-                        style:
-                            const TextStyle(fontSize: 14, color: Colors.grey),
-                      ),
-                      if (loadingProgress >= 85) ...[
-                        const SizedBox(height: 8),
-                        Text(
-                          'Almost done...',
-                          style: const TextStyle(
-                              fontSize: 12, color: Colors.purple),
+                        isLoading
+                            ? 'Loading: $loadingProgress%'
+                            : 'Add Friend',
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w600,
+                          color: (_isOnGoogleSearch() || isLoading)
+                              ? Colors.grey.shade600
+                              : Colors.white,
                         ),
-                      ],
-                      if (currentUrl != null) ...[
-                        const SizedBox(height: 8),
-                        Text(
-                          'URL: ${currentUrl!.length > 50 ? '${currentUrl!.substring(0, 50)}...' : currentUrl!}',
-                          style:
-                              const TextStyle(fontSize: 10, color: Colors.grey),
-                          textAlign: TextAlign.center,
-                        ),
-                      ],
+                      ),
                     ],
+                  ),
                   ),
                 ),
               ),
             ),
         ],
       ),
-      floatingActionButton: FloatingActionButton(
-        backgroundColor: Colors.transparent,
-        foregroundColor: Colors.white,
-        elevation: 0,
-        onPressed: () => _showAddFriendDialog(),
-        child: Image.asset(
-          'assets/images/img_person_add_blue.png',
-          width: 48,
-          height: 48,
-          errorBuilder: (context, error, stackTrace) {
-            return Icon(Icons.person_add, size: 48);
-          },
-        ),
-      ),
     );
   }
 
+  bool _isOnGoogleSearch() {
+    final url = currentUrl?.toLowerCase() ?? '';
+    return url.contains('google.com') || url.contains('googleapis.com');
+  }
+
   void _showAddFriendDialog() async {
+    // Don't show dialog if on Google search page
+    if (_isOnGoogleSearch()) {
+      Get.snackbar(
+        'Error',
+        'Please navigate to an Instagram profile page first',
+        snackPosition: SnackPosition.BOTTOM,
+        duration: const Duration(seconds: 2),
+        backgroundColor: Colors.red,
+        colorText: Colors.white,
+      );
+      return;
+    }
+
     final nameController = TextEditingController();
 
     String? actualCurrentUrl;
     try {
-      actualCurrentUrl = await _controller.currentUrl();
+      if (webViewController != null) {
+        actualCurrentUrl = (await webViewController!.getUrl())?.toString();
+      } else {
+        actualCurrentUrl = currentUrl;
+      }
     } catch (e) {
       actualCurrentUrl = currentUrl;
+    }
+
+    // Double check it's not a Google search page
+    if (_isOnGoogleSearch()) {
+      Get.snackbar(
+        'Error',
+        'Please navigate to an Instagram profile page first',
+        snackPosition: SnackPosition.BOTTOM,
+        duration: const Duration(seconds: 2),
+        backgroundColor: Colors.red,
+        colorText: Colors.white,
+      );
+      return;
     }
 
     String extractedName = '';

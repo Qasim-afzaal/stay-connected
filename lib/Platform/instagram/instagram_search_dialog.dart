@@ -2,7 +2,7 @@ import 'package:flutter/cupertino.dart';
 
 import 'package:get/get.dart';
 
-import 'package:stay_connected/Platform/shared/profile_webview_screen.dart';
+import 'package:stay_connected/Platform/instagram/instagram_webview_screen.dart';
 
 class InstagramSearchDialog extends StatelessWidget {
   final String iconName;
@@ -83,8 +83,8 @@ class InstagramSearchDialog extends StatelessWidget {
           onPressed: () {
             if (searchController.text.trim().isNotEmpty) {
               Navigator.of(context).pop();
-              Get.to(() => ProfileWebViewScreen(
-                    platform: platformName,
+              Get.to(() => InstagramWebviewScreen(
+                    platformName: platformName,
                     searchQuery: searchController.text.trim(),
                     iconName: iconName,
                   ));
