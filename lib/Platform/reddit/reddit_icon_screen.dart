@@ -1,8 +1,9 @@
+import 'dart:io';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
 import 'package:get/get.dart';
-import 'package:webview_flutter/webview_flutter.dart';
+import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 
 import 'package:stay_connected/Platform/reddit/reddit_controller.dart';
 import 'package:stay_connected/Platform/reddit/reddit_search_dialog.dart';
@@ -368,26 +369,21 @@ void _showRenameDialog(BuildContext context, String oldName, int index) {
 void _showMoveDialog(BuildContext context, String friendName, int index, String iconName) {
   final controller = Get.find<RedditController>();
 
-  // Always use loadIcons result (which merges defaults + saved)
-final allCategories = controller.icons
-    .map((icon) {
-      final cat = icon['category'];
-      if (cat == null || cat.isEmpty) return null;
-      if (cat == 'Entertainment') return 'Ent'; // fix name
-      if (cat == 'Audio') return null;          // remove Audio
-      return cat;
-    })
-    .where((cat) => cat != null)
-    .cast<String>()
-    .toSet()
-    .toList()
-  ..sort();
+  // Get all available categories including custom ones
+  final allCategories = controller.getAvailableCategories();
+  
+  // Also get categories that have friends (for debugging)
+  final categoriesWithFriends = controller.getCategoriesWithFriends();
 
-print('Facebook - Normalized Categories: $allCategories');
-
-
-  print('Facebook - Categories from loadIcons: $allCategories');
-  print('Facebook - Current category: $iconName');
+  print('Reddit - All Categories: $allCategories');
+  print('Reddit - Categories with Friends: $categoriesWithFriends');
+  print('Reddit - Current category: $iconName');
+  print('Reddit - Total icons in controller: ${controller.icons.length}');
+  
+  // Debug: Print all icons to see what's stored
+  for (var icon in controller.icons) {
+    print('Reddit - Icon: ${icon['name']}, Category: ${icon['category']}, ProfileUrl: ${icon['profileUrl']}');
+  }
 
   if (allCategories.isEmpty) {
     Get.snackbar(
@@ -637,33 +633,24 @@ class _FriendProfileWebView extends StatefulWidget {
 }
 
 class _FriendProfileWebViewState extends State<_FriendProfileWebView> {
-  late WebViewController _controller;
+  InAppWebViewController? webViewController;
   bool isLoading = true;
 
-  @override
-  void initState() {
-    super.initState();
-    _controller = WebViewController()
-      ..setJavaScriptMode(JavaScriptMode.unrestricted)
-      ..setNavigationDelegate(
-        NavigationDelegate(
-          onPageStarted: (String url) {
-            setState(() {
-              isLoading = true;
-            });
-          },
-          onPageFinished: (String url) {
-            setState(() {
-              isLoading = false;
-            });
-          },
-        ),
-      )
-      ..loadRequest(Uri.parse(widget.profileUrl));
+  String _getProfileUrl() {
+    String url = widget.profileUrl;
+    // Add parameters to prevent Universal Links if not already present
+    if (!url.contains('_webview=1') && !url.contains('noapp=1')) {
+      url = url.contains('?') ? '$url&_webview=1&noapp=1' : '$url?_webview=1&noapp=1';
+    }
+    return url;
   }
 
   @override
   Widget build(BuildContext context) {
+    String userAgent = Platform.isIOS
+        ? 'Mozilla/5.0 (iPhone; CPU iPhone OS 17_5 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.5 Mobile/15E148 Safari/604.1'
+        : 'Mozilla/5.0 (Linux; Android 14; SM-G998B) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Mobile Safari/537.36';
+
     return Scaffold(
       appBar: AppBar(
         title: Text(widget.friendName),
@@ -673,7 +660,65 @@ class _FriendProfileWebViewState extends State<_FriendProfileWebView> {
       ),
       body: Stack(
         children: [
-          WebViewWidget(controller: _controller),
+          InAppWebView(
+            initialUrlRequest: URLRequest(
+              url: WebUri(_getProfileUrl()),
+              headers: {
+                'User-Agent': userAgent,
+                'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+                'Accept-Language': 'en-US,en;q=0.9',
+              },
+            ),
+            initialSettings: InAppWebViewSettings(
+              userAgent: userAgent,
+              javaScriptEnabled: true,
+              allowsInlineMediaPlayback: true,
+              mediaPlaybackRequiresUserGesture: false,
+              useShouldOverrideUrlLoading: true,
+            ),
+            onWebViewCreated: (controller) {
+              webViewController = controller;
+            },
+            onLoadStart: (controller, url) {
+              setState(() {
+                isLoading = true;
+              });
+            },
+            onLoadStop: (controller, url) async {
+              setState(() {
+                isLoading = false;
+              });
+            },
+            onProgressChanged: (controller, progress) {
+              if (progress >= 100) {
+                setState(() {
+                  isLoading = false;
+                });
+              }
+            },
+            shouldOverrideUrlLoading: (controller, navigationAction) async {
+              final url = navigationAction.request.url?.toString() ?? '';
+              final urlLower = url.toLowerCase();
+              
+              // Block Reddit app schemes and App Store URLs
+              if (urlLower.startsWith('reddit://') ||
+                  urlLower.contains('apps.apple.com') ||
+                  urlLower.contains('itunes.apple.com') ||
+                  urlLower.startsWith('itms://') ||
+                  urlLower.startsWith('itms-apps://') ||
+                  urlLower.contains('play.google.com/store') ||
+                  urlLower.startsWith('market://')) {
+                print('Reddit Profile - Blocking: $url');
+                return NavigationActionPolicy.CANCEL;
+              }
+              
+              // Allow all other navigation
+              return NavigationActionPolicy.ALLOW;
+            },
+            onReceivedServerTrustAuthRequest: (controller, challenge) async {
+              return ServerTrustAuthResponse(action: ServerTrustAuthResponseAction.PROCEED);
+            },
+          ),
           if (isLoading)
             const Center(
               child: CircularProgressIndicator(),
