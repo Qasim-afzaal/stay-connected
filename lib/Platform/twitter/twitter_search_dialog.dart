@@ -2,7 +2,7 @@ import 'package:flutter/cupertino.dart';
 
 import 'package:get/get.dart';
 
-import 'package:stay_connected/Platform/shared/profile_webview_screen.dart';
+import 'package:stay_connected/Platform/twitter/twitter_webview_screen.dart';
 
 class TwitterSearchDialog extends StatelessWidget {
   final String iconName;
@@ -84,8 +84,8 @@ class TwitterSearchDialog extends StatelessWidget {
           onPressed: () {
             if (searchController.text.trim().isNotEmpty) {
               Navigator.of(context).pop();
-              Get.to(() => ProfileWebViewScreen(
-                    platform: platformName,
+              Get.to(() => TwitterWebviewScreen(
+                    platformName: platformName,
                     searchQuery: searchController.text.trim(),
                     iconName: iconName,
                   ));
