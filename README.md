@@ -1,4 +1,4 @@
-# 🌐 StayConnected - Your Social Universe, Organized
+# 🌐 StayConnected - Your Social Universe, Organized Your Networks
 
 Welcome to **StayConnected**, the ultimate app for managing and accessing all your social connections across multiple platforms in one seamless experience!
 
@@ -60,13 +60,6 @@ npm install
 npm start
 ```
 
-## 🏗️ Technical Overview
-
-- **Framework**: React Native (iOS & Android compatible)
-- **Navigation**: React Navigation
-- **Web Integration**: React Native WebView
-- **Storage**: AsyncStorage/Local Database
-- **State Management**: Context API/Redux
 
 ## 🤝 Contributing
 
