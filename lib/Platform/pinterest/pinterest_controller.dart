@@ -180,11 +180,14 @@ class PinterestController extends GetxController {
     }
   }
 
-  Future<void> addIcon(String name, String iconUrl) async {
+  Future<void> addIcon(String name, String iconUrl, {String? category}) async {
     try {
-      icons.add({'name': name, 'icon': iconUrl});
+      // If no category is specified, use the name as the category (for custom categories)
+      final categoryName = category ?? name;
+      icons.add({'name': name, 'icon': iconUrl, 'category': categoryName});
       await _saveToPrefs();
       update();
+      print('Pinterest - Added icon: $name with category: $categoryName');
     } catch (e) {
       print('Error adding icon for $platformName: $e');
     }
@@ -228,6 +231,23 @@ class PinterestController extends GetxController {
   List<String> getAvailableCategories() {
     Set<String> categories = {};
     print('Pinterest - Getting available categories from ${icons.length} icons');
+    
+    // Fix existing categories that were incorrectly stored without category field
+    bool needsSave = false;
+    for (var icon in icons) {
+      if (icon['category'] == null || icon['category']!.isEmpty) {
+        // If no category, use the name as category (for custom categories)
+        icon['category'] = icon['name'] ?? 'General';
+        needsSave = true;
+        print('Pinterest - Fixed category for ${icon['name']} from null to ${icon['name']}');
+      }
+    }
+    
+    // Save the fix if needed
+    if (needsSave) {
+      _saveToPrefs();
+    }
+    
     for (var icon in icons) {
       if (icon['category'] != null && icon['category']!.isNotEmpty) {
         categories.add(icon['category']!);

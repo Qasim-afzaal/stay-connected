@@ -5,7 +5,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
 import 'package:get/get.dart';
-import 'package:webview_flutter/webview_flutter.dart';
+import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 
 import 'package:stay_connected/Platform/pinterest/pinterest_controller.dart';
 
@@ -26,7 +26,7 @@ class PinterestWebviewScreen extends StatefulWidget {
 }
 
 class _PinterestWebviewScreenState extends State<PinterestWebviewScreen> {
-  late WebViewController _controller;
+  InAppWebViewController? webViewController;
   bool isLoading = true;
   bool hasError = false;
   String? errorMessage;
@@ -96,7 +96,7 @@ class _PinterestWebviewScreenState extends State<PinterestWebviewScreen> {
   Future<void> _checkBlockOrCaptcha() async {
     print('Pinterest WebView - Checking for block/captcha...');
     try {
-      String? title = await _controller.getTitle();
+      String? title = await webViewController?.getTitle();
       String url = currentUrl ?? '';
       print('Pinterest WebView - Page title: $title');
       print('Pinterest WebView - Current URL: $url');
@@ -129,13 +129,12 @@ class _PinterestWebviewScreenState extends State<PinterestWebviewScreen> {
     }
   }
 
-  bool _isExpectedError(WebResourceError error) {
-    return error.errorCode == -1002 ||
-        error.errorCode == -999 ||
-        error.errorCode == -1001;
+  bool _isExpectedError(int? errorCode) {
+    return errorCode == -1002 ||
+        errorCode == -999 ||
+        errorCode == -1001;
   }
 
-  @override
   void initState() {
     super.initState();
     _initializeWebView();
@@ -143,175 +142,6 @@ class _PinterestWebviewScreenState extends State<PinterestWebviewScreen> {
 
   void _initializeWebView() {
     print('Pinterest WebView - Initializing WebView controller');
-
-    String userAgent = Platform.isIOS
-        ? 'Mozilla/5.0 (iPhone; CPU iPhone OS 15_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/15.0 Mobile/15E148 Safari/604.1'
-        : 'Mozilla/5.0 (Linux; Android 10; SM-G975F) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.120 Mobile Safari/537.36';
-
-    _controller = WebViewController()
-      ..setJavaScriptMode(JavaScriptMode.unrestricted)
-      ..setUserAgent(userAgent)
-      ..setNavigationDelegate(
-        NavigationDelegate(
-          onPageStarted: (String url) {
-            print('Pinterest WebView - Page Started: $url');
-
-            if (url.startsWith('pinterest://')) {
-              print(
-                  'Pinterest WebView - Detected Pinterest app redirect, ignoring');
-              setState(() {
-                isNavigatingToApp = true;
-              });
-              return;
-            }
-
-            print('Pinterest WebView - Starting loader timeout...');
-            if (mounted) {
-              setState(() {
-                isLoading = true;
-                hasError = false;
-                errorMessage = null;
-                isBlocked = false;
-                currentUrl = url;
-                loadingProgress = 0;
-                lastProgressUpdate = 0;
-                isNavigatingToApp = false;
-              });
-              _startLoaderTimeout();
-            }
-          },
-          onPageFinished: (String url) async {
-            print('Pinterest WebView - Page Finished: $url');
-
-            if (url.startsWith('pinterest://')) {
-              print('Pinterest WebView - Ignoring app redirect completion');
-              return;
-            }
-
-            print('Pinterest WebView - Cancelling timeout timer');
-            if (mounted) {
-              setState(() {
-                isLoading = false;
-                currentUrl = url;
-                hasLoadedSuccessfully = true;
-                loadingProgress = 100;
-                isNavigatingToApp = false;
-              });
-              await _checkBlockOrCaptcha();
-              _loaderTimer?.cancel();
-              _fallbackTimer?.cancel();
-              _progressTimer?.cancel();
-            }
-          },
-          onNavigationRequest: (NavigationRequest request) {
-            print('Pinterest WebView - Navigation Request: ${request.url}');
-
-            if (request.url.startsWith('pinterest://')) {
-              print('Pinterest WebView - Blocking Pinterest app redirect');
-              setState(() {
-                isNavigatingToApp = true;
-              });
-              return NavigationDecision.prevent;
-            }
-
-            if (mounted) {
-              setState(() {
-                currentUrl = request.url;
-                isNavigatingToApp = false;
-              });
-            }
-            return NavigationDecision.navigate;
-          },
-          onUrlChange: (UrlChange change) {
-            if (change.url != null && mounted) {
-              print('Pinterest WebView - URL Changed: ${change.url}');
-
-              if (change.url!.startsWith('pinterest://')) {
-                print('Pinterest WebView - Detected app redirect URL change');
-                setState(() {
-                  isNavigatingToApp = true;
-                });
-                return;
-              }
-
-              setState(() {
-                currentUrl = change.url!;
-                isNavigatingToApp = false;
-              });
-            }
-          },
-          onWebResourceError: (WebResourceError error) {
-            print('Pinterest WebView - Error: ${error.description}');
-            print('Pinterest WebView - Error Code: ${error.errorCode}');
-            print('Pinterest WebView - Error URL: ${error.url}');
-
-            if (!_isExpectedError(error) &&
-                !hasLoadedSuccessfully &&
-                !isNavigatingToApp) {
-              if (mounted) {
-                setState(() {
-                  isLoading = false;
-                  hasError = true;
-                  errorMessage = error.description;
-                });
-                _loaderTimer?.cancel();
-                _fallbackTimer?.cancel();
-                _progressTimer?.cancel();
-              }
-            } else if (_isExpectedError(error)) {
-              print(
-                  'Pinterest WebView - Ignoring expected error: ${error.errorCode}');
-            }
-          },
-          onProgress: (int progress) {
-            print('Pinterest WebView - Loading Progress: $progress%');
-            setState(() {
-              loadingProgress = progress;
-              lastProgressUpdate = DateTime.now().millisecondsSinceEpoch;
-            });
-
-            if (progress >= 85 &&
-                isLoading &&
-                !hasLoadedSuccessfully &&
-                !isNavigatingToApp) {
-              print(
-                  'Pinterest WebView - High progress detected ($progress%), considering loaded');
-              setState(() {
-                isLoading = false;
-                hasLoadedSuccessfully = true;
-              });
-              _loaderTimer?.cancel();
-              _fallbackTimer?.cancel();
-              _progressTimer?.cancel();
-            } else if (progress >= 80 &&
-                isLoading &&
-                !hasLoadedSuccessfully &&
-                !isNavigatingToApp) {
-              _startProgressStuckTimer();
-            }
-          },
-        ),
-      )
-      ..setBackgroundColor(Colors.white)
-      ..loadRequest(
-        Uri.parse(
-          'https://www.google.com/search?q=${Uri.encodeComponent(widget.searchQuery + " " + widget.platformName)}',
-        ),
-        headers: {
-          'User-Agent': userAgent,
-          'Accept':
-              'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
-          'Accept-Language': 'en-US,en;q=0.5',
-          'Accept-Encoding': 'gzip, deflate, br',
-          'DNT': '1',
-          'Connection': 'keep-alive',
-          'Upgrade-Insecure-Requests': '1',
-          'Sec-Fetch-Dest': 'document',
-          'Sec-Fetch-Mode': 'navigate',
-          'Sec-Fetch-Site': 'none',
-          'Cache-Control': 'max-age=0',
-        },
-      );
 
     _fallbackTimer = Timer(const Duration(seconds: 8), () async {
       if (mounted &&
@@ -321,7 +151,7 @@ class _PinterestWebviewScreenState extends State<PinterestWebviewScreen> {
         print(
             'Pinterest WebView - Fallback 1: Checking if page actually loaded after 8 seconds');
         try {
-          String? title = await _controller.getTitle();
+          String? title = await webViewController?.getTitle();
           print('Pinterest WebView - Fallback 1: Page title after 8s: $title');
           if (title != null && title.isNotEmpty && title != 'Google') {
             print(
@@ -349,7 +179,7 @@ class _PinterestWebviewScreenState extends State<PinterestWebviewScreen> {
         print(
             'Pinterest WebView - Fallback 2: Checking if page actually loaded after 15 seconds');
         try {
-          String? title = await _controller.getTitle();
+          String? title = await webViewController?.getTitle();
           print('Pinterest WebView - Fallback 2: Page title after 15s: $title');
           if (title != null && title.isNotEmpty) {
             print(
@@ -389,25 +219,29 @@ class _PinterestWebviewScreenState extends State<PinterestWebviewScreen> {
     });
   }
 
+  String _getInitialUrl() {
+    String query = widget.searchQuery;
+    if (query.isNotEmpty) {
+      query = '$query site:pinterest.com';
+    }
+    return 'https://www.google.com/search?q=${Uri.encodeComponent(query)}';
+  }
+
   @override
   Widget build(BuildContext context) {
+    String userAgent = Platform.isIOS
+        ? 'Mozilla/5.0 (iPhone; CPU iPhone OS 15_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/15.0 Mobile/15E148 Safari/604.1'
+        : 'Mozilla/5.0 (Linux; Android 10; SM-G975F) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.120 Mobile Safari/537.36';
+
     print(
         'Pinterest WebView - Build: isLoading=$isLoading, hasError=$hasError, hasLoadedSuccessfully=$hasLoadedSuccessfully, progress=$loadingProgress%, isNavigatingToApp=$isNavigatingToApp');
 
     return Scaffold(
       appBar: AppBar(
-        title: Text('Search: ${widget.searchQuery}'),
+        title: Text(widget.iconName),
         centerTitle: true,
-        backgroundColor: Colors.white,
-        foregroundColor: Colors.black,
-        elevation: 0,
-        actions: [
-          IconButton(
-            onPressed: () => _showAddFriendDialog(),
-            icon: const Icon(Icons.person_add),
-            tooltip: 'Add Friend',
-          ),
-        ],
+        backgroundColor: Colors.red,
+        foregroundColor: Colors.white,
       ),
       body: Stack(
         children: [
@@ -452,7 +286,7 @@ class _PinterestWebviewScreenState extends State<PinterestWebviewScreen> {
                         loadingProgress = 0;
                         isNavigatingToApp = false;
                       });
-                      _controller.reload();
+                      webViewController?.reload();
                       _startLoaderTimeout();
                     },
                     child: const Text("Retry"),
@@ -466,81 +300,475 @@ class _PinterestWebviewScreenState extends State<PinterestWebviewScreen> {
               ),
             )
           else
-            SizedBox.expand(
-              child: WebViewWidget(controller: _controller),
+            InAppWebView(
+              initialUrlRequest: URLRequest(
+                url: WebUri(_getInitialUrl()),
+                headers: {
+                  'User-Agent': userAgent,
+                  'Accept':
+                      'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
+                  'Accept-Language': 'en-US,en;q=0.5',
+                  'Accept-Encoding': 'gzip, deflate, br',
+                  'DNT': '1',
+                  'Connection': 'keep-alive',
+                  'Upgrade-Insecure-Requests': '1',
+                  'Sec-Fetch-Dest': 'document',
+                  'Sec-Fetch-Mode': 'navigate',
+                  'Sec-Fetch-Site': 'none',
+                  'Cache-Control': 'max-age=0',
+                },
+              ),
+              initialSettings: InAppWebViewSettings(
+                userAgent: userAgent,
+                javaScriptEnabled: true,
+                allowsInlineMediaPlayback: true,
+                mediaPlaybackRequiresUserGesture: false,
+                useShouldOverrideUrlLoading: true,
+              ),
+              onWebViewCreated: (controller) {
+                webViewController = controller;
+                
+                // Inject blocking script at document start
+                controller.addUserScript(
+                  userScript: UserScript(
+                    source: '''
+                      (function() {
+                        if (window.pinterestBlockingLoaded) return;
+                        window.pinterestBlockingLoaded = true;
+                        
+                        // Block all clicks that would open Pinterest app
+                        document.addEventListener('click', function(e) {
+                          let target = e.target;
+                          let depth = 0;
+                          while (target && target !== document && depth < 10) {
+                            if (target.tagName === 'A' && target.href) {
+                              const href = target.href.toLowerCase();
+                              if (href.startsWith('pinterest://') ||
+                                  href.includes('applink.pinterest.com') ||
+                                  href.includes('apps.apple.com') ||
+                                  href.includes('itunes.apple.com') ||
+                                  href.startsWith('itms://') ||
+                                  href.startsWith('itms-apps://') ||
+                                  href.includes('play.google.com/store') ||
+                                  href.startsWith('market://')) {
+                                e.preventDefault();
+                                e.stopPropagation();
+                                e.stopImmediatePropagation();
+                                return false;
+                              }
+                            }
+                            target = target.parentElement;
+                            depth++;
+                          }
+                        }, true);
+                        
+                        // Override window.open
+                        const originalOpen = window.open;
+                        window.open = function(url, target, features) {
+                          if (url) {
+                            const urlLower = url.toLowerCase();
+                            if (urlLower.startsWith('pinterest://') ||
+                                urlLower.includes('applink.pinterest.com') ||
+                                urlLower.includes('apps.apple.com') ||
+                                urlLower.includes('itunes.apple.com')) {
+                              return null;
+                            }
+                          }
+                          return originalOpen.call(window, url, target, features);
+                        };
+                      })();
+                    ''',
+                    injectionTime: UserScriptInjectionTime.AT_DOCUMENT_START,
+                  ),
+                );
+              },
+              onLoadStart: (controller, url) {
+                print('Pinterest WebView - Page Started: $url');
+
+                if (url?.toString().startsWith('pinterest://') ?? false) {
+                  print(
+                      'Pinterest WebView - Detected Pinterest app redirect, ignoring');
+                  setState(() {
+                    isNavigatingToApp = true;
+                  });
+                  return;
+                }
+
+                print('Pinterest WebView - Starting loader timeout...');
+                if (mounted) {
+                  setState(() {
+                    isLoading = true;
+                    hasError = false;
+                    errorMessage = null;
+                    isBlocked = false;
+                    currentUrl = url?.toString();
+                    loadingProgress = 0;
+                    lastProgressUpdate = DateTime.now().millisecondsSinceEpoch;
+                    isNavigatingToApp = false;
+                  });
+                  _startLoaderTimeout();
+                }
+                
+                // Inject blocking script early
+                controller.evaluateJavascript(source: '''
+                  (function() {
+                    // Block all clicks that would open Pinterest app
+                    document.addEventListener('click', function(e) {
+                      let target = e.target;
+                      let depth = 0;
+                      while (target && target !== document && depth < 10) {
+                        if (target.tagName === 'A' && target.href) {
+                          const href = target.href.toLowerCase();
+                          if (href.startsWith('pinterest://') ||
+                              href.includes('applink.pinterest.com') ||
+                              href.includes('apps.apple.com') ||
+                              href.includes('itunes.apple.com') ||
+                              href.startsWith('itms://') ||
+                              href.startsWith('itms-apps://') ||
+                              href.includes('play.google.com/store') ||
+                              href.startsWith('market://')) {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            e.stopImmediatePropagation();
+                            return false;
+                          }
+                        }
+                        target = target.parentElement;
+                        depth++;
+                      }
+                    }, true);
+                  })();
+                ''');
+              },
+              onLoadStop: (controller, url) async {
+                print('Pinterest WebView - Page Finished: $url');
+
+                if (url?.toString().startsWith('pinterest://') ?? false) {
+                  print('Pinterest WebView - Ignoring app redirect completion');
+                  return;
+                }
+
+                print('Pinterest WebView - Cancelling timeout timer');
+                if (mounted) {
+                  setState(() {
+                    isLoading = false;
+                    currentUrl = url?.toString();
+                    hasLoadedSuccessfully = true;
+                    loadingProgress = 100;
+                    isNavigatingToApp = false;
+                  });
+                  await _checkBlockOrCaptcha();
+                  _loaderTimer?.cancel();
+                  _fallbackTimer?.cancel();
+                  _progressTimer?.cancel();
+                }
+                
+                // Inject blocking script again after page loads
+                await controller.evaluateJavascript(source: '''
+                  (function() {
+                    // Block all clicks that would open Pinterest app
+                    document.addEventListener('click', function(e) {
+                      let target = e.target;
+                      let depth = 0;
+                      while (target && target !== document && depth < 10) {
+                        if (target.tagName === 'A' && target.href) {
+                          const href = target.href.toLowerCase();
+                          if (href.startsWith('pinterest://') ||
+                              href.includes('applink.pinterest.com') ||
+                              href.includes('apps.apple.com') ||
+                              href.includes('itunes.apple.com') ||
+                              href.startsWith('itms://') ||
+                              href.startsWith('itms-apps://') ||
+                              href.includes('play.google.com/store') ||
+                              href.startsWith('market://')) {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            e.stopImmediatePropagation();
+                            return false;
+                          }
+                        }
+                        target = target.parentElement;
+                        depth++;
+                      }
+                    }, true);
+                    
+                    // Override window.open
+                    const originalOpen = window.open;
+                    window.open = function(url, target, features) {
+                      if (url) {
+                        const urlLower = url.toLowerCase();
+                        if (urlLower.startsWith('pinterest://') ||
+                            urlLower.includes('applink.pinterest.com') ||
+                            urlLower.includes('apps.apple.com') ||
+                            urlLower.includes('itunes.apple.com')) {
+                          return null;
+                        }
+                      }
+                      return originalOpen.call(window, url, target, features);
+                    };
+                  })();
+                ''');
+              },
+              onProgressChanged: (controller, progress) {
+                print('Pinterest WebView - Loading Progress: $progress%');
+                setState(() {
+                  loadingProgress = progress.toInt();
+                  lastProgressUpdate = DateTime.now().millisecondsSinceEpoch;
+                });
+
+                if (progress >= 85 &&
+                    isLoading &&
+                    !hasLoadedSuccessfully &&
+                    !isNavigatingToApp) {
+                  print(
+                      'Pinterest WebView - High progress detected ($progress%), considering loaded');
+                  setState(() {
+                    isLoading = false;
+                    hasLoadedSuccessfully = true;
+                  });
+                  _loaderTimer?.cancel();
+                  _fallbackTimer?.cancel();
+                  _progressTimer?.cancel();
+                } else if (progress >= 80 &&
+                    isLoading &&
+                    !hasLoadedSuccessfully &&
+                    !isNavigatingToApp) {
+                  _startProgressStuckTimer();
+                }
+              },
+              shouldOverrideUrlLoading: (controller, navigationAction) async {
+                final url = navigationAction.request.url?.toString() ?? '';
+                final urlLower = url.toLowerCase();
+                final isMainFrame = navigationAction.targetFrame?.isMainFrame ?? true;
+                
+                print('Pinterest WebView - Navigation Request: $url (isMainFrame: $isMainFrame)');
+
+                // Block Google OAuth/iframe URLs that cause white screens
+                if (urlLower.contains('accounts.google.com') ||
+                    urlLower.contains('google.com/gsi/') ||
+                    urlLower.contains('google.com/oauth2/')) {
+                  print('Pinterest WebView - Blocking Google OAuth/iframe URL: $url');
+                  return NavigationActionPolicy.CANCEL;
+                }
+                
+                // Block applink.pinterest.com URLs (Universal Links)
+                if (urlLower.contains('applink.pinterest.com')) {
+                  print('Pinterest WebView - Blocking applink URL: $url');
+                  return NavigationActionPolicy.CANCEL;
+                }
+                
+                // Block URLs with launch_app_store parameter
+                if (urlLower.contains('launch_app_store=true')) {
+                  print('Pinterest WebView - Blocking URL with launch_app_store: $url');
+                  return NavigationActionPolicy.CANCEL;
+                }
+
+                if (url.startsWith('pinterest://')) {
+                  print('Pinterest WebView - Blocking Pinterest app redirect');
+                  setState(() {
+                    isNavigatingToApp = true;
+                  });
+                  return NavigationActionPolicy.CANCEL;
+                }
+                
+                // Block App Store URLs
+                if (urlLower.contains('apps.apple.com') ||
+                    urlLower.contains('itunes.apple.com') ||
+                    urlLower.startsWith('itms://') ||
+                    urlLower.startsWith('itms-apps://') ||
+                    urlLower.contains('play.google.com/store') ||
+                    urlLower.startsWith('market://')) {
+                  print('Pinterest WebView - Blocking app scheme/App Store URL: $url');
+                  return NavigationActionPolicy.CANCEL;
+                }
+                
+                // For main frame Pinterest URLs only, ensure _webview=1&noapp=1 parameters are present
+                // Don't modify iframe URLs or OAuth URLs
+                if (isMainFrame &&
+                    urlLower.contains('pinterest.com') &&
+                    !urlLower.contains('accounts.google.com') &&
+                    !urlLower.contains('google.com/gsi/') &&
+                    !urlLower.contains('google.com/oauth2/') &&
+                    !urlLower.contains('_webview=1') &&
+                    !urlLower.contains('noapp=1')) {
+                  print('Pinterest WebView - Modifying URL to prevent Universal Links: $url');
+                  final modifiedUrl = url.contains('?')
+                      ? '$url&_webview=1&noapp=1'
+                      : '$url?_webview=1&noapp=1';
+                  Future.microtask(() async {
+                    await controller.loadUrl(urlRequest: URLRequest(url: WebUri(modifiedUrl)));
+                  });
+                  return NavigationActionPolicy.CANCEL;
+                }
+
+                if (mounted) {
+                  setState(() {
+                    currentUrl = url;
+                    isNavigatingToApp = false;
+                  });
+                }
+                return NavigationActionPolicy.ALLOW;
+              },
+              onReceivedError: (controller, request, error) {
+                print('Pinterest WebView - Error: ${error.description}');
+                print('Pinterest WebView - Error Type: ${error.type}');
+                print('Pinterest WebView - Error URL: ${request.url}');
+
+                // Convert error type to a numeric code for comparison
+                final errorCode = error.type == WebResourceErrorType.HOST_LOOKUP ? -1002 :
+                                 error.type == WebResourceErrorType.CANCELLED ? -999 :
+                                 error.type == WebResourceErrorType.TIMEOUT ? -1001 : 0;
+                
+                if (!_isExpectedError(errorCode) &&
+                    !hasLoadedSuccessfully &&
+                    !isNavigatingToApp) {
+                  if (mounted) {
+                    setState(() {
+                      isLoading = false;
+                      hasError = true;
+                      errorMessage = error.description;
+                    });
+                    _loaderTimer?.cancel();
+                    _fallbackTimer?.cancel();
+                    _progressTimer?.cancel();
+                  }
+                } else if (_isExpectedError(errorCode)) {
+                  print(
+                      'Pinterest WebView - Ignoring expected error: $errorCode');
+                }
+              },
+              onReceivedServerTrustAuthRequest: (controller, challenge) async {
+                return ServerTrustAuthResponse(action: ServerTrustAuthResponseAction.PROCEED);
+              },
             ),
           if (isLoading && !hasError && !isNavigatingToApp)
-            Positioned.fill(
-              child: Container(
-                color: Colors.white.withOpacity(0.8),
-                child: Center(
-                  child: Column(
+            Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  CircularProgressIndicator(
+                    value: loadingProgress / 100,
+                    backgroundColor: Colors.grey[300],
+                  ),
+                  const SizedBox(height: 16),
+                  Text(
+                    'Loading: $loadingProgress%',
+                    style: const TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w500,
+                      color: Colors.grey,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          // Always show Add Friend button at bottom
+          Positioned(
+            bottom: 0,
+            left: 0,
+            right: 0,
+            child: Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.1),
+                    blurRadius: 4,
+                    offset: const Offset(0, -2),
+                  ),
+                ],
+              ),
+              child: SafeArea(
+                child: ElevatedButton(
+                  onPressed: _isOnGoogleSearch() || isLoading
+                      ? null
+                      : () => _showAddFriendDialog(),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.black,
+                    foregroundColor: Colors.white,
+                    disabledBackgroundColor: Colors.grey.shade400,
+                    disabledForegroundColor: Colors.grey.shade600,
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 24,
+                      vertical: 16,
+                    ),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    elevation: 0,
+                  ),
+                  child: Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      CircularProgressIndicator(
-                        value: loadingProgress / 100,
-                        backgroundColor: Colors.grey[300],
+                      Icon(
+                        Icons.person_add,
+                        color: (_isOnGoogleSearch() || isLoading)
+                            ? Colors.grey.shade600
+                            : Colors.white,
                       ),
-                      const SizedBox(height: 16),
+                      const SizedBox(width: 8),
                       Text(
-                        'Loading Pinterest...',
-                        style: const TextStyle(fontSize: 16),
-                      ),
-                      const SizedBox(height: 8),
-                      Text(
-                        '$loadingProgress%',
-                        style:
-                            const TextStyle(fontSize: 14, color: Colors.grey),
-                      ),
-                      if (loadingProgress >= 85) ...[
-                        const SizedBox(height: 8),
-                        Text(
-                          'Almost done...',
-                          style:
-                              const TextStyle(fontSize: 12, color: Colors.red),
+                        isLoading
+                            ? 'Loading: $loadingProgress%'
+                            : 'Add Friend',
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w600,
+                          color: (_isOnGoogleSearch() || isLoading)
+                              ? Colors.grey.shade600
+                              : Colors.white,
                         ),
-                      ],
-                      if (currentUrl != null) ...[
-                        const SizedBox(height: 8),
-                        Text(
-                          'URL: ${currentUrl!.length > 50 ? '${currentUrl!.substring(0, 50)}...' : currentUrl!}',
-                          style:
-                              const TextStyle(fontSize: 10, color: Colors.grey),
-                          textAlign: TextAlign.center,
-                        ),
-                      ],
+                      ),
                     ],
                   ),
                 ),
               ),
             ),
+          ),
         ],
-      ),
-      floatingActionButton: FloatingActionButton(
-        backgroundColor: Colors.transparent,
-        foregroundColor: Colors.white,
-        elevation: 0,
-        onPressed: () => _showAddFriendDialog(),
-        child: Image.asset(
-          'assets/images/img_person_add_blue.png',
-          width: 48,
-          height: 48,
-          errorBuilder: (context, error, stackTrace) {
-            return Icon(Icons.person_add, size: 48);
-          },
-        ),
       ),
     );
   }
 
   void _showAddFriendDialog() async {
+    // Don't show dialog if on Google search page
+    if (_isOnGoogleSearch()) {
+      Get.snackbar(
+        'Error',
+        'Please navigate to a Pinterest profile page first',
+        snackPosition: SnackPosition.BOTTOM,
+        duration: const Duration(seconds: 2),
+        backgroundColor: Colors.red,
+        colorText: Colors.white,
+      );
+      return;
+    }
+
     final nameController = TextEditingController();
 
     String? actualCurrentUrl;
     try {
-      actualCurrentUrl = await _controller.currentUrl();
+      if (webViewController != null) {
+        actualCurrentUrl = (await webViewController!.getUrl())?.toString();
+      } else {
+        actualCurrentUrl = currentUrl;
+      }
     } catch (e) {
       actualCurrentUrl = currentUrl;
+    }
+
+    // Double check it's not a Google search page
+    if (_isOnGoogleSearch()) {
+      Get.snackbar(
+        'Error',
+        'Please navigate to a Pinterest profile page first',
+        snackPosition: SnackPosition.BOTTOM,
+        duration: const Duration(seconds: 2),
+        backgroundColor: Colors.red,
+        colorText: Colors.white,
+      );
+      return;
     }
 
     String extractedName = '';
@@ -676,6 +904,11 @@ class _PinterestWebviewScreenState extends State<PinterestWebviewScreen> {
       margin: const EdgeInsets.all(10),
       borderRadius: 10,
     );
+  }
+
+  bool _isOnGoogleSearch() {
+    final url = currentUrl?.toLowerCase() ?? '';
+    return url.contains('google.com') || url.contains('googleapis.com');
   }
 
   String? _extractNameFromUrl(String url) {
