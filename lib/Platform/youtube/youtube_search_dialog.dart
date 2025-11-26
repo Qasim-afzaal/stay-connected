@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:get/get.dart';
-import 'package:stay_connected/Platform/shared/profile_webview_screen.dart';
+import 'package:stay_connected/Platform/youtube/youtube_webview_screen.dart';
 
 class YouTubeSearchDialog extends StatelessWidget {
   final String iconName;
@@ -83,8 +83,8 @@ class YouTubeSearchDialog extends StatelessWidget {
           onPressed: () {
             if (searchController.text.trim().isNotEmpty) {
               Navigator.of(context).pop();
-              Get.to(() => ProfileWebViewScreen(
-                    platform: platformName,
+              Get.to(() => YouTubeWebviewScreen(
+                    platformName: platformName,
                     searchQuery: searchController.text.trim(),
                     iconName: iconName,
                   ));
