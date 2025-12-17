@@ -12,10 +12,13 @@ class SplashPage extends StatelessWidget {
     return GetBuilder(
       init: SplashController(),
       builder: (controller) {
+        final theme = Theme.of(context);
+        final isDark = theme.brightness == Brightness.dark;
+        
         return Scaffold(
           body: Container(
-            decoration: const BoxDecoration(
-              color: Colors.white,
+            decoration: BoxDecoration(
+              color: theme.scaffoldBackgroundColor,
             ),
             child: Center(
               child: Image.asset(
