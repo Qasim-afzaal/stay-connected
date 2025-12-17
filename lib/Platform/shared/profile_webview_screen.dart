@@ -4,6 +4,7 @@ import 'dart:io';
 
 import 'package:get/get.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
+import 'package:stay_connected/util/webview_dark_theme_helper.dart';
 
 // Import all platform controllers
 import 'package:stay_connected/Platform/facebook/facebook_controller.dart';
@@ -356,6 +357,8 @@ class _ProfileWebViewScreenState extends State<ProfileWebViewScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
     final userAgent = _getUserAgent();
     final blockingScript = _getBlockingScript();
     
@@ -363,8 +366,8 @@ class _ProfileWebViewScreenState extends State<ProfileWebViewScreen> {
       appBar: AppBar(
         title: Text('Select ${widget.platform} Profile'),
         centerTitle: true,
-        backgroundColor: Colors.white,
-        foregroundColor: Colors.black,
+        backgroundColor: theme.appBarTheme.backgroundColor ?? (isDark ? Colors.grey[900] : Colors.white),
+        foregroundColor: theme.appBarTheme.foregroundColor ?? (isDark ? Colors.grey[300] : Colors.black),
         elevation: 0,
       ),
       body: Column(
@@ -391,6 +394,11 @@ class _ProfileWebViewScreenState extends State<ProfileWebViewScreen> {
                     mediaPlaybackRequiresUserGesture: false,
                   ),
                   onWebViewCreated: (controller) async {
+                    // Inject dark theme CSS at document start if dark mode is enabled
+                    if (Theme.of(context).brightness == Brightness.dark) {
+                      await controller.addUserScript(userScript: WebViewDarkThemeHelper.getDarkThemeUserScript());
+                    }
+                    
                     // CRITICAL: Add user script that runs BEFORE page scripts
                     await controller.addUserScript(
                       userScript: UserScript(
@@ -427,6 +435,9 @@ class _ProfileWebViewScreenState extends State<ProfileWebViewScreen> {
                       isLoading = false;
                       currentUrl = url?.toString();
                     });
+                    
+                    // Inject dark theme CSS after page loads
+                    await WebViewDarkThemeHelper.injectDarkTheme(controller, context);
                     
                     // CRITICAL: Inject blocking script multiple times after page loads
                     if (url != null) {
@@ -620,7 +631,7 @@ class _ProfileWebViewScreenState extends State<ProfileWebViewScreen> {
                 child: ElevatedButton(
                   onPressed: _onOkPressed,
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.black,
+                    backgroundColor: isDark ? Colors.grey[800] : Colors.black,
                     foregroundColor: Colors.white,
                     padding: const EdgeInsets.symmetric(vertical: 16),
                     textStyle: const TextStyle(
