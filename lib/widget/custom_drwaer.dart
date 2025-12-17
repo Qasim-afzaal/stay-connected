@@ -14,14 +14,18 @@ class CustomDrawer extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final homeController = Get.put(HomeController());
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
 
     return Drawer(
+      backgroundColor: theme.drawerTheme.backgroundColor ?? theme.scaffoldBackgroundColor,
       child: ListView(
         padding: EdgeInsets.zero,
         children: [
           DrawerHeader(
             decoration: BoxDecoration(
-              image: DecorationImage(
+              color: isDark ? Colors.black : null,
+              image: isDark ? null : DecorationImage(
                 image: AssetImage('assets/images/blue_moutain.png'),
                 fit: BoxFit.fill,
               ),

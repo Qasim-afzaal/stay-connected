@@ -14,21 +14,26 @@ class HomePage extends StatelessWidget {
     return GetBuilder<HomeController>(
       init: HomeController(),
       builder: (HomeController controller) {
+        final theme = Theme.of(context);
+        final isDark = theme.brightness == Brightness.dark;
+        
         return Scaffold(
           drawer: const CustomDrawer(),
           appBar: AppBar(
             title: const Text('Stay Connected'),
             centerTitle: true,
-            backgroundColor: Colors.white,
-            foregroundColor: Colors.black,
+            backgroundColor: theme.appBarTheme.backgroundColor,
+            foregroundColor: theme.appBarTheme.foregroundColor,
           ),
           body: Stack(
             children: [
               Positioned.fill(
-                child: Image.asset(
-                  'assets/images/img_group_173.jpg',
-                  fit: BoxFit.cover,
-                ),
+                child: isDark 
+                    ? Container(color: Colors.black)
+                    : Image.asset(
+                        'assets/images/img_group_173.jpg',
+                        fit: BoxFit.cover,
+                      ),
               ),
               Padding(
                 padding: const EdgeInsets.all(15),
@@ -80,7 +85,9 @@ class HomePage extends StatelessWidget {
                       },
                       child: Container(
                         decoration: BoxDecoration(
-                          color: Colors.grey.withOpacity(0.1),
+                          color: isDark 
+                              ? Colors.grey.withOpacity(0.3)
+                              : Colors.grey.withOpacity(0.1),
                           borderRadius: BorderRadius.circular(50),
                         ),
                         alignment: Alignment.center,
@@ -89,7 +96,9 @@ class HomePage extends StatelessWidget {
                           width: 90,
                           height: 90,
                           decoration: BoxDecoration(
-                            color: Colors.grey.shade200,
+                            color: isDark 
+                                ? Colors.grey[800]
+                                : Colors.grey.shade200,
                             shape: BoxShape.circle,
                           ),
                           alignment: Alignment.center,
@@ -99,7 +108,7 @@ class HomePage extends StatelessWidget {
                             width: 70,
                             fit: BoxFit.contain,
                             errorBuilder: (_, __, ___) =>
-                                const Icon(Icons.link),
+                                Icon(Icons.link, color: isDark ? Colors.grey[300] : Colors.black),
                           ),
                         ),
                       ),
