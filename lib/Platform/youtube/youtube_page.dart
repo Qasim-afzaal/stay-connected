@@ -12,6 +12,9 @@ class YouTubePage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+    
     return GetBuilder<YouTubeController>(
       builder: (controller) {
         final categoryIcons = controller.icons
@@ -23,8 +26,8 @@ class YouTubePage extends StatelessWidget {
           appBar: AppBar(
             title: const Text('YouTube'),
             centerTitle: true,
-            backgroundColor: Colors.white,
-            foregroundColor: Colors.black,
+            backgroundColor: theme.appBarTheme.backgroundColor,
+            foregroundColor: theme.appBarTheme.foregroundColor,
             elevation: 0,
             actions: [
               IconButton(
@@ -48,7 +51,7 @@ class YouTubePage extends StatelessWidget {
                         errorBuilder: (context, error, stackTrace) {
                           return Icon(
                             Icons.delete,
-                            color: Colors.black,
+                            color: isDark ? Colors.grey[300] : Colors.black,
                             size: 24,
                           );
                         },
@@ -64,7 +67,7 @@ class YouTubePage extends StatelessWidget {
               if (controller.isDeleteMode &&
                   controller.selectedIcons.isNotEmpty)
                 IconButton(
-                  icon: const Icon(Icons.check, color: Colors.black),
+                  icon: Icon(Icons.check, color: isDark ? Colors.grey[300] : Colors.black),
                   onPressed: () {
                     controller.deleteSelectedIcons();
                     Get.snackbar(
@@ -78,8 +81,9 @@ class YouTubePage extends StatelessWidget {
             ],
           ),
           body: Container(
-            decoration: const BoxDecoration(
-              image: DecorationImage(
+            decoration: BoxDecoration(
+              color: isDark ? Colors.black : null,
+              image: isDark ? null : DecorationImage(
                 image: AssetImage('assets/images/img_group_295.jpg'),
                 fit: BoxFit.cover,
               ),
@@ -117,14 +121,14 @@ class YouTubePage extends StatelessWidget {
                             ),
                           ),
                           const SizedBox(height: 8),
-                          const Padding(
+                          Padding(
                             padding: EdgeInsets.symmetric(horizontal: 8),
                             child: Text(
                               'Add',
                               style: TextStyle(
                                 fontSize: 11,
                                 fontWeight: FontWeight.bold,
-                                color: Colors.grey,
+                                color: isDark ? Colors.grey[400] : Colors.grey,
                               ),
                               textAlign: TextAlign.center,
                               maxLines: 2,
@@ -168,13 +172,13 @@ class YouTubePage extends StatelessWidget {
                                       iconData['icon']!,
                                       width: 32,
                                       height: 32,
-                                      color: Colors.grey.shade700,
+                                      color: isDark ? (Colors.grey[400] ?? Colors.grey.shade400) : Colors.grey.shade700,
                                       errorBuilder:
                                           (context, error, stackTrace) {
                                         return Icon(
                                           Icons.favorite,
                                           size: 32,
-                                          color: Colors.grey.shade700,
+                                          color: isDark ? (Colors.grey[400] ?? Colors.grey.shade400) : Colors.grey.shade700,
                                         );
                                       },
                                     )
@@ -187,7 +191,7 @@ class YouTubePage extends StatelessWidget {
                                         return Icon(
                                           Icons.favorite,
                                           size: 44,
-                                          color: Colors.grey.shade700,
+                                          color: isDark ? (Colors.grey[400] ?? Colors.grey.shade400) : Colors.grey.shade700,
                                         );
                                       },
                                     ),
@@ -198,9 +202,10 @@ class YouTubePage extends StatelessWidget {
                                   const EdgeInsets.symmetric(horizontal: 8),
                               child: Text(
                                 iconData['name']!,
-                                style: const TextStyle(
+                                style: TextStyle(
                                   fontSize: 11,
                                   fontWeight: FontWeight.bold,
+                                  color: isDark ? Colors.grey[300] : Colors.black,
                                 ),
                                 textAlign: TextAlign.center,
                                 maxLines: 2,
@@ -238,6 +243,8 @@ class YouTubePage extends StatelessWidget {
   }
 
   void _showAddIconDialog(BuildContext context, YouTubeController controller) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
     final nameController = TextEditingController();
     final List<Map<String, String>> availableIcons = [
       {'name': 'Food', 'path': 'assets/images/platform_icons/img_food_12.png'},
@@ -358,18 +365,22 @@ class YouTubePage extends StatelessWidget {
                       controller: nameController,
                       autofocus: true,
                       placeholder: 'Icon name',
+                      placeholderStyle: TextStyle(
+                        color: isDark ? Colors.grey[500] : Colors.grey[600],
+                      ),
                       // maxLength: 10,
                       decoration: BoxDecoration(
-                        color: CupertinoColors.systemGrey6,
+                        color: isDark ? Colors.grey[800] : CupertinoColors.systemGrey6,
                         borderRadius: BorderRadius.circular(8),
                       ),
                       padding: const EdgeInsets.symmetric(
                         horizontal: 12,
                         vertical: 12,
                       ),
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.w500,
+                        color: isDark ? Colors.grey[300] : Colors.black,
                       ),
                     ),
                   ),
@@ -407,7 +418,10 @@ class YouTubePage extends StatelessWidget {
                       padding: const EdgeInsets.symmetric(
                           horizontal: 8, vertical: 4),
                       minSize: 28,
-                      child: const Text('See more'),
+                      child: Text(
+                        'See more',
+                        style: TextStyle(color: isDark ? Colors.blue[300] : Colors.blue),
+                      ),
                       onPressed: () {
                         setState(() {
                           showAllIcons = true;
@@ -441,10 +455,10 @@ class YouTubePage extends StatelessWidget {
                             },
                             child: Container(
                               decoration: BoxDecoration(
-                                color: CupertinoColors.systemGrey6,
+                                color: isDark ? Colors.grey[800] : CupertinoColors.systemGrey6,
                                 borderRadius: BorderRadius.circular(8),
                                 border: Border.all(
-                                  color: CupertinoColors.systemGrey4,
+                                  color: isDark ? (Colors.grey[700] ?? Colors.grey.shade700) : CupertinoColors.systemGrey4,
                                   width: 1,
                                 ),
                               ),
@@ -468,7 +482,10 @@ class YouTubePage extends StatelessWidget {
               actions: [
                 CupertinoDialogAction(
                   onPressed: () => Navigator.of(context).pop(),
-                  child: const Text('Cancel'),
+                  child: Text(
+                    'Cancel',
+                    style: TextStyle(color: isDark ? Colors.grey[300] : Colors.black),
+                  ),
                 ),
               ],
             );
@@ -480,6 +497,8 @@ class YouTubePage extends StatelessWidget {
 
   void _showRenameDialog(BuildContext context, YouTubeController controller,
       int index, String currentName) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
     final nameController = TextEditingController(text: currentName);
 
     showCupertinoDialog(
@@ -494,18 +513,22 @@ class YouTubePage extends StatelessWidget {
                 controller: nameController,
                 autofocus: true,
                 placeholder: 'Rename icon',
+                placeholderStyle: TextStyle(
+                  color: isDark ? Colors.grey[500] : Colors.grey[600],
+                ),
                 // maxLength: 10,
                 decoration: BoxDecoration(
-                  color: CupertinoColors.systemGrey6,
+                  color: isDark ? Colors.grey[800] : CupertinoColors.systemGrey6,
                   borderRadius: BorderRadius.circular(8),
                 ),
                 padding: const EdgeInsets.symmetric(
                   horizontal: 12,
                   vertical: 12,
                 ),
-                style: const TextStyle(
+                style: TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.w500,
+                  color: isDark ? Colors.grey[300] : Colors.black,
                 ),
               ),
             ),
@@ -513,7 +536,10 @@ class YouTubePage extends StatelessWidget {
           actions: [
             CupertinoDialogAction(
               onPressed: () => Navigator.of(context).pop(),
-              child: const Text('Cancel'),
+              child: Text(
+                'Cancel',
+                style: TextStyle(color: isDark ? Colors.grey[300] : Colors.black),
+              ),
             ),
             CupertinoDialogAction(
               onPressed: () {
@@ -523,7 +549,10 @@ class YouTubePage extends StatelessWidget {
                 }
               },
               isDefaultAction: true,
-              child: const Text('OK'),
+              child: Text(
+                'OK',
+                style: TextStyle(color: isDark ? Colors.blue[300] : Colors.blue),
+              ),
             ),
           ],
         );

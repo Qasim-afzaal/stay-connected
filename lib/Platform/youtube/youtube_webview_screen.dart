@@ -8,6 +8,7 @@ import 'package:get/get.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 
 import 'package:stay_connected/Platform/youtube/youtube_controller.dart';
+import 'package:stay_connected/util/webview_dark_theme_helper.dart';
 
 class YouTubeWebviewScreen extends StatefulWidget {
   final String searchQuery;
@@ -224,6 +225,9 @@ class _YouTubeWebviewScreenState extends State<YouTubeWebviewScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+    
     String userAgent = Platform.isIOS
         ? 'Mozilla/5.0 (iPhone; CPU iPhone OS 15_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/15.0 Mobile/15E148 Safari/604.1'
         : 'Mozilla/5.0 (Linux; Android 10; SM-G975F) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.120 Mobile Safari/537.36';
@@ -235,8 +239,8 @@ class _YouTubeWebviewScreenState extends State<YouTubeWebviewScreen> {
       appBar: AppBar(
         title: Text(widget.iconName),
         centerTitle: true,
-        backgroundColor: Colors.red,
-        foregroundColor: Colors.white,
+        backgroundColor: theme.appBarTheme.backgroundColor ?? (isDark ? Colors.grey[900] : Colors.red),
+        foregroundColor: theme.appBarTheme.foregroundColor ?? Colors.white,
       ),
       body: Stack(
         children: [
@@ -320,6 +324,11 @@ class _YouTubeWebviewScreenState extends State<YouTubeWebviewScreen> {
               ),
               onWebViewCreated: (controller) {
                 webViewController = controller;
+                
+                // Inject dark theme CSS at document start if dark mode is enabled
+                if (Theme.of(context).brightness == Brightness.dark) {
+                  controller.addUserScript(userScript: WebViewDarkThemeHelper.getDarkThemeUserScript());
+                }
                 
                 // Inject blocking script at document start
                 controller.addUserScript(
@@ -406,6 +415,11 @@ class _YouTubeWebviewScreenState extends State<YouTubeWebviewScreen> {
                   _startLoaderTimeout();
                 }
                 
+                // Inject dark theme CSS early if dark mode is enabled
+                if (Theme.of(context).brightness == Brightness.dark) {
+                  WebViewDarkThemeHelper.injectDarkTheme(controller, context);
+                }
+                
                 // Inject blocking script early
                 controller.evaluateJavascript(source: '''
                   (function() {
@@ -461,6 +475,9 @@ class _YouTubeWebviewScreenState extends State<YouTubeWebviewScreen> {
                   _fallbackTimer?.cancel();
                   _progressTimer?.cancel();
                 }
+                
+                // Inject dark theme CSS after page loads
+                await WebViewDarkThemeHelper.injectDarkTheme(controller, context);
                 
                 // Inject blocking script again after page loads
                 await controller.evaluateJavascript(source: '''
@@ -667,10 +684,10 @@ class _YouTubeWebviewScreenState extends State<YouTubeWebviewScreen> {
                   const SizedBox(height: 16),
                   Text(
                     'Loading: $loadingProgress%',
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.w500,
-                      color: Colors.grey,
+                      color: isDark ? Colors.grey[400] : Colors.grey,
                     ),
                   ),
                 ],
@@ -684,7 +701,7 @@ class _YouTubeWebviewScreenState extends State<YouTubeWebviewScreen> {
             child: Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color: Colors.white,
+                color: isDark ? Colors.grey[900] : Colors.white,
                 boxShadow: [
                   BoxShadow(
                     color: Colors.black.withOpacity(0.1),
@@ -699,7 +716,7 @@ class _YouTubeWebviewScreenState extends State<YouTubeWebviewScreen> {
                       ? null
                       : () => _showAddFriendDialog(),
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.black,
+                    backgroundColor: isDark ? Colors.grey[800] : Colors.black,
                     foregroundColor: Colors.white,
                     disabledBackgroundColor: Colors.grey.shade400,
                     disabledForegroundColor: Colors.grey.shade600,
