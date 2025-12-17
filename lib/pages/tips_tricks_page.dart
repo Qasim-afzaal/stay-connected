@@ -5,18 +5,21 @@ class TipsTricksPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+    
     return Scaffold(
       appBar: AppBar(
         title: Text(
           'Stay Connected',
           style: TextStyle(
-            color: Colors.blue[900],
+            color: isDark ? Colors.blue[300] : Colors.blue[900],
             fontWeight: FontWeight.bold,
           ),
         ),
         centerTitle: true,
-        backgroundColor: Colors.white,
-        foregroundColor: Colors.blue[900],
+        backgroundColor: theme.appBarTheme.backgroundColor,
+        foregroundColor: theme.appBarTheme.foregroundColor,
         elevation: 0,
       ),
       body: Padding(
@@ -28,28 +31,46 @@ class TipsTricksPage extends StatelessWidget {
               Center(
                 child: Text(
                   'Tips and Tricks',
-                  style: TextStyle(fontSize: 26, fontWeight: FontWeight.bold),
+                  style: TextStyle(
+                    fontSize: 26, 
+                    fontWeight: FontWeight.bold,
+                    color: isDark ? Colors.grey[300] : Colors.black,
+                  ),
                 ),
               ),
               SizedBox(height: 24),
               Text(
                 'Apps',
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                style: TextStyle(
+                  fontSize: 18, 
+                  fontWeight: FontWeight.bold,
+                  color: isDark ? Colors.grey[300] : Colors.black,
+                ),
               ),
               SizedBox(height: 8),
               Text(
                 'The social media apps do not need to be installed on your device in order too...Stay Connected.',
-                style: TextStyle(fontSize: 15),
+                style: TextStyle(
+                  fontSize: 15,
+                  color: isDark ? Colors.grey[300] : Colors.black87,
+                ),
               ),
               SizedBox(height: 20),
               Text(
                 'Performance',
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                style: TextStyle(
+                  fontSize: 18, 
+                  fontWeight: FontWeight.bold,
+                  color: isDark ? Colors.grey[300] : Colors.black,
+                ),
               ),
               SizedBox(height: 8),
               Text(
                 'Having an account with the sites below is not needed, but may provide a better experience while using Stay Connected.',
-                style: TextStyle(fontSize: 15),
+                style: TextStyle(
+                  fontSize: 15,
+                  color: isDark ? Colors.grey[300] : Colors.black87,
+                ),
               ),
               SizedBox(height: 8),
               Padding(
@@ -57,24 +78,31 @@ class TipsTricksPage extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text('- Facebook', style: TextStyle(fontSize: 15)),
-                    Text('- Instagram', style: TextStyle(fontSize: 15)),
+                    Text('- Facebook', style: TextStyle(fontSize: 15, color: isDark ? Colors.grey[300] : Colors.black87)),
+                    Text('- Instagram', style: TextStyle(fontSize: 15, color: isDark ? Colors.grey[300] : Colors.black87)),
                     Text('- X (Formely Twitter)',
-                        style: TextStyle(fontSize: 15)),
+                        style: TextStyle(fontSize: 15, color: isDark ? Colors.grey[300] : Colors.black87)),
                     Text('- Reddit (to view NSFW tags)',
-                        style: TextStyle(fontSize: 15)),
+                        style: TextStyle(fontSize: 15, color: isDark ? Colors.grey[300] : Colors.black87)),
                   ],
                 ),
               ),
               SizedBox(height: 20),
               Text(
                 'Open app button',
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                style: TextStyle(
+                  fontSize: 18, 
+                  fontWeight: FontWeight.bold,
+                  color: isDark ? Colors.grey[300] : Colors.black,
+                ),
               ),
               SizedBox(height: 8),
               Text(
                 'Currently we have the Open app function disabled (planned future update to enable). If you do have an account you are still able to log in for full functionality.',
-                style: TextStyle(fontSize: 15),
+                style: TextStyle(
+                  fontSize: 15,
+                  color: isDark ? Colors.grey[300] : Colors.black87,
+                ),
               ),
               SizedBox(height: 20),
               ClipRRect(
@@ -88,20 +116,27 @@ class TipsTricksPage extends StatelessWidget {
               SizedBox(height: 24),
               Text(
                 'Add to Album and Rename',
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                style: TextStyle(
+                  fontSize: 18, 
+                  fontWeight: FontWeight.bold,
+                  color: isDark ? Colors.grey[300] : Colors.black,
+                ),
               ),
               SizedBox(height: 8),
               Text(
                 'A long press on a user will give you two options:',
-                style: TextStyle(fontSize: 15),
+                style: TextStyle(
+                  fontSize: 15,
+                  color: isDark ? Colors.grey[300] : Colors.black87,
+                ),
               ),
               Padding(
                 padding: EdgeInsets.only(left: 16),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text('1. Add to Album', style: TextStyle(fontSize: 15)),
-                    Text('2. Rename', style: TextStyle(fontSize: 15)),
+                    Text('1. Add to Album', style: TextStyle(fontSize: 15, color: isDark ? Colors.grey[300] : Colors.black87)),
+                    Text('2. Rename', style: TextStyle(fontSize: 15, color: isDark ? Colors.grey[300] : Colors.black87)),
                   ],
                 ),
               ),
@@ -117,7 +152,10 @@ class TipsTricksPage extends StatelessWidget {
               SizedBox(height: 8),
               Text(
                 'Some added users (profiles) will come in with a generic name of (r). A long press will allow you to rename the user (profile). The rename function can be used at any time on any user (profile).',
-                style: TextStyle(fontSize: 15),
+                style: TextStyle(
+                  fontSize: 15,
+                  color: isDark ? Colors.grey[300] : Colors.black87,
+                ),
               ),
               SizedBox(height: 24),
               ClipRRect(
