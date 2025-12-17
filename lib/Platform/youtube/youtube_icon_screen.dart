@@ -111,12 +111,15 @@ class YouTubeIconScreen extends StatelessWidget {
                               Container(
                                 padding: const EdgeInsets.all(4),
                                 child: Image.asset(
-                                  'assets/images/iconnew_nbg.png',
-                                  scale: 0.1,
+                                  isDark ? 'assets/images/iconnew_nbg.png' : 'assets/images/yt_resized.png',
+                                  width: isDark ? 30 : null,
+                                  height: isDark ? 30 : null,
+                                  scale: isDark ? null : 0.1,
+                                  fit: BoxFit.contain,
                                   errorBuilder: (context, error, stackTrace) {
                                     return Icon(
                                       Icons.person,
-                                      size: 50,
+                                      size: isDark ? 30 : 50,
                                       color: Colors.red.shade700,
                                     );
                                   },
