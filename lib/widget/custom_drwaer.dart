@@ -80,17 +80,40 @@ class CustomDrawer extends StatelessWidget {
               Get.offAll(() => const HomePage());
             },
           ),
-          ...homeController.socialPlatforms.map((item) => ListTile(
-                leading: ClipRRect(
-                  borderRadius: BorderRadius.circular(4),
-                  child: Image.asset(
-                    item['icon'],
-                    height: 32,
-                    width: 32,
-                    fit: BoxFit.contain,
-                    errorBuilder: (_, __, ___) => const Icon(Icons.link),
-                  ),
-                ),
+          ...homeController.socialPlatforms.map((item) {
+                final isTwitter = item['name'].toString().toLowerCase() == 'twitter';
+                return ListTile(
+                leading: isDark && isTwitter
+                    ? Container(
+                        width: 32,
+                        height: 32,
+                        decoration: BoxDecoration(
+                          color: Colors.grey[800],
+                          shape: BoxShape.circle,
+                        ),
+                        alignment: Alignment.center,
+                        child: Image.asset(
+                          item['icon'],
+                          height: 24,
+                          width: 24,
+                          fit: BoxFit.contain,
+                          errorBuilder: (_, __, ___) => Icon(
+                            Icons.link,
+                            color: Colors.grey[300],
+                            size: 20,
+                          ),
+                        ),
+                      )
+                    : ClipRRect(
+                        borderRadius: BorderRadius.circular(4),
+                        child: Image.asset(
+                          item['icon'],
+                          height: 32,
+                          width: 32,
+                          fit: BoxFit.contain,
+                          errorBuilder: (_, __, ___) => const Icon(Icons.link),
+                        ),
+                      ),
                 title: Text(item['name']),
                 onTap: () {
                   print(item["name"]);
@@ -125,7 +148,8 @@ class CustomDrawer extends StatelessWidget {
                       break;
                   }
                 },
-              )),
+              );
+            }),
           const Divider(),
           ListTile(
             leading: Image.asset(
