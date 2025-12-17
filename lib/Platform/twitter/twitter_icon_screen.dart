@@ -109,12 +109,15 @@ class TwitterIconScreen extends StatelessWidget {
                               Container(
                                 padding: const EdgeInsets.all(4),
                                 child: Image.asset(
-                                  'assets/images/img_twitter.png',
-                                  scale: 0.1,
+                                  isDark ? 'assets/images/iconnew_nbg.png' : 'assets/images/img_twitter.png',
+                                  width: isDark ? 30 : null,
+                                  height: isDark ? 30 : null,
+                                  scale: isDark ? null : 0.1,
+                                  fit: BoxFit.contain,
                                   errorBuilder: (context, error, stackTrace) {
                                     return Icon(
                                       Icons.person,
-                                      size: 50,
+                                      size: isDark ? 30 : 50,
                                       color: Colors.blue.shade700,
                                     );
                                   },
