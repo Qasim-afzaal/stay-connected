@@ -19,6 +19,9 @@ class TikTokIconScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+    
     return GetBuilder<TikTokController>(
       builder: (controller) {
         final categoryFriends = controller.icons
@@ -40,13 +43,14 @@ class TikTokIconScreen extends StatelessWidget {
           appBar: AppBar(
             title: Text(iconName),
             centerTitle: true,
-            backgroundColor: Colors.white,
-            foregroundColor: Colors.black,
+            backgroundColor: theme.appBarTheme.backgroundColor,
+            foregroundColor: theme.appBarTheme.foregroundColor,
             elevation: 0,
           ),
           body: Container(
-            decoration: const BoxDecoration(
-              image: DecorationImage(
+            decoration: BoxDecoration(
+              color: isDark ? Colors.black : null,
+              image: isDark ? null : DecorationImage(
                 image: AssetImage('assets/images/img_group_297.jpg'),
                 fit: BoxFit.cover,
               ),
@@ -59,14 +63,14 @@ class TikTokIconScreen extends StatelessWidget {
                         Icon(
                           Icons.people_outline,
                           size: 64,
-                          color: Colors.grey.shade400,
+                          color: isDark ? Colors.grey[600] : Colors.grey.shade400,
                         ),
                         const SizedBox(height: 16),
                         Text(
                           'Tap the + button to search people',
                           style: TextStyle(
                             fontSize: 14,
-                            color: Colors.grey.shade500,
+                            color: isDark ? Colors.grey[400] : Colors.grey.shade500,
                           ),
                         ),
                       ],
@@ -121,9 +125,10 @@ class TikTokIconScreen extends StatelessWidget {
                                     const EdgeInsets.symmetric(horizontal: 4),
                                 child: Text(
                                   friend['name'] ?? 'Unknown',
-                                  style: const TextStyle(
+                                  style: TextStyle(
                                     fontSize: 9,
                                     fontWeight: FontWeight.w500,
+                                    color: isDark ? Colors.grey[300] : Colors.black,
                                   ),
                                   textAlign: TextAlign.center,
                                   maxLines: 2,
@@ -332,13 +337,14 @@ class TikTokIconScreen extends StatelessWidget {
                           }
 
                           Navigator.of(context).pop();
+                          final isDark = Theme.of(context).brightness == Brightness.dark;
                           Get.snackbar(
                             'Friend Renamed',
                             '$oldName has been renamed to $newName',
                             snackPosition: SnackPosition.BOTTOM,
                             duration: const Duration(seconds: 2),
-                            backgroundColor: Colors.blue.shade100,
-                            colorText: Colors.blue.shade800,
+                            backgroundColor: isDark ? Colors.blue[900] : Colors.blue.shade100,
+                            colorText: isDark ? Colors.blue[100] : Colors.blue.shade800,
                           );
                         }
                       },
@@ -363,6 +369,7 @@ class TikTokIconScreen extends StatelessWidget {
 
 void _showMoveDialog(BuildContext context, String friendName, int index, String iconName) {
   final controller = Get.find<TikTokController>();
+  final isDark = Theme.of(context).brightness == Brightness.dark;
 
   // Get all available categories including custom ones
   final allCategories = controller.getAvailableCategories();
@@ -386,8 +393,8 @@ void _showMoveDialog(BuildContext context, String friendName, int index, String 
       'There are no categories to move this friend to.',
       snackPosition: SnackPosition.BOTTOM,
       duration: const Duration(seconds: 2),
-      backgroundColor: Colors.orange.shade100,
-      colorText: Colors.orange.shade800,
+      backgroundColor: isDark ? Colors.orange[900] : Colors.orange.shade100,
+      colorText: isDark ? Colors.orange[100] : Colors.orange.shade800,
     );
     return;
   }
@@ -492,13 +499,14 @@ void _showMoveDialog(BuildContext context, String friendName, int index, String 
                 }
 
                 Navigator.of(context).pop();
+                final isDark = Theme.of(context).brightness == Brightness.dark;
                 Get.snackbar(
                   'Friend Moved',
                   '$friendName has been moved to $newCategory',
                   snackPosition: SnackPosition.BOTTOM,
                   duration: const Duration(seconds: 2),
-                  backgroundColor: Colors.green.shade100,
-                  colorText: Colors.green.shade800,
+                  backgroundColor: isDark ? Colors.green[900] : Colors.green.shade100,
+                  colorText: isDark ? Colors.green[100] : Colors.green.shade800,
                 );
               }
             },
@@ -589,13 +597,14 @@ void _showMoveDialog(BuildContext context, String friendName, int index, String 
                 }
 
                 Navigator.of(context).pop();
+                final isDark = Theme.of(context).brightness == Brightness.dark;
                 Get.snackbar(
                   'Friend Deleted',
                   '$friendName has been removed from your $iconName list',
                   snackPosition: SnackPosition.BOTTOM,
                   duration: const Duration(seconds: 2),
-                  backgroundColor: Colors.red.shade100,
-                  colorText: Colors.red.shade800,
+                  backgroundColor: isDark ? Colors.red[900] : Colors.red.shade100,
+                  colorText: isDark ? Colors.red[100] : Colors.red.shade800,
                 );
               },
               isDestructiveAction: true,
@@ -1259,8 +1268,8 @@ class _FriendProfileWebViewState extends State<_FriendProfileWebView> {
       appBar: AppBar(
         title: Text(widget.friendName),
         centerTitle: true,
-        backgroundColor: Colors.white,
-        foregroundColor: Colors.black,
+        backgroundColor: Theme.of(context).appBarTheme.backgroundColor ?? (Theme.of(context).brightness == Brightness.dark ? Colors.grey[900] : Colors.white),
+        foregroundColor: Theme.of(context).appBarTheme.foregroundColor ?? (Theme.of(context).brightness == Brightness.dark ? Colors.white : Colors.black),
         elevation: 0,
       ),
       body: Stack(

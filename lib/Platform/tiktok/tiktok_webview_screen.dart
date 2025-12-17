@@ -43,8 +43,71 @@ class _TikTokWebviewScreenState extends State<TikTokWebviewScreen> {
     return url.contains('google.com') || url.contains('googleapis.com');
   }
 
+  // Inject dark theme CSS into webview
+  Future<void> _injectDarkTheme(InAppWebViewController controller) async {
+    final brightness = Theme.of(context).brightness;
+    if (brightness == Brightness.dark) {
+      try {
+        await controller.evaluateJavascript(source: '''
+          (function() {
+            // Remove existing dark theme style if any
+            const existingStyle = document.getElementById('dark-theme-style');
+            if (existingStyle) {
+              existingStyle.remove();
+            }
+            
+            // Create and inject dark theme CSS
+            const style = document.createElement('style');
+            style.id = 'dark-theme-style';
+            style.textContent = `
+              :root {
+                color-scheme: dark;
+              }
+              html {
+                background-color: #000000 !important;
+                filter: invert(1) hue-rotate(180deg) !important;
+              }
+              img, video, iframe, embed, object, svg, canvas, [style*="background-image"] {
+                filter: invert(1) hue-rotate(180deg) !important;
+              }
+              body {
+                background-color: #000000 !important;
+                color: #ffffff !important;
+              }
+              /* Apply dark theme to common elements */
+              div, section, article, main, header, footer, nav, aside {
+                background-color: transparent !important;
+              }
+              /* Preserve media colors - re-invert images and videos */
+              img[src*=".jpg"], img[src*=".jpeg"], img[src*=".png"], img[src*=".gif"],
+              img[src*=".webp"], video, iframe[src*="youtube"], iframe[src*="vimeo"],
+              img[src*="tiktok"], video[src*="tiktok"] {
+                filter: invert(1) hue-rotate(180deg) !important;
+              }
+            `;
+            if (document.head) {
+              document.head.appendChild(style);
+            } else {
+              document.addEventListener('DOMContentLoaded', function() {
+                if (document.head) {
+                  document.head.appendChild(style);
+                }
+              });
+            }
+          })();
+        ''');
+      } catch (e) {
+        print('Error injecting dark theme: $e');
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final brightness = theme.brightness;
+    final isDark = brightness == Brightness.dark;
+    
     String userAgent = Platform.isIOS
         ? 'Mozilla/5.0 (iPhone; CPU iPhone OS 15_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/15.0 Mobile/15E148 Safari/604.1'
         : 'Mozilla/5.0 (Linux; Android 10; SM-G975F) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.120 Mobile Safari/537.36';
@@ -53,8 +116,8 @@ class _TikTokWebviewScreenState extends State<TikTokWebviewScreen> {
       appBar: AppBar(
         title: Text(widget.iconName),
         centerTitle: true,
-        backgroundColor: Colors.black,
-        foregroundColor: Colors.white,
+        backgroundColor: theme.appBarTheme.backgroundColor ?? (isDark ? Colors.black : Colors.black),
+        foregroundColor: theme.appBarTheme.foregroundColor ?? Colors.white,
       ),
       body: Stack(
         children: [
@@ -128,6 +191,56 @@ class _TikTokWebviewScreenState extends State<TikTokWebviewScreen> {
                   }
                 },
               );
+              
+              // Inject dark theme CSS at document start if dark mode is enabled
+              if (Theme.of(context).brightness == Brightness.dark) {
+                controller.addUserScript(
+                  userScript: UserScript(
+                    source: '''
+                      (function() {
+                        const style = document.createElement('style');
+                        style.id = 'dark-theme-style';
+                        style.textContent = `
+                          :root {
+                            color-scheme: dark;
+                          }
+                          html {
+                            background-color: #000000 !important;
+                            filter: invert(1) hue-rotate(180deg) !important;
+                          }
+                          img, video, iframe, embed, object, svg, canvas, [style*="background-image"] {
+                            filter: invert(1) hue-rotate(180deg) !important;
+                          }
+                          body {
+                            background-color: #000000 !important;
+                            color: #ffffff !important;
+                          }
+                          /* Apply dark theme to common elements */
+                          div, section, article, main, header, footer, nav, aside {
+                            background-color: transparent !important;
+                          }
+                          /* Preserve media colors - re-invert images and videos */
+                          img[src*=".jpg"], img[src*=".jpeg"], img[src*=".png"], img[src*=".gif"],
+                          img[src*=".webp"], video, iframe[src*="youtube"], iframe[src*="vimeo"],
+                          img[src*="tiktok"], video[src*="tiktok"] {
+                            filter: invert(1) hue-rotate(180deg) !important;
+                          }
+                        `;
+                        if (document.head) {
+                          document.head.appendChild(style);
+                        } else {
+                          document.addEventListener('DOMContentLoaded', function() {
+                            if (document.head) {
+                              document.head.appendChild(style);
+                            }
+                          });
+                        }
+                      })();
+                    ''',
+                    injectionTime: UserScriptInjectionTime.AT_DOCUMENT_START,
+                  ),
+                );
+              }
               
               // Inject blocking and video capture script at document start
               controller.addUserScript(
@@ -583,6 +696,11 @@ class _TikTokWebviewScreenState extends State<TikTokWebviewScreen> {
                 });
               }
               
+              // Inject dark theme CSS early if dark mode is enabled
+              if (Theme.of(context).brightness == Brightness.dark) {
+                _injectDarkTheme(controller);
+              }
+              
               // Inject blocking and video capture script early
               controller.evaluateJavascript(source: '''
                 (function() {
@@ -747,6 +865,9 @@ class _TikTokWebviewScreenState extends State<TikTokWebviewScreen> {
                 loadingProgress = 100;
                 });
               }
+              
+              // Inject dark theme CSS after page loads
+              await _injectDarkTheme(controller);
               
               // Inject blocking and video capture script again after page loads
               await controller.evaluateJavascript(source: '''
@@ -1178,10 +1299,10 @@ class _TikTokWebviewScreenState extends State<TikTokWebviewScreen> {
                   const SizedBox(height: 16),
                   Text(
                     'Loading: $loadingProgress%',
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.w500,
-                      color: Colors.grey,
+                      color: isDark ? Colors.grey[400] : Colors.grey,
                     ),
                   ),
                 ],
@@ -1195,7 +1316,7 @@ class _TikTokWebviewScreenState extends State<TikTokWebviewScreen> {
             child: Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color: Colors.white,
+                color: isDark ? Colors.grey[900] : Colors.white,
                 boxShadow: [
                   BoxShadow(
                     color: Colors.black.withOpacity(0.1),
@@ -1210,7 +1331,7 @@ class _TikTokWebviewScreenState extends State<TikTokWebviewScreen> {
                       ? null
                       : () => _showAddFriendDialog(),
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.black,
+                    backgroundColor: isDark ? Colors.grey[800] : Colors.black,
                     foregroundColor: Colors.white,
                     disabledBackgroundColor: Colors.grey.shade400,
                     disabledForegroundColor: Colors.grey.shade600,
