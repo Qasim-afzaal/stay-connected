@@ -244,8 +244,17 @@ class _PinterestWebviewScreenState extends State<PinterestWebviewScreen> {
       appBar: AppBar(
         title: Text(widget.iconName),
         centerTitle: true,
-        backgroundColor: theme.appBarTheme.backgroundColor ?? (isDark ? Colors.grey[900] : Colors.red),
-        foregroundColor: theme.appBarTheme.foregroundColor ?? Colors.white,
+        backgroundColor: isDark ? (theme.appBarTheme.backgroundColor ?? Colors.grey[900]) : Colors.white,
+        foregroundColor: isDark ? (theme.appBarTheme.foregroundColor ?? Colors.white) : Colors.black,
+        elevation: 0,
+        bottom: PreferredSize(
+          preferredSize: const Size.fromHeight(1.0),
+          child: Divider(
+            height: 1,
+            thickness: 1,
+            color: isDark ? Colors.grey[800] : Colors.grey[300],
+          ),
+        ),
       ),
       body: Stack(
         children: [
