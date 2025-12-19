@@ -35,9 +35,17 @@ class InstagramIconScreen extends StatelessWidget {
           appBar: AppBar(
             title: Text(iconName),
             centerTitle: true,
-            backgroundColor: theme.appBarTheme.backgroundColor,
-            foregroundColor: theme.appBarTheme.foregroundColor,
+            backgroundColor: isDark ? theme.appBarTheme.backgroundColor : Colors.white,
+            foregroundColor: isDark ? theme.appBarTheme.foregroundColor : Colors.black,
             elevation: 0,
+            bottom: PreferredSize(
+              preferredSize: const Size.fromHeight(1.0),
+              child: Divider(
+                height: 1,
+                thickness: 1,
+                color: isDark ? Colors.grey[800] : Colors.grey[300],
+              ),
+            ),
           ),
           body: Container(
             decoration: BoxDecoration(
@@ -925,8 +933,17 @@ class _FriendProfileScreenState extends State<FriendProfileScreen> {
       appBar: AppBar(
         title: Text(widget.friendName),
         centerTitle: true,
-        backgroundColor: Theme.of(context).appBarTheme.backgroundColor ?? (Theme.of(context).brightness == Brightness.dark ? Colors.grey[900] : Colors.purple),
-        foregroundColor: Theme.of(context).appBarTheme.foregroundColor ?? Colors.white,
+        backgroundColor: Theme.of(context).brightness == Brightness.dark ? (Theme.of(context).appBarTheme.backgroundColor ?? Colors.grey[900]) : Colors.white,
+        foregroundColor: Theme.of(context).brightness == Brightness.dark ? (Theme.of(context).appBarTheme.foregroundColor ?? Colors.white) : Colors.black,
+        elevation: 0,
+        bottom: PreferredSize(
+          preferredSize: const Size.fromHeight(1.0),
+          child: Divider(
+            height: 1,
+            thickness: 1,
+            color: Theme.of(context).brightness == Brightness.dark ? Colors.grey[800] : Colors.grey[300],
+          ),
+        ),
       ),
       body: Stack(
         children: [

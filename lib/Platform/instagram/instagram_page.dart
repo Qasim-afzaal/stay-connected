@@ -26,9 +26,17 @@ class InstagramPage extends StatelessWidget {
           appBar: AppBar(
             title: const Text('Instagram'),
             centerTitle: true,
-            backgroundColor: theme.appBarTheme.backgroundColor,
-            foregroundColor: theme.appBarTheme.foregroundColor,
+            backgroundColor: isDark ? theme.appBarTheme.backgroundColor : Colors.white,
+            foregroundColor: isDark ? theme.appBarTheme.foregroundColor : Colors.black,
             elevation: 0,
+            bottom: PreferredSize(
+              preferredSize: const Size.fromHeight(1.0),
+              child: Divider(
+                height: 1,
+                thickness: 1,
+                color: isDark ? Colors.grey[800] : Colors.grey[300],
+              ),
+            ),
             actions: [
               // Temporary reset button for debugging
               IconButton(
