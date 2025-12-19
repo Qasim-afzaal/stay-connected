@@ -47,6 +47,12 @@ Organize your connections with intuitive categories:
 - **Google OAuth Support**: Handles OAuth flows without breaking navigation
 - **Content Detection**: Automatically detects and handles videos, posts, and profiles
 
+### 🎨 User Interface
+- **Consistent AppBar Design**: White background with black text in light mode for optimal readability
+- **Visual Separation**: Dividers on all AppBars for clear content boundaries
+- **Dark Mode Support**: Seamless theme switching with appropriate color schemes
+- **Platform-Specific Styling**: Each platform maintains its unique identity while following design guidelines
+
 ## 🚀 How It Works
 
 1. **Select a Platform** - Choose from our supported social networks
@@ -120,6 +126,8 @@ flutter run
 - ✅ Google OAuth iframe support
 - ✅ Screen time prompt handling for TikTok
 - ✅ Content detection and smart navigation
+- ✅ Consistent AppBar styling across all screens with white background and black text in light mode
+- ✅ Added dividers to AppBars for better visual separation
 
 
 ## 📱 Platform-Specific Features
@@ -142,6 +150,13 @@ flutter run
 - Network-dependent features require active internet connection
 
 ## 🔄 Recent Updates
+
+### Version 2.1.0
+- ✨ **UI/UX Improvements**: Updated AppBar styling across all screens
+  - White background with black text in light mode for better readability
+  - Added dividers to AppBars for clear visual separation
+  - Consistent styling across all platform pages, icon screens, and webview screens
+  - Maintained dark mode compatibility with theme-based colors
 
 ### Version 2.0.0
 - ✨ Added platform-specific webview implementations
