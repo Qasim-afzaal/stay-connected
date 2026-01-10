@@ -7,7 +7,6 @@ import 'package:get/get.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 
 import 'package:stay_connected/Platform/instagram/instagram_controller.dart';
-import 'package:stay_connected/util/webview_dark_theme_helper.dart';
 
 class InstagramWebviewScreen extends StatefulWidget {
   final String searchQuery;
@@ -92,11 +91,6 @@ class _InstagramWebviewScreenState extends State<InstagramWebviewScreen> {
             ),
             onWebViewCreated: (controller) {
               webViewController = controller;
-              
-              // Inject dark theme CSS at document start if dark mode is enabled
-              if (Theme.of(context).brightness == Brightness.dark) {
-                controller.addUserScript(userScript: WebViewDarkThemeHelper.getDarkThemeUserScript());
-              }
               
               // Register JavaScript handler for post capture
               controller.addJavaScriptHandler(
@@ -262,11 +256,6 @@ class _InstagramWebviewScreenState extends State<InstagramWebviewScreen> {
                 });
               }
               
-              // Inject dark theme CSS early if dark mode is enabled
-              if (Theme.of(context).brightness == Brightness.dark) {
-                WebViewDarkThemeHelper.injectDarkTheme(controller, context);
-              }
-              
               // Inject blocking and post capture script early
               controller.evaluateJavascript(source: '''
                 (function() {
@@ -340,9 +329,6 @@ class _InstagramWebviewScreenState extends State<InstagramWebviewScreen> {
                 loadingProgress = 100;
                 });
               }
-              
-              // Inject dark theme CSS after page loads
-              await WebViewDarkThemeHelper.injectDarkTheme(controller, context);
               
               // Inject blocking and post capture script again after page loads
               await controller.evaluateJavascript(source: '''
