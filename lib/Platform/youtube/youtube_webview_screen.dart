@@ -8,7 +8,6 @@ import 'package:get/get.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 
 import 'package:stay_connected/Platform/youtube/youtube_controller.dart';
-import 'package:stay_connected/util/webview_dark_theme_helper.dart';
 
 class YouTubeWebviewScreen extends StatefulWidget {
   final String searchQuery;
@@ -334,11 +333,6 @@ class _YouTubeWebviewScreenState extends State<YouTubeWebviewScreen> {
               onWebViewCreated: (controller) {
                 webViewController = controller;
                 
-                // Inject dark theme CSS at document start if dark mode is enabled
-                if (Theme.of(context).brightness == Brightness.dark) {
-                  controller.addUserScript(userScript: WebViewDarkThemeHelper.getDarkThemeUserScript());
-                }
-                
                 // Inject blocking script at document start
                 controller.addUserScript(
                   userScript: UserScript(
@@ -424,11 +418,6 @@ class _YouTubeWebviewScreenState extends State<YouTubeWebviewScreen> {
                   _startLoaderTimeout();
                 }
                 
-                // Inject dark theme CSS early if dark mode is enabled
-                if (Theme.of(context).brightness == Brightness.dark) {
-                  WebViewDarkThemeHelper.injectDarkTheme(controller, context);
-                }
-                
                 // Inject blocking script early
                 controller.evaluateJavascript(source: '''
                   (function() {
@@ -484,9 +473,6 @@ class _YouTubeWebviewScreenState extends State<YouTubeWebviewScreen> {
                   _fallbackTimer?.cancel();
                   _progressTimer?.cancel();
                 }
-                
-                // Inject dark theme CSS after page loads
-                await WebViewDarkThemeHelper.injectDarkTheme(controller, context);
                 
                 // Inject blocking script again after page loads
                 await controller.evaluateJavascript(source: '''
