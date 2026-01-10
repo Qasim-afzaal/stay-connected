@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 import 'package:stay_connected/Platform/reddit/reddit_controller.dart';
-import 'package:stay_connected/util/webview_dark_theme_helper.dart';
 
 class RedditWebviewScreen extends StatefulWidget {
   final String searchQuery;
@@ -82,11 +81,6 @@ class _RedditWebviewScreenState extends State<RedditWebviewScreen> {
             onWebViewCreated: (controller) {
               webViewController = controller;
               
-              // Inject dark theme CSS at document start if dark mode is enabled
-              if (Theme.of(context).brightness == Brightness.dark) {
-                controller.addUserScript(userScript: WebViewDarkThemeHelper.getDarkThemeUserScript());
-              }
-              
               // Inject blocking script at document start
               controller.addUserScript(
                 userScript: UserScript(
@@ -148,11 +142,6 @@ class _RedditWebviewScreenState extends State<RedditWebviewScreen> {
                 currentUrl = url?.toString();
               });
               
-              // Inject dark theme CSS early if dark mode is enabled
-              if (Theme.of(context).brightness == Brightness.dark) {
-                WebViewDarkThemeHelper.injectDarkTheme(controller, context);
-              }
-              
               // Inject blocking script early
               controller.evaluateJavascript(source: '''
                 (function() {
@@ -190,9 +179,6 @@ class _RedditWebviewScreenState extends State<RedditWebviewScreen> {
                 loadingProgress = 100;
                 currentUrl = url?.toString();
               });
-              
-              // Inject dark theme CSS after page loads
-              await WebViewDarkThemeHelper.injectDarkTheme(controller, context);
               
               // Inject blocking script again after page loads
               await controller.evaluateJavascript(source: '''
