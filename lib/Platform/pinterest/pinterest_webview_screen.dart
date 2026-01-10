@@ -8,7 +8,6 @@ import 'package:get/get.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 
 import 'package:stay_connected/Platform/pinterest/pinterest_controller.dart';
-import 'package:stay_connected/util/webview_dark_theme_helper.dart';
 
 class PinterestWebviewScreen extends StatefulWidget {
   final String searchQuery;
@@ -341,11 +340,6 @@ class _PinterestWebviewScreenState extends State<PinterestWebviewScreen> {
               onWebViewCreated: (controller) {
                 webViewController = controller;
                 
-                // Inject dark theme CSS at document start if dark mode is enabled
-                if (Theme.of(context).brightness == Brightness.dark) {
-                  controller.addUserScript(userScript: WebViewDarkThemeHelper.getDarkThemeUserScript());
-                }
-                
                 // Inject blocking script at document start
                 controller.addUserScript(
                   userScript: UserScript(
@@ -427,11 +421,6 @@ class _PinterestWebviewScreenState extends State<PinterestWebviewScreen> {
                   _startLoaderTimeout();
                 }
                 
-                // Inject dark theme CSS early if dark mode is enabled
-                if (Theme.of(context).brightness == Brightness.dark) {
-                  WebViewDarkThemeHelper.injectDarkTheme(controller, context);
-                }
-                
                 // Inject blocking script early
                 controller.evaluateJavascript(source: '''
                   (function() {
@@ -485,9 +474,6 @@ class _PinterestWebviewScreenState extends State<PinterestWebviewScreen> {
                   _fallbackTimer?.cancel();
                   _progressTimer?.cancel();
                 }
-                
-                // Inject dark theme CSS after page loads
-                await WebViewDarkThemeHelper.injectDarkTheme(controller, context);
                 
                 // Inject blocking script again after page loads
                 await controller.evaluateJavascript(source: '''
