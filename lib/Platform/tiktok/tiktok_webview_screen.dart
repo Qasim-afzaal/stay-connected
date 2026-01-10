@@ -43,65 +43,6 @@ class _TikTokWebviewScreenState extends State<TikTokWebviewScreen> {
     return url.contains('google.com') || url.contains('googleapis.com');
   }
 
-  // Inject dark theme CSS into webview
-  Future<void> _injectDarkTheme(InAppWebViewController controller) async {
-    final brightness = Theme.of(context).brightness;
-    if (brightness == Brightness.dark) {
-      try {
-        await controller.evaluateJavascript(source: '''
-          (function() {
-            // Remove existing dark theme style if any
-            const existingStyle = document.getElementById('dark-theme-style');
-            if (existingStyle) {
-              existingStyle.remove();
-            }
-            
-            // Create and inject dark theme CSS
-            const style = document.createElement('style');
-            style.id = 'dark-theme-style';
-            style.textContent = `
-              :root {
-                color-scheme: dark;
-              }
-              html {
-                background-color: #000000 !important;
-                filter: invert(1) hue-rotate(180deg) !important;
-              }
-              img, video, iframe, embed, object, svg, canvas, [style*="background-image"] {
-                filter: invert(1) hue-rotate(180deg) !important;
-              }
-              body {
-                background-color: #000000 !important;
-                color: #ffffff !important;
-              }
-              /* Apply dark theme to common elements */
-              div, section, article, main, header, footer, nav, aside {
-                background-color: transparent !important;
-              }
-              /* Preserve media colors - re-invert images and videos */
-              img[src*=".jpg"], img[src*=".jpeg"], img[src*=".png"], img[src*=".gif"],
-              img[src*=".webp"], video, iframe[src*="youtube"], iframe[src*="vimeo"],
-              img[src*="tiktok"], video[src*="tiktok"] {
-                filter: invert(1) hue-rotate(180deg) !important;
-              }
-            `;
-            if (document.head) {
-              document.head.appendChild(style);
-            } else {
-              document.addEventListener('DOMContentLoaded', function() {
-                if (document.head) {
-                  document.head.appendChild(style);
-                }
-              });
-            }
-          })();
-        ''');
-      } catch (e) {
-        print('Error injecting dark theme: $e');
-      }
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -705,11 +646,6 @@ class _TikTokWebviewScreenState extends State<TikTokWebviewScreen> {
                 });
               }
               
-              // Inject dark theme CSS early if dark mode is enabled
-              if (Theme.of(context).brightness == Brightness.dark) {
-                _injectDarkTheme(controller);
-              }
-              
               // Inject blocking and video capture script early
               controller.evaluateJavascript(source: '''
                 (function() {
@@ -874,9 +810,6 @@ class _TikTokWebviewScreenState extends State<TikTokWebviewScreen> {
                 loadingProgress = 100;
                 });
               }
-              
-              // Inject dark theme CSS after page loads
-              await _injectDarkTheme(controller);
               
               // Inject blocking and video capture script again after page loads
               await controller.evaluateJavascript(source: '''
