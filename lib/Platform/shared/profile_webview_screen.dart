@@ -4,7 +4,6 @@ import 'dart:io';
 
 import 'package:get/get.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
-import 'package:stay_connected/util/webview_dark_theme_helper.dart';
 
 // Import all platform controllers
 import 'package:stay_connected/Platform/facebook/facebook_controller.dart';
@@ -402,11 +401,6 @@ class _ProfileWebViewScreenState extends State<ProfileWebViewScreen> {
                     mediaPlaybackRequiresUserGesture: false,
                   ),
                   onWebViewCreated: (controller) async {
-                    // Inject dark theme CSS at document start if dark mode is enabled
-                    if (Theme.of(context).brightness == Brightness.dark) {
-                      await controller.addUserScript(userScript: WebViewDarkThemeHelper.getDarkThemeUserScript());
-                    }
-                    
                     // CRITICAL: Add user script that runs BEFORE page scripts
                     await controller.addUserScript(
                       userScript: UserScript(
@@ -443,9 +437,6 @@ class _ProfileWebViewScreenState extends State<ProfileWebViewScreen> {
                       isLoading = false;
                       currentUrl = url?.toString();
                     });
-                    
-                    // Inject dark theme CSS after page loads
-                    await WebViewDarkThemeHelper.injectDarkTheme(controller, context);
                     
                     // CRITICAL: Inject blocking script multiple times after page loads
                     if (url != null) {
