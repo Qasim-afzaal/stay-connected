@@ -1014,6 +1014,7 @@ class _FriendProfileScreenState extends State<FriendProfileScreen> {
             ),
             onWebViewCreated: (controller) {
               _webViewController = controller;
+              
               // Register JavaScript handler for post capture
               controller.addJavaScriptHandler(
                 handlerName: 'InstagramPostCapture',
