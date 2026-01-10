@@ -307,6 +307,35 @@ class PinterestController extends GetxController {
     }
   }
 
+  Future<void> renameCategory(String oldCategoryName, String newCategoryName) async {
+    try {
+      // Rename the category icon itself (the one without profileUrl)
+      for (int i = 0; i < icons.length; i++) {
+        if (icons[i]['name'] == oldCategoryName &&
+            (icons[i]['profileUrl'] == null || icons[i]['profileUrl']!.isEmpty)) {
+          icons[i]['name'] = newCategoryName;
+          icons[i]['category'] = newCategoryName;
+          break;
+        }
+      }
+      
+      // Update all friends that belong to this category
+      for (int i = 0; i < icons.length; i++) {
+        if (icons[i]['category'] == oldCategoryName &&
+            icons[i]['profileUrl'] != null &&
+            icons[i]['profileUrl']!.isNotEmpty) {
+          icons[i]['category'] = newCategoryName;
+        }
+      }
+      
+      await _saveToPrefs();
+      update();
+      print('Pinterest - Renamed category from $oldCategoryName to $newCategoryName');
+    } catch (e) {
+      print('Error renaming category for $platformName: $e');
+    }
+  }
+
   Future<void> _saveToPrefs() async {
     try {
       final prefs = await SharedPreferences.getInstance();

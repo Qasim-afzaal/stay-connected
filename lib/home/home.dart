@@ -70,6 +70,7 @@ class HomePage extends StatelessWidget {
                             Get.offNamed(Routes.YOUTUBE);
                             break;
                           case "twitter":
+                          case "x":
                             Get.offNamed(Routes.TWITTER);
                             break;
                           case "tiktok":

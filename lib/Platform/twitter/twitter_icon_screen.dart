@@ -117,9 +117,9 @@ class TwitterIconScreen extends StatelessWidget {
                               Container(
                                 padding: const EdgeInsets.all(4),
                                 child: Image.asset(
-                                  isDark ? 'assets/images/iconnew_nbg.png' : 'assets/images/img_twitter.png',
-                                  width: isDark ? 30 : null,
-                                  height: isDark ? 30 : null,
+                                  isDark ? 'assets/images/account_x.png' : 'assets/images/img_twitter.png',
+                                  width: isDark ? 60 : null,
+                                  height: isDark ? 60 : null,
                                   scale: isDark ? null : 0.1,
                                   fit: BoxFit.contain,
                                   errorBuilder: (context, error, stackTrace) {
@@ -288,6 +288,8 @@ class TwitterIconScreen extends StatelessWidget {
   showCupertinoDialog(
     context: context,
     builder: (BuildContext context) {
+      final theme = Theme.of(context);
+      final isDark = theme.brightness == Brightness.dark;
       return Material( // ✅ Needed so Cupertino dialog renders properly
         color: Colors.transparent,
         child: Center(
@@ -295,27 +297,60 @@ class TwitterIconScreen extends StatelessWidget {
             padding: const EdgeInsets.all(20),
             margin: const EdgeInsets.symmetric(horizontal: 24),
             decoration: BoxDecoration(
-              color: CupertinoColors.systemBackground,
+              color: isDark ? Colors.grey[900] : CupertinoColors.systemBackground,
               borderRadius: BorderRadius.circular(16),
             ),
             child: Column(
               mainAxisSize: MainAxisSize.min, // ✅ prevents unnecessary scrolling
               children: [
-                const Text(
-                  "Rename Friend",
-                  style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.w600,
-                  ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(8),
+                      decoration: BoxDecoration(
+                        color: isDark ? Colors.grey[800] : CupertinoColors.systemBlue.withOpacity(0.1),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Image.asset(
+                        isDark ? 'assets/images/iconnew_nbg.png' : 'assets/images/img_logo1_1.png',
+                        width: 20,
+                        height: 20,
+                        fit: BoxFit.contain,
+                        errorBuilder: (context, error, stackTrace) {
+                          return Icon(
+                            CupertinoIcons.pencil,
+                            color: isDark ? Colors.blue[300] : CupertinoColors.systemBlue,
+                            size: 20,
+                          );
+                        },
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Text(
+                      "Rename Friend",
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.w600,
+                        color: isDark ? Colors.white : Colors.black,
+                      ),
+                    ),
+                  ],
                 ),
                 const SizedBox(height: 12),
                 CupertinoTextField(
                   controller: renameController,
                   autofocus: true,
                   placeholder: "Enter new name",
+                  placeholderStyle: TextStyle(
+                    color: isDark ? Colors.grey[500] : Colors.grey[600],
+                  ),
+                  style: TextStyle(
+                    color: isDark ? Colors.white : Colors.black,
+                  ),
                   padding: const EdgeInsets.all(12),
                   decoration: BoxDecoration(
-                    color: CupertinoColors.systemGrey6,
+                    color: isDark ? Colors.grey[800] : CupertinoColors.systemGrey6,
                     borderRadius: BorderRadius.circular(8),
                   ),
                 ),
@@ -326,7 +361,12 @@ class TwitterIconScreen extends StatelessWidget {
                     CupertinoButton(
                       padding: const EdgeInsets.symmetric(horizontal: 12),
                       onPressed: () => Navigator.of(context).pop(),
-                      child: const Text("Cancel"),
+                      child: Text(
+                        "Cancel",
+                        style: TextStyle(
+                          color: isDark ? Colors.grey[300] : CupertinoColors.systemGrey,
+                        ),
+                      ),
                     ),
                     CupertinoButton(
                       padding: const EdgeInsets.symmetric(horizontal: 12),
@@ -360,10 +400,11 @@ class TwitterIconScreen extends StatelessWidget {
                           );
                         }
                       },
-                      child: const Text(
+                      child: Text(
                         "Save",
                         style: TextStyle(
                           fontWeight: FontWeight.w600,
+                          color: isDark ? Colors.blue[300] : CupertinoColors.systemBlue,
                         ),
                       ),
                     ),

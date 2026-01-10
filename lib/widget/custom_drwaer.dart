@@ -41,7 +41,7 @@ class CustomDrawer extends StatelessWidget {
                     padding:
                         const EdgeInsets.all(6.0), // Adjust padding as needed
                     child: Image.asset(
-                      'assets/images/img_logo1_1.png',
+                      isDark ? 'assets/images/iconnew_nbg.png' : 'assets/images/img_logo1_1.png',
                       fit: BoxFit.contain,
                     ),
                   ),
@@ -71,7 +71,7 @@ class CustomDrawer extends StatelessWidget {
           ),
           ListTile(
             leading: Image.asset(
-              'assets/images/img_logo1_1.png',
+              isDark ? 'assets/images/home.png' : 'assets/images/img_logo1_1.png',
               scale: 13,
             ),
             title: const Text("Home"),
@@ -81,7 +81,8 @@ class CustomDrawer extends StatelessWidget {
             },
           ),
           ...homeController.socialPlatforms.map((item) {
-                final isTwitter = item['name'].toString().toLowerCase() == 'twitter';
+                final isTwitter = item['name'].toString().toLowerCase() == 'twitter' || item['name'].toString().toLowerCase() == 'x';
+                final iconPath = item['icon'] as String?;
                 return ListTile(
                 leading: isDark && isTwitter
                     ? Container(
@@ -92,27 +93,35 @@ class CustomDrawer extends StatelessWidget {
                           shape: BoxShape.circle,
                         ),
                         alignment: Alignment.center,
-                        child: Image.asset(
-                          item['icon'],
-                          height: 24,
-                          width: 24,
-                          fit: BoxFit.contain,
-                          errorBuilder: (_, __, ___) => Icon(
-                            Icons.link,
-                            color: Colors.grey[300],
-                            size: 20,
-                          ),
-                        ),
+                        child: iconPath != null
+                            ? Image.asset(
+                                iconPath,
+                                height: 24,
+                                width: 24,
+                                fit: BoxFit.contain,
+                                errorBuilder: (_, __, ___) => Icon(
+                                  Icons.link,
+                                  color: Colors.grey[300],
+                                  size: 20,
+                                ),
+                              )
+                            : Icon(
+                                Icons.link,
+                                color: Colors.grey[300],
+                                size: 20,
+                              ),
                       )
                     : ClipRRect(
                         borderRadius: BorderRadius.circular(4),
-                        child: Image.asset(
-                          item['icon'],
-                          height: 32,
-                          width: 32,
-                          fit: BoxFit.contain,
-                          errorBuilder: (_, __, ___) => const Icon(Icons.link),
-                        ),
+                        child: iconPath != null
+                            ? Image.asset(
+                                iconPath,
+                                height: 32,
+                                width: 32,
+                                fit: BoxFit.contain,
+                                errorBuilder: (_, __, ___) => const Icon(Icons.link),
+                              )
+                            : const Icon(Icons.link),
                       ),
                 title: Text(item['name']),
                 onTap: () {
@@ -129,6 +138,7 @@ class CustomDrawer extends StatelessWidget {
                       Get.offNamed(Routes.YOUTUBE);
                       break;
                     case "twitter":
+                    case "x":
                       Get.offNamed(Routes.TWITTER);
                       break;
                     case "tiktok":

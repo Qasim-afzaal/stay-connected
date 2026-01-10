@@ -164,8 +164,8 @@ class TikTokPage extends StatelessWidget {
                     },
                     onLongPress: () {
                       if (!controller.isDeleteMode) {
-                        _showRenameDialog(
-                            context, controller, index, iconData['name']!);
+                        _showRenameCategoryDialog(
+                            context, controller, iconData['name']!);
                       }
                     },
                     child: Stack(
@@ -502,66 +502,126 @@ class TikTokPage extends StatelessWidget {
     );
   }
 
-  void _showRenameDialog(BuildContext context, TikTokController controller,
-      int index, String currentName) {
+  void _showRenameCategoryDialog(BuildContext context, TikTokController controller,
+      String currentCategoryName) {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
-    final nameController = TextEditingController(text: currentName);
+    final nameController = TextEditingController(text: currentCategoryName);
 
     showCupertinoDialog(
       context: context,
       builder: (BuildContext context) {
-        return CupertinoAlertDialog(
-          content: Padding(
-            padding: const EdgeInsets.only(top: 8),
-            child: SizedBox(
-              width: 240,
-              child: CupertinoTextField(
-                controller: nameController,
-                autofocus: true,
-                placeholder: 'Rename icon',
-                placeholderStyle: TextStyle(
-                  color: isDark ? Colors.grey[500] : Colors.grey[600],
-                ),
-                // maxLength: 10,
-                decoration: BoxDecoration(
-                  color: isDark ? Colors.grey[800] : CupertinoColors.systemGrey6,
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 12,
-                  vertical: 12,
-                ),
-                style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w500,
-                  color: isDark ? Colors.grey[300] : Colors.black,
-                ),
+        return Material(
+          color: Colors.transparent,
+          child: Center(
+            child: Container(
+              padding: const EdgeInsets.all(20),
+              margin: const EdgeInsets.symmetric(horizontal: 24),
+              decoration: BoxDecoration(
+                color: isDark ? Colors.grey[900] : CupertinoColors.systemBackground,
+                borderRadius: BorderRadius.circular(16),
+              ),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.all(8),
+                        decoration: BoxDecoration(
+                          color: isDark ? Colors.grey[800] : CupertinoColors.systemBlue.withOpacity(0.1),
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: Image.asset(
+                          isDark ? 'assets/images/iconnew_nbg.png' : 'assets/images/img_logo1_1.png',
+                          width: 20,
+                          height: 20,
+                          fit: BoxFit.contain,
+                          errorBuilder: (context, error, stackTrace) {
+                            return Icon(
+                              CupertinoIcons.folder,
+                              color: isDark ? Colors.blue[300] : CupertinoColors.systemBlue,
+                              size: 20,
+                            );
+                          },
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      Text(
+                        "Rename Category",
+                        style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.w600,
+                          color: isDark ? Colors.white : Colors.black,
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 12),
+                  CupertinoTextField(
+                    controller: nameController,
+                    autofocus: true,
+                    placeholder: "Enter new category name",
+                    placeholderStyle: TextStyle(
+                      color: isDark ? Colors.grey[500] : Colors.grey[600],
+                    ),
+                    style: TextStyle(
+                      color: isDark ? Colors.white : Colors.black,
+                    ),
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      color: isDark ? Colors.grey[800] : CupertinoColors.systemGrey6,
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                  ),
+                  const SizedBox(height: 20),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    children: [
+                      CupertinoButton(
+                        padding: const EdgeInsets.symmetric(horizontal: 12),
+                        onPressed: () => Navigator.of(context).pop(),
+                        child: Text(
+                          "Cancel",
+                          style: TextStyle(
+                            color: isDark ? Colors.grey[300] : CupertinoColors.systemGrey,
+                          ),
+                        ),
+                      ),
+                      CupertinoButton(
+                        padding: const EdgeInsets.symmetric(horizontal: 12),
+                        onPressed: () async {
+                          final newName = nameController.text.trim();
+                          if (newName.isNotEmpty && newName != currentCategoryName) {
+                            await controller.renameCategory(currentCategoryName, newName);
+                            Navigator.of(context).pop();
+                            Get.snackbar(
+                              'Category Renamed',
+                              '$currentCategoryName has been renamed to $newName',
+                              snackPosition: SnackPosition.BOTTOM,
+                              duration: const Duration(seconds: 2),
+                              backgroundColor: isDark ? Colors.blue[900] : Colors.blue.shade100,
+                              colorText: isDark ? Colors.blue[100] : Colors.blue.shade800,
+                            );
+                          } else {
+                            Navigator.of(context).pop();
+                          }
+                        },
+                        child: Text(
+                          "Save",
+                          style: TextStyle(
+                            fontWeight: FontWeight.w600,
+                            color: isDark ? Colors.blue[300] : CupertinoColors.systemBlue,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
               ),
             ),
           ),
-          actions: [
-            CupertinoDialogAction(
-              onPressed: () => Navigator.of(context).pop(),
-              child: Text(
-                'Cancel',
-                style: TextStyle(color: isDark ? Colors.grey[300] : Colors.black),
-              ),
-            ),
-            CupertinoDialogAction(
-              onPressed: () {
-                if (nameController.text.isNotEmpty) {
-                  controller.renameIcon(index, nameController.text);
-                  Navigator.of(context).pop();
-                }
-              },
-              isDefaultAction: true,
-              child: Text(
-                'OK',
-                style: TextStyle(color: isDark ? Colors.blue[300] : Colors.blue),
-              ),
-            ),
-          ],
         );
       },
     );

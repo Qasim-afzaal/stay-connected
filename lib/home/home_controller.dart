@@ -33,7 +33,7 @@ class HomeController extends GetxController {
       'icon': 'assets/images/img_tumblr_1.png',
     },
     {
-      'name': 'Twitter',
+      'name': 'X',
       'url': 'https://twitter.com',
       'icon': 'assets/images/img_twitter_1_60x60.png',
     },
