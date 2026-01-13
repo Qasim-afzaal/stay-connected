@@ -113,7 +113,9 @@ class HomePage extends StatelessWidget {
                           ),
                           alignment: Alignment.center,
                           child: Image.asset(
-                            item['icon'],
+                            (item['name'] == 'X') 
+                                ? (isDark ? 'assets/images/x_dark.png' : 'assets/images/x_light.png')
+                                : item['icon'],
                             height: 70,
                             width: 70,
                             fit: BoxFit.contain,
