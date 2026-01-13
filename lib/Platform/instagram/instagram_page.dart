@@ -527,79 +527,65 @@ class InstagramPage extends StatelessWidget {
               padding: const EdgeInsets.all(20),
               margin: const EdgeInsets.symmetric(horizontal: 24),
               decoration: BoxDecoration(
-                color: isDark ? Colors.grey[900] : CupertinoColors.systemBackground,
+                color: isDark ? Colors.black : Colors.white,
                 borderRadius: BorderRadius.circular(16),
               ),
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Container(
-                        padding: const EdgeInsets.all(8),
-                        decoration: BoxDecoration(
-                          color: isDark ? Colors.grey[800] : CupertinoColors.systemBlue.withOpacity(0.1),
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        child: Image.asset(
-                          isDark ? 'assets/images/iconnew_nbg.png' : 'assets/images/img_logo1_1.png',
-                          width: 20,
-                          height: 20,
-                          fit: BoxFit.contain,
-                          errorBuilder: (context, error, stackTrace) {
-                            return Icon(
-                              CupertinoIcons.folder,
-                              color: isDark ? Colors.blue[300] : CupertinoColors.systemBlue,
-                              size: 20,
-                            );
-                          },
-                        ),
-                      ),
-                      const SizedBox(width: 12),
-                      Text(
-                        "Rename Category",
-                        style: TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.w600,
-                          color: isDark ? Colors.white : Colors.black,
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 12),
-                  CupertinoTextField(
-                    controller: nameController,
-                    autofocus: true,
-                    placeholder: "Enter new category name",
-                    placeholderStyle: TextStyle(
-                      color: isDark ? Colors.grey[500] : Colors.grey[600],
-                    ),
+                  // Title
+                  Text(
+                    "Rename Category",
                     style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.w600,
                       color: isDark ? Colors.white : Colors.black,
-                    ),
-                    padding: const EdgeInsets.all(12),
-                    decoration: BoxDecoration(
-                      color: isDark ? Colors.grey[800] : CupertinoColors.systemGrey6,
-                      borderRadius: BorderRadius.circular(8),
                     ),
                   ),
                   const SizedBox(height: 20),
+                  // Input Field
+                  TextField(
+                    controller: nameController,
+                    autofocus: true,
+                    style: TextStyle(
+                      color: isDark ? Colors.white : Colors.black,
+                      fontSize: 16,
+                    ),
+                    decoration: InputDecoration(
+                      filled: true,
+                      fillColor: isDark ? Colors.grey[800] : Colors.grey[200],
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(8),
+                        borderSide: BorderSide.none,
+                      ),
+                      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                    ),
+                  ),
+                  const SizedBox(height: 20),
+                  // Buttons
                   Row(
                     mainAxisAlignment: MainAxisAlignment.end,
                     children: [
-                      CupertinoButton(
-                        padding: const EdgeInsets.symmetric(horizontal: 12),
+                      TextButton(
                         onPressed: () => Navigator.of(context).pop(),
+                        style: TextButton.styleFrom(
+                          backgroundColor: Colors.white,
+                          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                        ),
                         child: Text(
-                          "Cancel",
+                          'CANCEL',
                           style: TextStyle(
-                            color: isDark ? Colors.grey[300] : CupertinoColors.systemGrey,
+                            color: Colors.black,
+                            fontWeight: FontWeight.w600,
+                            fontSize: 14,
                           ),
                         ),
                       ),
-                      CupertinoButton(
-                        padding: const EdgeInsets.symmetric(horizontal: 12),
+                      const SizedBox(width: 12),
+                      TextButton(
                         onPressed: () async {
                           final newName = nameController.text.trim();
                           if (newName.isNotEmpty && newName != currentCategoryName) {
@@ -617,11 +603,19 @@ class InstagramPage extends StatelessWidget {
                             Navigator.of(context).pop();
                           }
                         },
+                        style: TextButton.styleFrom(
+                          backgroundColor: Colors.white,
+                          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                        ),
                         child: Text(
-                          "Save",
+                          'RENAME',
                           style: TextStyle(
+                            color: Colors.black,
                             fontWeight: FontWeight.w600,
-                            color: isDark ? Colors.blue[300] : CupertinoColors.systemBlue,
+                            fontSize: 14,
                           ),
                         ),
                       ),
