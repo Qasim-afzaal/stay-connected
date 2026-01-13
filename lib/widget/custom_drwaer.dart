@@ -82,7 +82,9 @@ class CustomDrawer extends StatelessWidget {
           ),
           ...homeController.socialPlatforms.map((item) {
                 final isTwitter = item['name'].toString().toLowerCase() == 'twitter' || item['name'].toString().toLowerCase() == 'x';
-                final iconPath = item['icon'] as String?;
+                final iconPath = isTwitter 
+                    ? (isDark ? 'assets/images/x_dark.png' : 'assets/images/x_light.png')
+                    : (item['icon'] as String?);
                 return ListTile(
                 leading: isDark && isTwitter
                     ? Container(
