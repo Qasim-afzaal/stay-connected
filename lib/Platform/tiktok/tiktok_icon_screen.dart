@@ -185,96 +185,138 @@ class TikTokIconScreen extends StatelessWidget {
   }
 
   void _showActionDialog(BuildContext context, String friendName, int index) {
-    showCupertinoDialog(
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    
+    showDialog(
       context: context,
       builder: (BuildContext context) {
-        return CupertinoAlertDialog(
-          title: Row(
-            children: [
-              Container(
-                padding: const EdgeInsets.all(8),
-                decoration: BoxDecoration(
-                  color: CupertinoColors.systemBlue.withOpacity(0.1),
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: Icon(
-                  CupertinoIcons.person_2,
-                  color: CupertinoColors.systemBlue,
-                  size: 20,
-                ),
+        return Material(
+          color: Colors.transparent,
+          child: Center(
+            child: Container(
+              padding: const EdgeInsets.all(24),
+              margin: const EdgeInsets.symmetric(horizontal: 24),
+              decoration: BoxDecoration(
+                color: isDark ? Colors.black : Colors.white,
+                borderRadius: BorderRadius.circular(16),
               ),
-              const SizedBox(width: 12),
-              const Text(
-                'Friend Options',
-                style: TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-            ],
-          ),
-          content: Padding(
-            padding: const EdgeInsets.only(top: 16),
-            child: Text(
-              'What would you like to do with $friendName?',
-              style: const TextStyle(
-                fontSize: 14,
-                color: CupertinoColors.systemGrey,
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  // Title
+                  Text(
+                    'Friend Options',
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.w600,
+                      color: isDark ? Colors.white : Colors.black,
+                    ),
+                  ),
+                  const SizedBox(height: 20),
+                  // Content
+                  Text(
+                    'What would you like to do with $friendName?',
+                    style: TextStyle(
+                      fontSize: 14,
+                      color: isDark ? Colors.grey[300] : Colors.grey[700],
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 20),
+                  // Buttons
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    children: [
+                      TextButton(
+                        onPressed: () => Navigator.of(context).pop(),
+                        style: TextButton.styleFrom(
+                          backgroundColor: Colors.white,
+                          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                        ),
+                        child: Text(
+                          'CANCEL',
+                          style: TextStyle(
+                            color: Colors.black,
+                            fontWeight: FontWeight.w600,
+                            fontSize: 14,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      TextButton(
+                        onPressed: () {
+                          Navigator.of(context).pop();
+                          _showRenameDialog(context, friendName, index);
+                        },
+                        style: TextButton.styleFrom(
+                          backgroundColor: Colors.white,
+                          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                        ),
+                        child: Text(
+                          'RENAME',
+                          style: TextStyle(
+                            color: Colors.black,
+                            fontWeight: FontWeight.w600,
+                            fontSize: 14,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      TextButton(
+                        onPressed: () {
+                          Navigator.of(context).pop();
+                          _showMoveDialog(context, friendName, index, iconName);
+                        },
+                        style: TextButton.styleFrom(
+                          backgroundColor: Colors.white,
+                          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                        ),
+                        child: Text(
+                          'MOVE',
+                          style: TextStyle(
+                            color: Colors.black,
+                            fontWeight: FontWeight.w600,
+                            fontSize: 14,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      TextButton(
+                        onPressed: () {
+                          Navigator.of(context).pop();
+                          _showDeleteConfirmationDialog(context, friendName, index);
+                        },
+                        style: TextButton.styleFrom(
+                          backgroundColor: Colors.white,
+                          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                        ),
+                        child: Text(
+                          'DELETE',
+                          style: TextStyle(
+                            color: Colors.red,
+                            fontWeight: FontWeight.w600,
+                            fontSize: 14,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
               ),
             ),
           ),
-          actions: [
-            CupertinoDialogAction(
-              onPressed: () => Navigator.of(context).pop(),
-              child: const Text(
-                'Cancel',
-                style: TextStyle(
-                  color: CupertinoColors.systemGrey,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-            ),
-            CupertinoDialogAction(
-              onPressed: () {
-                Navigator.of(context).pop();
-                _showRenameDialog(context, friendName, index);
-              },
-              child: const Text(
-                'Rename',
-                style: TextStyle(
-                  color: CupertinoColors.activeBlue,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-            ),
-            CupertinoDialogAction(
-              onPressed: () {
-                Navigator.of(context).pop();
-                _showMoveDialog(context, friendName, index, iconName);
-              },
-              child: const Text(
-                'Move',
-                style: TextStyle(
-                  color: CupertinoColors.systemBlue,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-            ),
-            CupertinoDialogAction(
-              onPressed: () {
-                Navigator.of(context).pop();
-                _showDeleteConfirmationDialog(context, friendName, index);
-              },
-              isDestructiveAction: true,
-              child: const Text(
-                'Delete',
-                style: TextStyle(
-                  color: CupertinoColors.systemRed,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-            ),
-          ],
         );
       },
     );
@@ -296,79 +338,65 @@ class TikTokIconScreen extends StatelessWidget {
             padding: const EdgeInsets.all(20),
             margin: const EdgeInsets.symmetric(horizontal: 24),
             decoration: BoxDecoration(
-              color: isDark ? Colors.grey[900] : CupertinoColors.systemBackground,
+              color: isDark ? Colors.black : Colors.white,
               borderRadius: BorderRadius.circular(16),
             ),
             child: Column(
-              mainAxisSize: MainAxisSize.min, // ✅ prevents unnecessary scrolling
+              mainAxisSize: MainAxisSize.min,
               children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Container(
-                      padding: const EdgeInsets.all(8),
-                      decoration: BoxDecoration(
-                        color: isDark ? Colors.grey[800] : CupertinoColors.systemBlue.withOpacity(0.1),
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      child: Image.asset(
-                        isDark ? 'assets/images/iconnew_nbg.png' : 'assets/images/img_logo1_1.png',
-                        width: 20,
-                        height: 20,
-                        fit: BoxFit.contain,
-                        errorBuilder: (context, error, stackTrace) {
-                          return Icon(
-                            CupertinoIcons.pencil,
-                            color: isDark ? Colors.blue[300] : CupertinoColors.systemBlue,
-                            size: 20,
-                          );
-                        },
-                      ),
-                    ),
-                    const SizedBox(width: 12),
-                    Text(
-                      "Rename Friend",
-                      style: TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.w600,
-                        color: isDark ? Colors.white : Colors.black,
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 12),
-                CupertinoTextField(
-                  controller: renameController,
-                  autofocus: true,
-                  placeholder: "Enter new name",
-                  placeholderStyle: TextStyle(
-                    color: isDark ? Colors.grey[500] : Colors.grey[600],
-                  ),
+                // Title
+                Text(
+                  "Rename Friend",
                   style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.w600,
                     color: isDark ? Colors.white : Colors.black,
-                  ),
-                  padding: const EdgeInsets.all(12),
-                  decoration: BoxDecoration(
-                    color: isDark ? Colors.grey[800] : CupertinoColors.systemGrey6,
-                    borderRadius: BorderRadius.circular(8),
                   ),
                 ),
                 const SizedBox(height: 20),
+                // Input Field
+                TextField(
+                  controller: renameController,
+                  autofocus: true,
+                  style: TextStyle(
+                    color: isDark ? Colors.white : Colors.black,
+                    fontSize: 16,
+                  ),
+                  decoration: InputDecoration(
+                    filled: true,
+                    fillColor: isDark ? Colors.grey[800] : Colors.grey[200],
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(8),
+                      borderSide: BorderSide.none,
+                    ),
+                    contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                  ),
+                ),
+                const SizedBox(height: 20),
+                // Buttons
                 Row(
                   mainAxisAlignment: MainAxisAlignment.end,
                   children: [
-                    CupertinoButton(
-                      padding: const EdgeInsets.symmetric(horizontal: 12),
+                    TextButton(
                       onPressed: () => Navigator.of(context).pop(),
+                      style: TextButton.styleFrom(
+                        backgroundColor: Colors.white,
+                        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                      ),
                       child: Text(
-                        "Cancel",
+                        'CANCEL',
                         style: TextStyle(
-                          color: isDark ? Colors.grey[300] : CupertinoColors.systemGrey,
+                          color: Colors.black,
+                          fontWeight: FontWeight.w600,
+                          fontSize: 14,
                         ),
                       ),
                     ),
-                    CupertinoButton(
-                      padding: const EdgeInsets.symmetric(horizontal: 12),
+                    const SizedBox(width: 12),
+                    TextButton(
                       onPressed: () async {
                         final newName = renameController.text.trim();
                         if (newName.isNotEmpty) {
@@ -399,11 +427,19 @@ class TikTokIconScreen extends StatelessWidget {
                           );
                         }
                       },
+                      style: TextButton.styleFrom(
+                        backgroundColor: Colors.white,
+                        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                      ),
                       child: Text(
-                        "Save",
+                        'RENAME',
                         style: TextStyle(
+                          color: Colors.black,
                           fontWeight: FontWeight.w600,
-                          color: isDark ? Colors.blue[300] : CupertinoColors.systemBlue,
+                          fontSize: 14,
                         ),
                       ),
                     ),
@@ -453,222 +489,271 @@ void _showMoveDialog(BuildContext context, String friendName, int index, String 
 
   int selectedCategoryIndex = 0; // Default first
 
-  showCupertinoDialog(
+  showDialog(
     context: context,
     builder: (BuildContext context) {
-      return CupertinoAlertDialog(
-        title: Row(
-          children: [
-            Container(
-              padding: const EdgeInsets.all(8),
-              decoration: BoxDecoration(
-                color: CupertinoColors.systemGreen.withOpacity(0.1),
-                borderRadius: BorderRadius.circular(8),
-              ),
-              child: const Icon(
-                CupertinoIcons.arrow_right_arrow_left,
-                color: CupertinoColors.systemGreen,
-                size: 20,
-              ),
-            ),
-            const SizedBox(width: 12),
-            const Text(
-              'Move Friend',
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-          ],
-        ),
-        content: Padding(
-          padding: const EdgeInsets.only(top: 16),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text(
-                'Move $friendName to which category?',
-                style: const TextStyle(
-                  fontSize: 14,
-                  color: CupertinoColors.systemGrey,
+      return StatefulBuilder(
+        builder: (context, setState) {
+          return Material(
+            color: Colors.transparent,
+            child: Center(
+              child: Container(
+                padding: const EdgeInsets.all(24),
+                margin: const EdgeInsets.symmetric(horizontal: 24),
+                decoration: BoxDecoration(
+                  color: isDark ? Colors.black : Colors.white,
+                  borderRadius: BorderRadius.circular(16),
                 ),
-              ),
-              const SizedBox(height: 16),
-              SizedBox(
-                height: 200,
-                child: CupertinoPicker(
-                  itemExtent: 40,
-                  onSelectedItemChanged: (int selectedIndex) {
-                    selectedCategoryIndex = selectedIndex;
-                  },
-                  children: allCategories.map((category) {
-                    return Center(
-                      child: Text(
-                        category,
-                        style: const TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.w500,
-                        ),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    // Title
+                    Text(
+                      'Move Friend',
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.w600,
+                        color: isDark ? Colors.white : Colors.black,
                       ),
-                    );
-                  }).toList(),
+                    ),
+                    const SizedBox(height: 20),
+                    // Content
+                    Text(
+                      'Move $friendName to which category?',
+                      style: TextStyle(
+                        fontSize: 14,
+                        color: isDark ? Colors.grey[300] : Colors.grey[700],
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                    const SizedBox(height: 16),
+                    SizedBox(
+                      height: 200,
+                      child: CupertinoPicker(
+                        itemExtent: 40,
+                        onSelectedItemChanged: (int selectedIndex) {
+                          setState(() {
+                            selectedCategoryIndex = selectedIndex;
+                          });
+                        },
+                        children: allCategories.map((category) {
+                          return Center(
+                            child: Text(
+                              category,
+                              style: TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.w500,
+                                color: isDark ? Colors.white : Colors.black,
+                              ),
+                            ),
+                          );
+                        }).toList(),
+                      ),
+                    ),
+                    const SizedBox(height: 20),
+                    // Buttons
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.end,
+                      children: [
+                        TextButton(
+                          onPressed: () => Navigator.of(context).pop(),
+                          style: TextButton.styleFrom(
+                            backgroundColor: Colors.white,
+                            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                          ),
+                          child: Text(
+                            'CANCEL',
+                            style: TextStyle(
+                              color: Colors.black,
+                              fontWeight: FontWeight.w600,
+                              fontSize: 14,
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        TextButton(
+                          onPressed: () async {
+                            if (selectedCategoryIndex < allCategories.length) {
+                              final newCategory = allCategories[selectedCategoryIndex];
+
+                              final categoryFriends = controller.icons
+                                  .where((icon) =>
+                                      icon['category'] == iconName &&
+                                      icon['profileUrl'] != null &&
+                                      icon['profileUrl']!.isNotEmpty)
+                                  .toList();
+
+                              if (index < categoryFriends.length) {
+                                final friendToMove = categoryFriends[index];
+                                await controller.moveFriendToCategory(
+                                  friendToMove['name']!,
+                                  friendToMove['category']!,
+                                  newCategory,
+                                  friendToMove['profileUrl']!,
+                                );
+                              }
+
+                              Navigator.of(context).pop();
+                              final isDark = Theme.of(context).brightness == Brightness.dark;
+                              Get.snackbar(
+                                'Friend Moved',
+                                '$friendName has been moved to $newCategory',
+                                snackPosition: SnackPosition.BOTTOM,
+                                duration: const Duration(seconds: 2),
+                                backgroundColor: isDark ? Colors.green[900] : Colors.green.shade100,
+                                colorText: isDark ? Colors.green[100] : Colors.green.shade800,
+                              );
+                            }
+                          },
+                          style: TextButton.styleFrom(
+                            backgroundColor: Colors.white,
+                            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                          ),
+                          child: Text(
+                            'MOVE',
+                            style: TextStyle(
+                              color: Colors.black,
+                              fontWeight: FontWeight.w600,
+                              fontSize: 14,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
                 ),
               ),
-            ],
-          ),
-        ),
-        actions: [
-          CupertinoDialogAction(
-            onPressed: () => Navigator.of(context).pop(),
-            child: const Text(
-              'Cancel',
-              style: TextStyle(
-                color: CupertinoColors.systemGrey,
-                fontWeight: FontWeight.w600,
-              ),
             ),
-          ),
-          CupertinoDialogAction(
-            onPressed: () async {
-              if (selectedCategoryIndex < allCategories.length) {
-                final newCategory = allCategories[selectedCategoryIndex];
-
-                final categoryFriends = controller.icons
-                    .where((icon) =>
-                        icon['category'] == iconName &&
-                        icon['profileUrl'] != null &&
-                        icon['profileUrl']!.isNotEmpty)
-                    .toList();
-
-                if (index < categoryFriends.length) {
-                  final friendToMove = categoryFriends[index];
-                  await controller.moveFriendToCategory(
-                    friendToMove['name']!,
-                    friendToMove['category']!,
-                    newCategory,
-                    friendToMove['profileUrl']!,
-                  );
-                }
-
-                Navigator.of(context).pop();
-                final isDark = Theme.of(context).brightness == Brightness.dark;
-                Get.snackbar(
-                  'Friend Moved',
-                  '$friendName has been moved to $newCategory',
-                  snackPosition: SnackPosition.BOTTOM,
-                  duration: const Duration(seconds: 2),
-                  backgroundColor: isDark ? Colors.green[900] : Colors.green.shade100,
-                  colorText: isDark ? Colors.green[100] : Colors.green.shade800,
-                );
-              }
-            },
-            child: const Text(
-              'Move',
-              style: TextStyle(
-                color: CupertinoColors.systemGreen,
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-          ),
-        ],
+          );
+        },
       );
     },
   );
 }
 
   void _showDeleteConfirmationDialog(BuildContext context, String friendName, int index) {
-    showCupertinoDialog(
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    
+    showDialog(
       context: context,
       builder: (BuildContext context) {
-        return CupertinoAlertDialog(
-          title: Row(
-            children: [
-              Container(
-                padding: const EdgeInsets.all(8),
-                decoration: BoxDecoration(
-                  color: CupertinoColors.systemRed.withOpacity(0.1),
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: Icon(
-                  CupertinoIcons.delete,
-                  color: CupertinoColors.systemRed,
-                  size: 20,
-                ),
+        return Material(
+          color: Colors.transparent,
+          child: Center(
+            child: Container(
+              padding: const EdgeInsets.all(24),
+              margin: const EdgeInsets.symmetric(horizontal: 24),
+              decoration: BoxDecoration(
+                color: isDark ? Colors.black : Colors.white,
+                borderRadius: BorderRadius.circular(16),
               ),
-              const SizedBox(width: 12),
-              const Text(
-                'Delete Friend',
-                style: TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-            ],
-          ),
-          content: Padding(
-            padding: const EdgeInsets.only(top: 16),
-            child: Text(
-              'Are you sure you want to delete $friendName from your $iconName list?',
-              style: const TextStyle(
-                fontSize: 14,
-                color: CupertinoColors.systemGrey,
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  // Title
+                  Text(
+                    'Delete Friend',
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.w600,
+                      color: isDark ? Colors.white : Colors.black,
+                    ),
+                  ),
+                  const SizedBox(height: 20),
+                  // Content
+                  Text(
+                    'Are you sure you want to delete $friendName from your $iconName list?',
+                    style: TextStyle(
+                      fontSize: 14,
+                      color: isDark ? Colors.grey[300] : Colors.grey[700],
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 20),
+                  // Buttons
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    children: [
+                      TextButton(
+                        onPressed: () => Navigator.of(context).pop(),
+                        style: TextButton.styleFrom(
+                          backgroundColor: Colors.white,
+                          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                        ),
+                        child: Text(
+                          'CANCEL',
+                          style: TextStyle(
+                            color: Colors.black,
+                            fontWeight: FontWeight.w600,
+                            fontSize: 14,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      TextButton(
+                        onPressed: () async {
+                          final controller = Get.find<TikTokController>();
+
+                          final categoryFriends = controller.icons
+                              .where((icon) =>
+                                  icon['category'] == iconName &&
+                                  icon['profileUrl'] != null &&
+                                  icon['profileUrl']!.isNotEmpty)
+                              .toList();
+
+                          if (index < categoryFriends.length) {
+                            final friendToDelete = categoryFriends[index];
+                            controller.icons.removeWhere((icon) =>
+                                icon['name'] == friendToDelete['name'] &&
+                                icon['category'] == friendToDelete['category'] &&
+                                icon['profileUrl'] == friendToDelete['profileUrl']);
+
+                            await controller.saveToPrefs();
+                            controller.update();
+                          }
+
+                          Navigator.of(context).pop();
+                          final isDark = Theme.of(context).brightness == Brightness.dark;
+                          Get.snackbar(
+                            'Friend Deleted',
+                            '$friendName has been removed from your $iconName list',
+                            snackPosition: SnackPosition.BOTTOM,
+                            duration: const Duration(seconds: 2),
+                            backgroundColor: isDark ? Colors.red[900] : Colors.red.shade100,
+                            colorText: isDark ? Colors.red[100] : Colors.red.shade800,
+                          );
+                        },
+                        style: TextButton.styleFrom(
+                          backgroundColor: Colors.white,
+                          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                        ),
+                        child: Text(
+                          'DELETE',
+                          style: TextStyle(
+                            color: Colors.red,
+                            fontWeight: FontWeight.w600,
+                            fontSize: 14,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
               ),
             ),
           ),
-          actions: [
-            CupertinoDialogAction(
-              onPressed: () => Navigator.of(context).pop(),
-              child: const Text(
-                'Cancel',
-                style: TextStyle(
-                  color: CupertinoColors.systemGrey,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-            ),
-            CupertinoDialogAction(
-              onPressed: () async {
-                final controller = Get.find<TikTokController>();
-
-                final categoryFriends = controller.icons
-                    .where((icon) =>
-                        icon['category'] == iconName &&
-                        icon['profileUrl'] != null &&
-                        icon['profileUrl']!.isNotEmpty)
-                    .toList();
-
-                if (index < categoryFriends.length) {
-                  final friendToDelete = categoryFriends[index];
-                  controller.icons.removeWhere((icon) =>
-                      icon['name'] == friendToDelete['name'] &&
-                      icon['category'] == friendToDelete['category'] &&
-                      icon['profileUrl'] == friendToDelete['profileUrl']);
-
-                  await controller.saveToPrefs();
-                  controller.update();
-                }
-
-                Navigator.of(context).pop();
-                final isDark = Theme.of(context).brightness == Brightness.dark;
-                Get.snackbar(
-                  'Friend Deleted',
-                  '$friendName has been removed from your $iconName list',
-                  snackPosition: SnackPosition.BOTTOM,
-                  duration: const Duration(seconds: 2),
-                  backgroundColor: isDark ? Colors.red[900] : Colors.red.shade100,
-                  colorText: isDark ? Colors.red[100] : Colors.red.shade800,
-                );
-              },
-              isDestructiveAction: true,
-              child: const Text(
-                'Delete',
-                style: TextStyle(
-                  color: CupertinoColors.systemRed,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-            ),
-          ],
         );
       },
     );
