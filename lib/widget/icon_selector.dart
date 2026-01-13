@@ -1,4 +1,5 @@
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
 
 class IconSelector extends StatelessWidget {
   final Function(String iconPath, String iconName) onIconSelected;
@@ -18,6 +19,9 @@ class IconSelector extends StatelessWidget {
   }
 
   void _showIconSelectorDialog(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+    
     final List<Map<String, String>> availableIcons = [
       {'name': 'Add', 'path': 'assets/images/platform_icons/add.png'},
       {'name': 'Food', 'path': 'assets/images/platform_icons/img_food_12.png'},
@@ -122,78 +126,58 @@ class IconSelector extends StatelessWidget {
       {'name': 'Pets', 'path': 'assets/images/custom_icons/img_pets_12.png'},
     ];
 
-    showCupertinoDialog(
+    showDialog(
       context: context,
       builder: (BuildContext context) {
-        return CupertinoAlertDialog(
-          title: Row(
-            children: [
-              Container(
-                padding: const EdgeInsets.all(8),
-                decoration: BoxDecoration(
-                  color: CupertinoColors.systemBlue.withOpacity(0.1),
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: Icon(
-                  CupertinoIcons.photo_on_rectangle,
-                  color: CupertinoColors.systemBlue,
-                  size: 20,
-                ),
+        return Material(
+          color: Colors.transparent,
+          child: Center(
+            child: Container(
+              padding: const EdgeInsets.all(24),
+              margin: const EdgeInsets.symmetric(horizontal: 24),
+              decoration: BoxDecoration(
+                color: isDark ? Colors.black : Colors.white,
+                borderRadius: BorderRadius.circular(16),
               ),
-              const SizedBox(width: 12),
-              const Text(
-                'Select Icon',
-                style: TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-            ],
-          ),
-          content: Container(
-            height: 400,
-            width: 300,
-            child: Column(
-              children: [
-                const Text(
-                  'Choose an icon for your category',
-                  style: TextStyle(
-                    fontSize: 14,
-                    color: CupertinoColors.systemGrey,
-                  ),
-                ),
-                const SizedBox(height: 16),
-                Expanded(
-                  child: GridView.builder(
-                    gridDelegate:
-                        const SliverGridDelegateWithFixedCrossAxisCount(
-                      crossAxisCount: 4,
-                      crossAxisSpacing: 8,
-                      mainAxisSpacing: 8,
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  // Title
+                  Text(
+                    'Update Icon',
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.w600,
+                      color: isDark ? Colors.white : Colors.black,
                     ),
-                    itemCount: availableIcons.length,
-                    itemBuilder: (context, index) {
-                      final icon = availableIcons[index];
-                      return GestureDetector(
-                        onTap: () {
-                          onIconSelected(icon['path']!, icon['name']!);
-
-                          Navigator.of(context).pop();
-                          Navigator.of(context).pop();
-                        },
-                        child: Container(
-                          decoration: BoxDecoration(
-                            color: CupertinoColors.systemGrey6,
-                            borderRadius: BorderRadius.circular(8),
-                            border: Border.all(
-                              color: CupertinoColors.systemGrey4,
-                              width: 1,
+                  ),
+                  const SizedBox(height: 20),
+                  // Icon Grid
+                  SizedBox(
+                    height: 300,
+                    width: 280,
+                    child: GridView.builder(
+                      gridDelegate:
+                          const SliverGridDelegateWithFixedCrossAxisCount(
+                        crossAxisCount: 4,
+                        crossAxisSpacing: 12,
+                        mainAxisSpacing: 12,
+                      ),
+                      itemCount: availableIcons.length,
+                      itemBuilder: (context, index) {
+                        final icon = availableIcons[index];
+                        return GestureDetector(
+                          onTap: () {
+                            onIconSelected(icon['path']!, icon['name']!);
+                            Navigator.of(context).pop();
+                          },
+                          child: Container(
+                            decoration: BoxDecoration(
+                              color: isDark ? Colors.grey[800] : Colors.grey[200],
+                              borderRadius: BorderRadius.circular(8),
                             ),
-                          ),
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Image.asset(
+                            child: Center(
+                              child: Image.asset(
                                 icon['path']!,
                                 width: 32,
                                 height: 32,
@@ -201,35 +185,47 @@ class IconSelector extends StatelessWidget {
                                   return Icon(
                                     CupertinoIcons.photo,
                                     size: 32,
-                                    color: CupertinoColors.systemGrey,
+                                    color: isDark ? Colors.grey[400] : Colors.grey[600],
                                   );
                                 },
                               ),
-                            ],
+                            ),
+                          ),
+                        );
+                      },
+                    ),
+                  ),
+                  const SizedBox(height: 20),
+                  // Buttons
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    children: [
+                      TextButton(
+                        onPressed: () {
+                          Navigator.of(context).pop();
+                        },
+                        style: TextButton.styleFrom(
+                          backgroundColor: Colors.white,
+                          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(8),
                           ),
                         ),
-                      );
-                    },
+                        child: Text(
+                          'CANCEL',
+                          style: TextStyle(
+                            color: Colors.black,
+                            fontWeight: FontWeight.w600,
+                            fontSize: 14,
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
-                ),
-              ],
-            ),
-          ),
-          actions: [
-            CupertinoDialogAction(
-              onPressed: () {
-                Navigator.of(context).pop();
-                Navigator.of(context).pop();
-              },
-              child: const Text(
-                'Cancel',
-                style: TextStyle(
-                  color: CupertinoColors.systemGrey,
-                  fontWeight: FontWeight.w600,
-                ),
+                ],
               ),
             ),
-          ],
+          ),
         );
       },
     );
