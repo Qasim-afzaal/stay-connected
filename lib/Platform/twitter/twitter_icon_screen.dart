@@ -7,6 +7,7 @@ import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 
 import 'package:stay_connected/Platform/twitter/twitter_controller.dart';
 import 'package:stay_connected/Platform/twitter/twitter_search_dialog.dart';
+import 'package:stay_connected/Platform/twitter/twitter_constants.dart';
 
 class TwitterIconScreen extends StatelessWidget {
   final String iconName;
@@ -60,7 +61,7 @@ class TwitterIconScreen extends StatelessWidget {
             decoration: BoxDecoration(
               color: isDark ? Colors.black : null,
               image: isDark ? null : DecorationImage(
-                image: AssetImage('assets/images/img_group_297.jpg'),
+                image: AssetImage(TwitterConstants.assetImageGroup297),
                 fit: BoxFit.cover,
               ),
             ),
@@ -76,7 +77,7 @@ class TwitterIconScreen extends StatelessWidget {
                         ),
                         const SizedBox(height: 16),
                         Text(
-                          'Tap the + button to search people',
+                          TwitterConstants.emptyCategoryMessage,
                           style: TextStyle(
                             fontSize: 14,
                             color: isDark ? Colors.grey[400] : Colors.grey.shade500,
@@ -103,7 +104,7 @@ class TwitterIconScreen extends StatelessWidget {
                             if (friend['profileUrl'] != null) {
                               Get.to(() => _FriendProfileWebView(
                                     profileUrl: friend['profileUrl']!,
-                                    friendName: friend['name'] ?? 'Unknown',
+                                    friendName: friend['name'] ?? TwitterConstants.unknownFriend,
                                   ));
                             }
                           },
@@ -204,9 +205,8 @@ class TwitterIconScreen extends StatelessWidget {
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  // Title
                   Text(
-                    'Friend Options',
+                    TwitterConstants.friendOptionsTitle,
                     style: TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.w600,
@@ -214,9 +214,8 @@ class TwitterIconScreen extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(height: 20),
-                  // Content
                   Text(
-                    'What would you like to do with $friendName?',
+                    '${TwitterConstants.friendOptionsMessage} $friendName?',
                     style: TextStyle(
                       fontSize: 14,
                       color: isDark ? Colors.grey[300] : Colors.grey[700],
@@ -224,93 +223,109 @@ class TwitterIconScreen extends StatelessWidget {
                     textAlign: TextAlign.center,
                   ),
                   const SizedBox(height: 20),
-                  // Buttons
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.end,
+                  Column(
                     children: [
-                      TextButton(
-                        onPressed: () => Navigator.of(context).pop(),
-                        style: TextButton.styleFrom(
-                          backgroundColor: Colors.white,
-                          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(8),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.end,
+                        children: [
+                          Expanded(
+                            child: TextButton(
+                              onPressed: () => Navigator.of(context).pop(),
+                              style: TextButton.styleFrom(
+                                backgroundColor: Colors.white,
+                                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
+                              ),
+                              child: Text(
+                                TwitterConstants.cancelButton,
+                                style: TextStyle(
+                                  color: Colors.black,
+                                  fontWeight: FontWeight.w600,
+                                  fontSize: 14,
+                                ),
+                              ),
+                            ),
                           ),
-                        ),
-                        child: Text(
-                          'CANCEL',
-                          style: TextStyle(
-                            color: Colors.black,
-                            fontWeight: FontWeight.w600,
-                            fontSize: 14,
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: TextButton(
+                              onPressed: () {
+                                Navigator.of(context).pop();
+                                _showRenameDialog(context, friendName, index);
+                              },
+                              style: TextButton.styleFrom(
+                                backgroundColor: Colors.white,
+                                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
+                              ),
+                              child: Text(
+                                TwitterConstants.renameButton,
+                                style: TextStyle(
+                                  color: Colors.black,
+                                  fontWeight: FontWeight.w600,
+                                  fontSize: 14,
+                                ),
+                              ),
+                            ),
                           ),
-                        ),
+                        ],
                       ),
-                      const SizedBox(width: 12),
-                      TextButton(
-                        onPressed: () {
-                          Navigator.of(context).pop();
-                          _showRenameDialog(context, friendName, index);
-                        },
-                        style: TextButton.styleFrom(
-                          backgroundColor: Colors.white,
-                          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(8),
+                      const SizedBox(height: 12),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.end,
+                        children: [
+                          Expanded(
+                            child: TextButton(
+                              onPressed: () {
+                                Navigator.of(context).pop();
+                                _showMoveDialog(context, friendName, index, iconName);
+                              },
+                              style: TextButton.styleFrom(
+                                backgroundColor: Colors.white,
+                                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
+                              ),
+                              child: Text(
+                                TwitterConstants.moveButton,
+                                style: TextStyle(
+                                  color: Colors.black,
+                                  fontWeight: FontWeight.w600,
+                                  fontSize: 14,
+                                ),
+                              ),
+                            ),
                           ),
-                        ),
-                        child: Text(
-                          'RENAME',
-                          style: TextStyle(
-                            color: Colors.black,
-                            fontWeight: FontWeight.w600,
-                            fontSize: 14,
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: TextButton(
+                              onPressed: () {
+                                Navigator.of(context).pop();
+                                _showDeleteConfirmationDialog(context, friendName, index);
+                              },
+                              style: TextButton.styleFrom(
+                                backgroundColor: Colors.white,
+                                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
+                              ),
+                              child: Text(
+                                TwitterConstants.deleteButton,
+                                style: TextStyle(
+                                  color: Colors.red,
+                                  fontWeight: FontWeight.w600,
+                                  fontSize: 14,
+                                ),
+                              ),
+                            ),
                           ),
-                        ),
-                      ),
-                      const SizedBox(width: 12),
-                      TextButton(
-                        onPressed: () {
-                          Navigator.of(context).pop();
-                          _showMoveDialog(context, friendName, index, iconName);
-                        },
-                        style: TextButton.styleFrom(
-                          backgroundColor: Colors.white,
-                          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                        ),
-                        child: Text(
-                          'MOVE',
-                          style: TextStyle(
-                            color: Colors.black,
-                            fontWeight: FontWeight.w600,
-                            fontSize: 14,
-                          ),
-                        ),
-                      ),
-                      const SizedBox(width: 12),
-                      TextButton(
-                        onPressed: () {
-                          Navigator.of(context).pop();
-                          _showDeleteConfirmationDialog(context, friendName, index);
-                        },
-                        style: TextButton.styleFrom(
-                          backgroundColor: Colors.white,
-                          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                        ),
-                        child: Text(
-                          'DELETE',
-                          style: TextStyle(
-                            color: Colors.red,
-                            fontWeight: FontWeight.w600,
-                            fontSize: 14,
-                          ),
-                        ),
+                        ],
                       ),
                     ],
                   ),
@@ -345,9 +360,8 @@ class TwitterIconScreen extends StatelessWidget {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                // Title
                 Text(
-                  "Rename Friend",
+                  TwitterConstants.renameFriendTitle,
                   style: TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.w600,
@@ -355,7 +369,6 @@ class TwitterIconScreen extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(height: 20),
-                // Input Field
                 TextField(
                   controller: renameController,
                   autofocus: true,
@@ -510,9 +523,8 @@ void _showMoveDialog(BuildContext context, String friendName, int index, String 
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    // Title
                     Text(
-                      'Move Friend',
+                      TwitterConstants.moveFriendTitle,
                       style: TextStyle(
                         fontSize: 18,
                         fontWeight: FontWeight.w600,
@@ -520,9 +532,8 @@ void _showMoveDialog(BuildContext context, String friendName, int index, String 
                       ),
                     ),
                     const SizedBox(height: 20),
-                    // Content
                     Text(
-                      'Move $friendName to which category?',
+                      '${TwitterConstants.moveFriendMessage} $friendName ${TwitterConstants.moveFriendTo}',
                       style: TextStyle(
                         fontSize: 14,
                         color: isDark ? Colors.grey[300] : Colors.grey[700],
@@ -568,7 +579,7 @@ void _showMoveDialog(BuildContext context, String friendName, int index, String 
                             ),
                           ),
                           child: Text(
-                            'CANCEL',
+                            TwitterConstants.cancelButton,
                             style: TextStyle(
                               color: Colors.black,
                               fontWeight: FontWeight.w600,
@@ -619,7 +630,7 @@ void _showMoveDialog(BuildContext context, String friendName, int index, String 
                             ),
                           ),
                           child: Text(
-                            'MOVE',
+                            TwitterConstants.moveButton,
                             style: TextStyle(
                               color: Colors.black,
                               fontWeight: FontWeight.w600,
@@ -669,9 +680,8 @@ void _showMoveDialog(BuildContext context, String friendName, int index, String 
                     ),
                   ),
                   const SizedBox(height: 20),
-                  // Content
                   Text(
-                    'Are you sure you want to delete $friendName from your $iconName list?',
+                    '${TwitterConstants.deleteFriendMessage} $friendName ${TwitterConstants.deleteFriendFrom} $iconName ${TwitterConstants.deleteFriendList}',
                     style: TextStyle(
                       fontSize: 14,
                       color: isDark ? Colors.grey[300] : Colors.grey[700],
@@ -679,7 +689,6 @@ void _showMoveDialog(BuildContext context, String friendName, int index, String 
                     textAlign: TextAlign.center,
                   ),
                   const SizedBox(height: 20),
-                  // Buttons
                   Row(
                     mainAxisAlignment: MainAxisAlignment.end,
                     children: [
@@ -693,7 +702,7 @@ void _showMoveDialog(BuildContext context, String friendName, int index, String 
                           ),
                         ),
                         child: Text(
-                          'CANCEL',
+                          TwitterConstants.cancelButton,
                           style: TextStyle(
                             color: Colors.black,
                             fontWeight: FontWeight.w600,
@@ -743,7 +752,7 @@ void _showMoveDialog(BuildContext context, String friendName, int index, String 
                           ),
                         ),
                         child: Text(
-                          'DELETE',
+                          TwitterConstants.deleteButton,
                           style: TextStyle(
                             color: Colors.red,
                             fontWeight: FontWeight.w600,

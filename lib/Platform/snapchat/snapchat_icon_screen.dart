@@ -7,6 +7,7 @@ import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 
 import 'package:stay_connected/Platform/snapchat/snapchat_controller.dart';
 import 'package:stay_connected/Platform/snapchat/snapchat_search_dialog.dart';
+import 'package:stay_connected/Platform/snapchat/snapchat_constants.dart';
 
 class SnapchatIconScreen extends StatelessWidget {
   final String iconName;
@@ -103,7 +104,7 @@ class SnapchatIconScreen extends StatelessWidget {
                             if (friend['profileUrl'] != null) {
                               Get.to(() => _FriendProfileWebView(
                                     profileUrl: friend['profileUrl']!,
-                                    friendName: friend['name'] ?? 'Unknown',
+                                    friendName: friend['name'] ?? SnapchatConstants.unknownFriend,
                                   ));
                             }
                           },
@@ -207,7 +208,7 @@ class SnapchatIconScreen extends StatelessWidget {
                 children: [
                   // Title
                   Text(
-                    'Friend Options',
+                    SnapchatConstants.friendOptionsTitle,
                     style: TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.w600,
@@ -225,93 +226,109 @@ class SnapchatIconScreen extends StatelessWidget {
                     textAlign: TextAlign.center,
                   ),
                   const SizedBox(height: 20),
-                  // Buttons
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.end,
+                  Column(
                     children: [
-                      TextButton(
-                        onPressed: () => Navigator.of(context).pop(),
-                        style: TextButton.styleFrom(
-                          backgroundColor: Colors.white,
-                          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(8),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.end,
+                        children: [
+                          Expanded(
+                            child: TextButton(
+                              onPressed: () => Navigator.of(context).pop(),
+                              style: TextButton.styleFrom(
+                                backgroundColor: Colors.white,
+                                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
+                              ),
+                              child: Text(
+                                SnapchatConstants.cancelButton,
+                                style: TextStyle(
+                                  color: Colors.black,
+                                  fontWeight: FontWeight.w600,
+                                  fontSize: 14,
+                                ),
+                              ),
+                            ),
                           ),
-                        ),
-                        child: Text(
-                          'CANCEL',
-                          style: TextStyle(
-                            color: Colors.black,
-                            fontWeight: FontWeight.w600,
-                            fontSize: 14,
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: TextButton(
+                              onPressed: () {
+                                Navigator.of(context).pop();
+                                _showRenameDialog(context, friendName, index);
+                              },
+                              style: TextButton.styleFrom(
+                                backgroundColor: Colors.white,
+                                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
+                              ),
+                              child: Text(
+                                SnapchatConstants.renameButton,
+                                style: TextStyle(
+                                  color: Colors.black,
+                                  fontWeight: FontWeight.w600,
+                                  fontSize: 14,
+                                ),
+                              ),
+                            ),
                           ),
-                        ),
+                        ],
                       ),
-                      const SizedBox(width: 12),
-                      TextButton(
-                        onPressed: () {
-                          Navigator.of(context).pop();
-                          _showRenameDialog(context, friendName, index);
-                        },
-                        style: TextButton.styleFrom(
-                          backgroundColor: Colors.white,
-                          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(8),
+                      const SizedBox(height: 12),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.end,
+                        children: [
+                          Expanded(
+                            child: TextButton(
+                              onPressed: () {
+                                Navigator.of(context).pop();
+                                _showMoveDialog(context, friendName, index, iconName);
+                              },
+                              style: TextButton.styleFrom(
+                                backgroundColor: Colors.white,
+                                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
+                              ),
+                              child: Text(
+                                SnapchatConstants.moveButton,
+                                style: TextStyle(
+                                  color: Colors.black,
+                                  fontWeight: FontWeight.w600,
+                                  fontSize: 14,
+                                ),
+                              ),
+                            ),
                           ),
-                        ),
-                        child: Text(
-                          'RENAME',
-                          style: TextStyle(
-                            color: Colors.black,
-                            fontWeight: FontWeight.w600,
-                            fontSize: 14,
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: TextButton(
+                              onPressed: () {
+                                Navigator.of(context).pop();
+                                _showDeleteConfirmationDialog(context, friendName, index);
+                              },
+                              style: TextButton.styleFrom(
+                                backgroundColor: Colors.white,
+                                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
+                              ),
+                              child: Text(
+                                SnapchatConstants.deleteButton,
+                                style: TextStyle(
+                                  color: Colors.red,
+                                  fontWeight: FontWeight.w600,
+                                  fontSize: 14,
+                                ),
+                              ),
+                            ),
                           ),
-                        ),
-                      ),
-                      const SizedBox(width: 12),
-                      TextButton(
-                        onPressed: () {
-                          Navigator.of(context).pop();
-                          _showMoveDialog(context, friendName, index, iconName);
-                        },
-                        style: TextButton.styleFrom(
-                          backgroundColor: Colors.white,
-                          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                        ),
-                        child: Text(
-                          'MOVE',
-                          style: TextStyle(
-                            color: Colors.black,
-                            fontWeight: FontWeight.w600,
-                            fontSize: 14,
-                          ),
-                        ),
-                      ),
-                      const SizedBox(width: 12),
-                      TextButton(
-                        onPressed: () {
-                          Navigator.of(context).pop();
-                          _showDeleteConfirmationDialog(context, friendName, index);
-                        },
-                        style: TextButton.styleFrom(
-                          backgroundColor: Colors.white,
-                          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                        ),
-                        child: Text(
-                          'DELETE',
-                          style: TextStyle(
-                            color: Colors.red,
-                            fontWeight: FontWeight.w600,
-                            fontSize: 14,
-                          ),
-                        ),
+                        ],
                       ),
                     ],
                   ),
@@ -419,7 +436,7 @@ class SnapchatIconScreen extends StatelessWidget {
                           Navigator.of(context).pop();
                           final isDark = Theme.of(context).brightness == Brightness.dark;
                           Get.snackbar(
-                            'Friend Renamed',
+                            SnapchatConstants.friendRenamedTitle,
                             '$oldName has been renamed to $newName',
                             snackPosition: SnackPosition.BOTTOM,
                             duration: const Duration(seconds: 2),
@@ -478,7 +495,7 @@ void _showMoveDialog(BuildContext context, String friendName, int index, String 
   if (allCategories.isEmpty) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     Get.snackbar(
-      'No Categories Available',
+      SnapchatConstants.noCategoriesAvailableTitle,
       'There are no categories to move this friend to.',
       snackPosition: SnackPosition.BOTTOM,
       duration: const Duration(seconds: 2),
@@ -512,7 +529,7 @@ void _showMoveDialog(BuildContext context, String friendName, int index, String 
                   children: [
                     // Title
                     Text(
-                      'Move Friend',
+                      SnapchatConstants.moveFriendTitle,
                       style: TextStyle(
                         fontSize: 18,
                         fontWeight: FontWeight.w600,
@@ -568,7 +585,7 @@ void _showMoveDialog(BuildContext context, String friendName, int index, String 
                             ),
                           ),
                           child: Text(
-                            'CANCEL',
+                            SnapchatConstants.cancelButton,
                             style: TextStyle(
                               color: Colors.black,
                               fontWeight: FontWeight.w600,
@@ -602,7 +619,7 @@ void _showMoveDialog(BuildContext context, String friendName, int index, String 
                               Navigator.of(context).pop();
                               final isDark = Theme.of(context).brightness == Brightness.dark;
                               Get.snackbar(
-                                'Friend Moved',
+                                SnapchatConstants.friendMovedTitle,
                                 '$friendName has been moved to $newCategory',
                                 snackPosition: SnackPosition.BOTTOM,
                                 duration: const Duration(seconds: 2),
@@ -619,7 +636,7 @@ void _showMoveDialog(BuildContext context, String friendName, int index, String 
                             ),
                           ),
                           child: Text(
-                            'MOVE',
+                            SnapchatConstants.moveButton,
                             style: TextStyle(
                               color: Colors.black,
                               fontWeight: FontWeight.w600,
@@ -661,7 +678,7 @@ void _showMoveDialog(BuildContext context, String friendName, int index, String 
                 children: [
                   // Title
                   Text(
-                    'Delete Friend',
+                    SnapchatConstants.deleteFriendTitle,
                     style: TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.w600,
@@ -693,7 +710,7 @@ void _showMoveDialog(BuildContext context, String friendName, int index, String 
                           ),
                         ),
                         child: Text(
-                          'CANCEL',
+                          SnapchatConstants.cancelButton,
                           style: TextStyle(
                             color: Colors.black,
                             fontWeight: FontWeight.w600,
@@ -727,7 +744,7 @@ void _showMoveDialog(BuildContext context, String friendName, int index, String 
                           Navigator.of(context).pop();
                           final isDark = Theme.of(context).brightness == Brightness.dark;
                           Get.snackbar(
-                            'Friend Deleted',
+                            SnapchatConstants.friendDeletedTitle,
                             '$friendName has been removed from your $iconName list',
                             snackPosition: SnackPosition.BOTTOM,
                             duration: const Duration(seconds: 2),
@@ -743,7 +760,7 @@ void _showMoveDialog(BuildContext context, String friendName, int index, String 
                           ),
                         ),
                         child: Text(
-                          'DELETE',
+                          SnapchatConstants.deleteButton,
                           style: TextStyle(
                             color: Colors.red,
                             fontWeight: FontWeight.w600,

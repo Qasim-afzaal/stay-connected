@@ -7,6 +7,7 @@ import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 
 import 'package:stay_connected/Platform/facebook/facebook_controller.dart';
 import 'package:stay_connected/Platform/facebook/facebook_webview_screen.dart';
+import 'package:stay_connected/Platform/facebook/facebook_constants.dart';
 
 class FacebookIconScreen extends StatelessWidget {
   final String iconName;
@@ -60,7 +61,7 @@ class FacebookIconScreen extends StatelessWidget {
             decoration: BoxDecoration(
               color: isDark ? Colors.black : null,
               image: isDark ? null : DecorationImage(
-                image: AssetImage('assets/images/img_group_173.jpg'),
+                image: AssetImage(FacebookConstants.assetImageGroup173),
                 fit: BoxFit.cover,
               ),
             ),
@@ -76,7 +77,7 @@ class FacebookIconScreen extends StatelessWidget {
                         ),
                         const SizedBox(height: 16),
                         Text(
-                          'Tap the + button to search people',
+                          FacebookConstants.emptyCategoryMessage,
                           style: TextStyle(
                             fontSize: 14,
                             color: isDark ? Colors.grey[400] : Colors.grey.shade500,
@@ -100,17 +101,16 @@ class FacebookIconScreen extends StatelessWidget {
                         final friend = categoryFriends[index];
                         return GestureDetector(
                           onTap: () {
-                            // Open the fried's profile in WebView
                             if (friend['profileUrl'] != null) {
                               Get.to(() => _FriendProfileWebView(
                                     profileUrl: friend['profileUrl']!,
-                                    friendName: friend['name'] ?? 'Unknown',
+                                    friendName: friend['name'] ?? FacebookConstants.unknownFriend,
                                   ));
                             }
                           },
                           onLongPress: () {
                             _showActionDialog(
-                                context, friend['name'] ?? 'Unknown', index);
+                                context, friend['name'] ?? FacebookConstants.unknownFriend, index);
                           },
                           child: Column(
                             mainAxisAlignment: MainAxisAlignment.center,
@@ -118,7 +118,7 @@ class FacebookIconScreen extends StatelessWidget {
                               Container(
                                 padding: const EdgeInsets.all(4),
                                 child: Image.asset(
-                                  isDark ? 'assets/images/account_fb.png' : 'assets/images/img_fb.png',
+                                  isDark ? FacebookConstants.assetAccountFb : FacebookConstants.assetImgFb,
                                   width: isDark ? 60 : null,
                                   height: isDark ? 60 : null,
                                   scale: isDark ? null : 0.1,
@@ -137,7 +137,7 @@ class FacebookIconScreen extends StatelessWidget {
                                 padding:
                                     const EdgeInsets.symmetric(horizontal: 4),
                                 child: Text(
-                                  friend['name'] ?? 'Unknown',
+                                  friend['name'] ?? FacebookConstants.unknownFriend,
                                   style: TextStyle(
                                     fontSize: 10,
                                     fontWeight: FontWeight.bold,
@@ -161,7 +161,7 @@ class FacebookIconScreen extends StatelessWidget {
             foregroundColor: Colors.white,
             elevation: 0,
             child: Image.asset(
-              'assets/images/img_person_add_blue.png',
+              FacebookConstants.assetPersonAddBlue,
               width: 48,
               height: 48,
               errorBuilder: (context, error, stackTrace) {
@@ -189,9 +189,9 @@ class FacebookIconScreen extends StatelessWidget {
                 size: 20,
               ),
               const SizedBox(width: 8),
-              const Text(
-                'Search Friends',
-                style: TextStyle(
+              Text(
+                FacebookConstants.searchFriendsTitle,
+                style: const TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.w600,
                 ),
@@ -205,7 +205,7 @@ class FacebookIconScreen extends StatelessWidget {
                 CupertinoTextField(
                   controller: searchController,
                   autofocus: true,
-                  placeholder: 'Enter friend name or URL',
+                  placeholder: FacebookConstants.searchFriendsPlaceholder,
                   decoration: BoxDecoration(
                     color: CupertinoColors.systemGrey6,
                     borderRadius: BorderRadius.circular(8),
@@ -220,9 +220,9 @@ class FacebookIconScreen extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(height: 8),
-                const Text(
-                  'Search and add friends to your category',
-                  style: TextStyle(
+                Text(
+                  FacebookConstants.searchFriendsHint,
+                  style: const TextStyle(
                     fontSize: 12,
                     color: CupertinoColors.systemGrey,
                   ),
@@ -234,7 +234,7 @@ class FacebookIconScreen extends StatelessWidget {
             CupertinoDialogAction(
               onPressed: () => Navigator.of(context).pop(),
               child: const Text(
-                'Cancel',
+                FacebookConstants.cancel,
                 style: TextStyle(
                   color: CupertinoColors.systemGrey,
                   fontWeight: FontWeight.w600,
@@ -256,7 +256,7 @@ class FacebookIconScreen extends StatelessWidget {
               },
               isDefaultAction: true,
               child: const Text(
-                'Search',
+                FacebookConstants.search,
                 style: TextStyle(
                   color: CupertinoColors.systemBlue,
                   fontWeight: FontWeight.w600,
@@ -288,9 +288,8 @@ class FacebookIconScreen extends StatelessWidget {
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  // Title
                   Text(
-                    'Friend Options',
+                    FacebookConstants.friendOptionsTitle,
                     style: TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.w600,
@@ -298,9 +297,8 @@ class FacebookIconScreen extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(height: 20),
-                  // Content
                   Text(
-                    'What would you like to do with $friendName?',
+                    '${FacebookConstants.friendOptionsMessage} $friendName?',
                     style: TextStyle(
                       fontSize: 14,
                       color: isDark ? Colors.grey[300] : Colors.grey[700],
@@ -308,93 +306,109 @@ class FacebookIconScreen extends StatelessWidget {
                     textAlign: TextAlign.center,
                   ),
                   const SizedBox(height: 20),
-                  // Buttons
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.end,
+                  Column(
                     children: [
-                      TextButton(
-                        onPressed: () => Navigator.of(context).pop(),
-                        style: TextButton.styleFrom(
-                          backgroundColor: Colors.white,
-                          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(8),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.end,
+                        children: [
+                          Expanded(
+                            child: TextButton(
+                              onPressed: () => Navigator.of(context).pop(),
+                              style: TextButton.styleFrom(
+                                backgroundColor: Colors.white,
+                                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
+                              ),
+                              child: Text(
+                                FacebookConstants.cancelButton,
+                                style: TextStyle(
+                                  color: Colors.black,
+                                  fontWeight: FontWeight.w600,
+                                  fontSize: 14,
+                                ),
+                              ),
+                            ),
                           ),
-                        ),
-                        child: Text(
-                          'CANCEL',
-                          style: TextStyle(
-                            color: Colors.black,
-                            fontWeight: FontWeight.w600,
-                            fontSize: 14,
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: TextButton(
+                              onPressed: () {
+                                Navigator.of(context).pop();
+                                _showRenameDialog(context, friendName, index);
+                              },
+                              style: TextButton.styleFrom(
+                                backgroundColor: Colors.white,
+                                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
+                              ),
+                              child: Text(
+                                FacebookConstants.renameButton,
+                                style: TextStyle(
+                                  color: Colors.black,
+                                  fontWeight: FontWeight.w600,
+                                  fontSize: 14,
+                                ),
+                              ),
+                            ),
                           ),
-                        ),
+                        ],
                       ),
-                      const SizedBox(width: 12),
-                      TextButton(
-                        onPressed: () {
-                          Navigator.of(context).pop();
-                          _showRenameDialog(context, friendName, index);
-                        },
-                        style: TextButton.styleFrom(
-                          backgroundColor: Colors.white,
-                          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(8),
+                      const SizedBox(height: 12),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.end,
+                        children: [
+                          Expanded(
+                            child: TextButton(
+                              onPressed: () {
+                                Navigator.of(context).pop();
+                                _showMoveDialog(context, friendName, index, iconName);
+                              },
+                              style: TextButton.styleFrom(
+                                backgroundColor: Colors.white,
+                                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
+                              ),
+                              child: Text(
+                                FacebookConstants.moveButton,
+                                style: TextStyle(
+                                  color: Colors.black,
+                                  fontWeight: FontWeight.w600,
+                                  fontSize: 14,
+                                ),
+                              ),
+                            ),
                           ),
-                        ),
-                        child: Text(
-                          'RENAME',
-                          style: TextStyle(
-                            color: Colors.black,
-                            fontWeight: FontWeight.w600,
-                            fontSize: 14,
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: TextButton(
+                              onPressed: () {
+                                Navigator.of(context).pop();
+                                _showDeleteConfirmationDialog(context, friendName, index, iconName);
+                              },
+                              style: TextButton.styleFrom(
+                                backgroundColor: Colors.white,
+                                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
+                              ),
+                              child: Text(
+                                FacebookConstants.deleteButton,
+                                style: TextStyle(
+                                  color: Colors.red,
+                                  fontWeight: FontWeight.w600,
+                                  fontSize: 14,
+                                ),
+                              ),
+                            ),
                           ),
-                        ),
-                      ),
-                      const SizedBox(width: 12),
-                      TextButton(
-                        onPressed: () {
-                          Navigator.of(context).pop();
-                          _showMoveDialog(context, friendName, index, iconName);
-                        },
-                        style: TextButton.styleFrom(
-                          backgroundColor: Colors.white,
-                          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                        ),
-                        child: Text(
-                          'MOVE',
-                          style: TextStyle(
-                            color: Colors.black,
-                            fontWeight: FontWeight.w600,
-                            fontSize: 14,
-                          ),
-                        ),
-                      ),
-                      const SizedBox(width: 12),
-                      TextButton(
-                        onPressed: () {
-                          Navigator.of(context).pop();
-                          _showDeleteConfirmationDialog(context, friendName, index, iconName);
-                        },
-                        style: TextButton.styleFrom(
-                          backgroundColor: Colors.white,
-                          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                        ),
-                        child: Text(
-                          'DELETE',
-                          style: TextStyle(
-                            color: Colors.red,
-                            fontWeight: FontWeight.w600,
-                            fontSize: 14,
-                          ),
-                        ),
+                        ],
                       ),
                     ],
                   ),
@@ -417,7 +431,6 @@ class FacebookIconScreen extends StatelessWidget {
       context: context,
       builder: (BuildContext context) {
         return Material(
-          // ✅ Needed so Cupertino dialog renders properly
           color: Colors.transparent,
           child: Center(
             child: Container(
@@ -430,9 +443,8 @@ class FacebookIconScreen extends StatelessWidget {
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  // Title
                   Text(
-                    "Rename Friend",
+                    FacebookConstants.renameFriendTitle,
                     style: TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.w600,
@@ -440,7 +452,6 @@ class FacebookIconScreen extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(height: 20),
-                  // Input Field
                   TextField(
                     controller: renameController,
                     autofocus: true,
@@ -459,7 +470,6 @@ class FacebookIconScreen extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(height: 20),
-                  // Buttons
                   Row(
                     mainAxisAlignment: MainAxisAlignment.end,
                     children: [
@@ -473,7 +483,7 @@ class FacebookIconScreen extends StatelessWidget {
                           ),
                         ),
                         child: Text(
-                          'CANCEL',
+                          FacebookConstants.cancelButton,
                           style: TextStyle(
                             color: Colors.black,
                             fontWeight: FontWeight.w600,
@@ -505,8 +515,8 @@ class FacebookIconScreen extends StatelessWidget {
                             Navigator.of(context).pop();
                             final isDark = Theme.of(context).brightness == Brightness.dark;
                             Get.snackbar(
-                              'Friend Renamed',
-                              '$oldName has been renamed to $newName',
+                              FacebookConstants.friendRenamedTitle,
+                              '$oldName ${FacebookConstants.friendRenamedMessage} $newName',
                               snackPosition: SnackPosition.BOTTOM,
                               duration: const Duration(seconds: 2),
                               backgroundColor: isDark ? Colors.blue[900] : Colors.blue.shade100,
@@ -522,7 +532,7 @@ class FacebookIconScreen extends StatelessWidget {
                           ),
                         ),
                         child: Text(
-                          'RENAME',
+                          FacebookConstants.renameButton,
                           style: TextStyle(
                             color: Colors.black,
                             fontWeight: FontWeight.w600,
@@ -545,10 +555,7 @@ class FacebookIconScreen extends StatelessWidget {
       BuildContext context, String friendName, int index, String iconName) {
     final controller = Get.find<FaceBookController>();
 
-    // Get all available categories including custom ones
     final allCategories = controller.getAvailableCategories();
-    
-    // Also get categories that have friends (for debugging)
     final categoriesWithFriends = controller.getCategoriesWithFriends();
 
     print('Facebook - All Categories: $allCategories');
@@ -556,7 +563,6 @@ class FacebookIconScreen extends StatelessWidget {
     print('Facebook - Current category: $iconName');
     print('Facebook - Total icons in controller: ${controller.icons.length}');
     
-    // Debug: Print all icons to see what's stored
     for (var icon in controller.icons) {
       print('Facebook - Icon: ${icon['name']}, Category: ${icon['category']}, ProfileUrl: ${icon['profileUrl']}');
     }
@@ -564,8 +570,8 @@ class FacebookIconScreen extends StatelessWidget {
     if (allCategories.isEmpty) {
       final isDark = Theme.of(context).brightness == Brightness.dark;
       Get.snackbar(
-        'No Categories Available',
-        'There are no categories to move this friend to.',
+        FacebookConstants.noCategoriesAvailableTitle,
+        FacebookConstants.noCategoriesAvailableMessage,
         snackPosition: SnackPosition.BOTTOM,
         duration: const Duration(seconds: 2),
         backgroundColor: isDark ? Colors.orange[900] : Colors.orange.shade100,
@@ -574,7 +580,7 @@ class FacebookIconScreen extends StatelessWidget {
       return;
     }
 
-    int selectedCategoryIndex = 0; // Default first
+    int selectedCategoryIndex = 0;
 
     final isDark = Theme.of(context).brightness == Brightness.dark;
     
@@ -596,9 +602,8 @@ class FacebookIconScreen extends StatelessWidget {
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      // Title
                       Text(
-                        'Move Friend',
+                        FacebookConstants.moveFriendTitle,
                         style: TextStyle(
                           fontSize: 18,
                           fontWeight: FontWeight.w600,
@@ -606,9 +611,8 @@ class FacebookIconScreen extends StatelessWidget {
                         ),
                       ),
                       const SizedBox(height: 20),
-                      // Content
                       Text(
-                        'Move $friendName to which category?',
+                        '${FacebookConstants.moveFriendMessage} $friendName ${FacebookConstants.moveFriendTo}',
                         style: TextStyle(
                           fontSize: 14,
                           color: isDark ? Colors.grey[300] : Colors.grey[700],
@@ -640,7 +644,6 @@ class FacebookIconScreen extends StatelessWidget {
                         ),
                       ),
                       const SizedBox(height: 20),
-                      // Buttons
                       Row(
                         mainAxisAlignment: MainAxisAlignment.end,
                         children: [
@@ -654,7 +657,7 @@ class FacebookIconScreen extends StatelessWidget {
                               ),
                             ),
                             child: Text(
-                              'CANCEL',
+                              FacebookConstants.cancelButton,
                               style: TextStyle(
                                 color: Colors.black,
                                 fontWeight: FontWeight.w600,
@@ -688,8 +691,8 @@ class FacebookIconScreen extends StatelessWidget {
                                 Navigator.of(context).pop();
                                 final isDark = Theme.of(context).brightness == Brightness.dark;
                                 Get.snackbar(
-                                  'Friend Moved',
-                                  '$friendName has been moved to $selectedCategory',
+                                  FacebookConstants.friendMovedTitle,
+                                  '$friendName ${FacebookConstants.friendMovedMessage} $selectedCategory',
                                   snackPosition: SnackPosition.BOTTOM,
                                   duration: const Duration(seconds: 2),
                                   backgroundColor: isDark ? Colors.green[900] : Colors.green.shade100,
@@ -705,7 +708,7 @@ class FacebookIconScreen extends StatelessWidget {
                               ),
                             ),
                             child: Text(
-                              'MOVE',
+                              FacebookConstants.moveButton,
                               style: TextStyle(
                                 color: Colors.black,
                                 fontWeight: FontWeight.w600,
@@ -746,9 +749,8 @@ class FacebookIconScreen extends StatelessWidget {
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  // Title
                   Text(
-                    'Delete Friend',
+                    FacebookConstants.deleteFriendTitle,
                     style: TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.w600,
@@ -756,9 +758,8 @@ class FacebookIconScreen extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(height: 20),
-                  // Content
                   Text(
-                    'Are you sure you want to delete $friendName from your $iconName list?',
+                    '${FacebookConstants.deleteFriendMessage} $friendName ${FacebookConstants.deleteFriendFrom} $iconName ${FacebookConstants.deleteFriendList}',
                     style: TextStyle(
                       fontSize: 14,
                       color: isDark ? Colors.grey[300] : Colors.grey[700],
@@ -766,7 +767,6 @@ class FacebookIconScreen extends StatelessWidget {
                     textAlign: TextAlign.center,
                   ),
                   const SizedBox(height: 20),
-                  // Buttons
                   Row(
                     mainAxisAlignment: MainAxisAlignment.end,
                     children: [
@@ -780,7 +780,7 @@ class FacebookIconScreen extends StatelessWidget {
                           ),
                         ),
                         child: Text(
-                          'CANCEL',
+                          FacebookConstants.cancelButton,
                           style: TextStyle(
                             color: Colors.black,
                             fontWeight: FontWeight.w600,
@@ -814,8 +814,8 @@ class FacebookIconScreen extends StatelessWidget {
                           Navigator.of(context).pop();
                           final isDark = Theme.of(context).brightness == Brightness.dark;
                           Get.snackbar(
-                            'Friend Deleted',
-                            '$friendName has been removed from your $iconName list',
+                            FacebookConstants.friendDeletedTitle,
+                            '$friendName ${FacebookConstants.friendDeletedMessage} $iconName list',
                             snackPosition: SnackPosition.BOTTOM,
                             duration: const Duration(seconds: 2),
                             backgroundColor: isDark ? Colors.red[900] : Colors.red.shade100,
@@ -830,7 +830,7 @@ class FacebookIconScreen extends StatelessWidget {
                           ),
                         ),
                         child: Text(
-                          'DELETE',
+                          FacebookConstants.deleteButton,
                           style: TextStyle(
                             color: Colors.red,
                             fontWeight: FontWeight.w600,
@@ -869,9 +869,10 @@ class _FriendProfileWebViewState extends State<_FriendProfileWebView> {
 
   String _getProfileUrl() {
     String url = widget.profileUrl;
-    // Add parameters to prevent Universal Links if not already present
-    if (!url.contains('_webview=1') && !url.contains('noapp=1')) {
-      url = url.contains('?') ? '$url&_webview=1&noapp=1' : '$url?_webview=1&noapp=1';
+    if (!url.contains(FacebookConstants.webviewParam1) && !url.contains(FacebookConstants.webviewParam2)) {
+      url = url.contains('?') 
+          ? '$url&${FacebookConstants.webviewParam1}&${FacebookConstants.webviewParam2}' 
+          : '$url?${FacebookConstants.webviewParam1}&${FacebookConstants.webviewParam2}';
     }
     return url;
   }
@@ -879,8 +880,8 @@ class _FriendProfileWebViewState extends State<_FriendProfileWebView> {
   @override
   Widget build(BuildContext context) {
     String userAgent = Platform.isIOS
-        ? 'Mozilla/5.0 (iPhone; CPU iPhone OS 17_5 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.5 Mobile/15E148 Safari/604.1'
-        : 'Mozilla/5.0 (Linux; Android 14; SM-G998B) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Mobile Safari/537.36';
+        ? FacebookConstants.iosUserAgent
+        : FacebookConstants.androidUserAgent;
 
     return Scaffold(
       appBar: AppBar(
@@ -905,8 +906,8 @@ class _FriendProfileWebViewState extends State<_FriendProfileWebView> {
               url: WebUri(_getProfileUrl()),
               headers: {
                 'User-Agent': userAgent,
-                'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
-                'Accept-Language': 'en-US,en;q=0.9',
+                'Accept': FacebookConstants.acceptHeader,
+                'Accept-Language': FacebookConstants.acceptLanguageHeader,
               },
             ),
             initialSettings: InAppWebViewSettings(
@@ -919,94 +920,9 @@ class _FriendProfileWebViewState extends State<_FriendProfileWebView> {
             onWebViewCreated: (controller) {
               webViewController = controller;
               
-              // Inject blocking script at document start
               controller.addUserScript(
                 userScript: UserScript(
-                  source: '''
-                    (function() {
-                      if (window.facebookBlockingLoaded) return;
-                      window.facebookBlockingLoaded = true;
-                      
-                      // Block all clicks that would open Facebook app
-                      document.addEventListener('click', function(e) {
-                        let target = e.target;
-                        let depth = 0;
-                        while (target && target !== document && depth < 10) {
-                          if (target.tagName === 'A' && target.href) {
-                            const href = target.href.toLowerCase();
-                            if (href.startsWith('fb://') ||
-                                href.startsWith('fbapi://') ||
-                                href.startsWith('fbauth2://') ||
-                                href.includes('applink.facebook.com') ||
-                                href.includes('apps.apple.com') ||
-                                href.includes('itunes.apple.com') ||
-                                href.startsWith('itms://') ||
-                                href.startsWith('itms-apps://') ||
-                                href.includes('play.google.com/store') ||
-                                href.startsWith('market://')) {
-                              e.preventDefault();
-                              e.stopPropagation();
-                              e.stopImmediatePropagation();
-                              return false;
-                            }
-                          }
-                          target = target.parentElement;
-                          depth++;
-                        }
-                      }, true);
-                      
-                      // Override window.open
-                      const originalOpen = window.open;
-                      window.open = function(url, target, features) {
-                        if (url) {
-                          const urlLower = url.toLowerCase();
-                          if (urlLower.startsWith('fb://') ||
-                              urlLower.startsWith('fbapi://') ||
-                              urlLower.startsWith('fbauth2://') ||
-                              urlLower.includes('applink.facebook.com') ||
-                              urlLower.includes('apps.apple.com') ||
-                              urlLower.includes('itunes.apple.com')) {
-                            return null;
-                          }
-                        }
-                        return originalOpen.call(window, url, target, features);
-                      };
-                      
-                      // Override location methods
-                      const originalHref = Object.getOwnPropertyDescriptor(window, 'location').get;
-                      Object.defineProperty(window, 'location', {
-                        get: function() {
-                          const loc = originalHref.call(window);
-                          const originalAssign = loc.assign;
-                          const originalReplace = loc.replace;
-                          
-                          loc.assign = function(url) {
-                            const urlLower = (url || '').toLowerCase();
-                            if (urlLower.startsWith('fb://') ||
-                                urlLower.startsWith('fbapi://') ||
-                                urlLower.startsWith('fbauth2://') ||
-                                urlLower.includes('applink.facebook.com')) {
-                              return;
-                            }
-                            return originalAssign.call(loc, url);
-                          };
-                          
-                          loc.replace = function(url) {
-                            const urlLower = (url || '').toLowerCase();
-                            if (urlLower.startsWith('fb://') ||
-                                urlLower.startsWith('fbapi://') ||
-                                urlLower.startsWith('fbauth2://') ||
-                                urlLower.includes('applink.facebook.com')) {
-                              return;
-                            }
-                            return originalReplace.call(loc, url);
-                          };
-                          
-                          return loc;
-                        }
-                      });
-                    })();
-                  ''',
+                  source: FacebookConstants.blockingScript,
                   injectionTime: UserScriptInjectionTime.AT_DOCUMENT_START,
                 ),
               );
@@ -1016,93 +932,14 @@ class _FriendProfileWebViewState extends State<_FriendProfileWebView> {
                 isLoading = true;
               });
               
-              // Inject blocking script early
-              controller.evaluateJavascript(source: '''
-                (function() {
-                  // Block all clicks that would open Facebook app
-                  document.addEventListener('click', function(e) {
-                    let target = e.target;
-                    let depth = 0;
-                    while (target && target !== document && depth < 10) {
-                      if (target.tagName === 'A' && target.href) {
-                        const href = target.href.toLowerCase();
-                        if (href.startsWith('fb://') ||
-                            href.startsWith('fbapi://') ||
-                            href.startsWith('fbauth2://') ||
-                            href.includes('applink.facebook.com') ||
-                            href.includes('apps.apple.com') ||
-                            href.includes('itunes.apple.com') ||
-                            href.startsWith('itms://') ||
-                            href.startsWith('itms-apps://') ||
-                            href.includes('play.google.com/store') ||
-                            href.startsWith('market://')) {
-                          e.preventDefault();
-                          e.stopPropagation();
-                          e.stopImmediatePropagation();
-                          return false;
-                        }
-                      }
-                      target = target.parentElement;
-                      depth++;
-                    }
-                  }, true);
-                })();
-              ''');
+              controller.evaluateJavascript(source: FacebookConstants.blockingScriptSimple);
             },
             onLoadStop: (controller, url) async {
               setState(() {
                 isLoading = false;
               });
               
-              // Inject blocking script again after page loads
-              await controller.evaluateJavascript(source: '''
-                (function() {
-                  // Block all clicks that would open Facebook app
-                  document.addEventListener('click', function(e) {
-                    let target = e.target;
-                    let depth = 0;
-                    while (target && target !== document && depth < 10) {
-                      if (target.tagName === 'A' && target.href) {
-                        const href = target.href.toLowerCase();
-                        if (href.startsWith('fb://') ||
-                            href.startsWith('fbapi://') ||
-                            href.startsWith('fbauth2://') ||
-                            href.includes('applink.facebook.com') ||
-                            href.includes('apps.apple.com') ||
-                            href.includes('itunes.apple.com') ||
-                            href.startsWith('itms://') ||
-                            href.startsWith('itms-apps://') ||
-                            href.includes('play.google.com/store') ||
-                            href.startsWith('market://')) {
-                          e.preventDefault();
-                          e.stopPropagation();
-                          e.stopImmediatePropagation();
-                          return false;
-                        }
-                      }
-                      target = target.parentElement;
-                      depth++;
-                    }
-                  }, true);
-                  
-                  // Override window.open
-                  const originalOpen = window.open;
-                  window.open = function(url, target, features) {
-                    if (url) {
-                      const urlLower = url.toLowerCase();
-                      if (urlLower.startsWith('fb://') ||
-                          urlLower.startsWith('fbapi://') ||
-                          urlLower.startsWith('fbauth2://') ||
-                          urlLower.includes('applink.facebook.com') ||
-                          urlLower.includes('apps.apple.com') ||
-                          urlLower.includes('itunes.apple.com')) {
-                        return null;
-                      }
-                    }
-                    return originalOpen.call(window, url, target, features);
-                  };
-                })();
-              ''');
+              await controller.evaluateJavascript(source: FacebookConstants.blockingScriptWithWindowOpen);
             },
             onProgressChanged: (controller, progress) {
               if (progress >= 100) {
@@ -1117,19 +954,16 @@ class _FriendProfileWebViewState extends State<_FriendProfileWebView> {
               
               print('Facebook Profile - Navigation request to: $url');
               
-              // Block applink.facebook.com URLs (Universal Links)
               if (urlLower.contains('applink.facebook.com')) {
                 print('Facebook Profile - Blocking applink URL: $url');
                 return NavigationActionPolicy.CANCEL;
               }
               
-              // Block URLs with launch_app_store parameter
               if (urlLower.contains('launch_app_store=true')) {
                 print('Facebook Profile - Blocking URL with launch_app_store: $url');
                 return NavigationActionPolicy.CANCEL;
               }
               
-              // Block Facebook app schemes and App Store URLs
               if (urlLower.startsWith('fb://') ||
                   urlLower.startsWith('fbapi://') ||
                   urlLower.startsWith('fbauth2://') ||
@@ -1143,27 +977,24 @@ class _FriendProfileWebViewState extends State<_FriendProfileWebView> {
                 return NavigationActionPolicy.CANCEL;
               }
               
-              // Block tracking URLs (fbsbx.com) - redirect back to main profile
               if (urlLower.contains('fbsbx.com') || urlLower.contains('facebook.com/tr/')) {
                 print('Facebook Profile - Blocking tracking URL, staying on profile');
                 return NavigationActionPolicy.CANCEL;
               }
               
-              // For Facebook URLs, ensure _webview=1&noapp=1 parameters are present
               if (urlLower.contains('facebook.com') &&
-                  !urlLower.contains('_webview=1') &&
-                  !urlLower.contains('noapp=1')) {
+                  !urlLower.contains(FacebookConstants.webviewParam1) &&
+                  !urlLower.contains(FacebookConstants.webviewParam2)) {
                 print('Facebook Profile - Modifying URL to prevent Universal Links: $url');
                 final modifiedUrl = url.contains('?')
-                    ? '$url&_webview=1&noapp=1'
-                    : '$url?_webview=1&noapp=1';
+                    ? '$url&${FacebookConstants.webviewParam1}&${FacebookConstants.webviewParam2}'
+                    : '$url?${FacebookConstants.webviewParam1}&${FacebookConstants.webviewParam2}';
                 Future.microtask(() async {
                   await controller.loadUrl(urlRequest: URLRequest(url: WebUri(modifiedUrl)));
                 });
                 return NavigationActionPolicy.CANCEL;
               }
               
-              // Allow all other navigation
               return NavigationActionPolicy.ALLOW;
             },
             onReceivedServerTrustAuthRequest: (controller, challenge) async {

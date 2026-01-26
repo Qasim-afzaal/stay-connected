@@ -6,6 +6,7 @@ import 'package:get/get.dart';
 
 import 'package:stay_connected/Platform/instagram/instagram_controller.dart';
 import 'package:stay_connected/Platform/instagram/instagram_search_dialog.dart';
+import 'package:stay_connected/Platform/instagram/instagram_constants.dart';
 
 class InstagramIconScreen extends StatelessWidget {
   final String iconName;
@@ -51,7 +52,7 @@ class InstagramIconScreen extends StatelessWidget {
             decoration: BoxDecoration(
               color: isDark ? Colors.black : null,
               image: isDark ? null : DecorationImage(
-                image: AssetImage('assets/images/img_instagram.jpg'),
+                image: AssetImage(InstagramConstants.assetImageInstagram),
                 fit: BoxFit.cover,
               ),
             ),
@@ -67,7 +68,7 @@ class InstagramIconScreen extends StatelessWidget {
                         ),
                         const SizedBox(height: 16),
                         Text(
-                          'Tap the + button to search people',
+                          InstagramConstants.emptyCategoryMessage,
                           style: TextStyle(
                             fontSize: 14,
                             color: isDark ? Colors.grey[400] : Colors.grey.shade500,
@@ -91,18 +92,16 @@ class InstagramIconScreen extends StatelessWidget {
                         final friend = categoryFriends[index];
                         return GestureDetector(
                           onTap: () {
-                            // Open the friend's profile in WebView
                             if (friend['profileUrl'] != null) {
                               Get.to(() => FriendProfileScreen(
                                     profileUrl: friend['profileUrl']!,
-                                    friendName: friend['name'] ?? 'Unknown',
+                                    friendName: friend['name'] ?? InstagramConstants.unknownFriend,
                                   ));
                             }
                           },
                           onLongPress: () {
-                            // Show action dialog on long press
                             _showActionDialog(
-                                context, friend['name'] ?? 'Unknown', index);
+                                context, friend['name'] ?? InstagramConstants.unknownFriend, index);
                           },
                           child: Stack(
                             children: [
@@ -140,7 +139,7 @@ class InstagramIconScreen extends StatelessWidget {
                                     padding: const EdgeInsets.symmetric(
                                         horizontal: 4),
                                     child: Text(
-                                      friend['name'] ?? 'Unknown',
+                                      friend['name'] ?? InstagramConstants.unknownFriend,
                                       style: TextStyle(
                                         fontSize: 9,
                                         fontWeight: FontWeight.w500,
@@ -210,9 +209,8 @@ class InstagramIconScreen extends StatelessWidget {
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  // Title
                   Text(
-                    'Friend Options',
+                    InstagramConstants.friendOptionsTitle,
                     style: TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.w600,
@@ -220,9 +218,8 @@ class InstagramIconScreen extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(height: 20),
-                  // Content
                   Text(
-                    'What would you like to do with $friendName?',
+                    '${InstagramConstants.friendOptionsMessage} $friendName?',
                     style: TextStyle(
                       fontSize: 14,
                       color: isDark ? Colors.grey[300] : Colors.grey[700],
@@ -230,93 +227,109 @@ class InstagramIconScreen extends StatelessWidget {
                     textAlign: TextAlign.center,
                   ),
                   const SizedBox(height: 20),
-                  // Buttons
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.end,
+                  Column(
                     children: [
-                      TextButton(
-                        onPressed: () => Navigator.of(context).pop(),
-                        style: TextButton.styleFrom(
-                          backgroundColor: Colors.white,
-                          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(8),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.end,
+                        children: [
+                          Expanded(
+                            child: TextButton(
+                              onPressed: () => Navigator.of(context).pop(),
+                              style: TextButton.styleFrom(
+                                backgroundColor: Colors.white,
+                                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
+                              ),
+                              child: Text(
+                                InstagramConstants.cancelButton,
+                                style: TextStyle(
+                                  color: Colors.black,
+                                  fontWeight: FontWeight.w600,
+                                  fontSize: 14,
+                                ),
+                              ),
+                            ),
                           ),
-                        ),
-                        child: Text(
-                          'CANCEL',
-                          style: TextStyle(
-                            color: Colors.black,
-                            fontWeight: FontWeight.w600,
-                            fontSize: 14,
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: TextButton(
+                              onPressed: () {
+                                Navigator.of(context).pop();
+                                _showRenameDialog(context, friendName, index);
+                              },
+                              style: TextButton.styleFrom(
+                                backgroundColor: Colors.white,
+                                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
+                              ),
+                              child: Text(
+                                InstagramConstants.renameButton,
+                                style: TextStyle(
+                                  color: Colors.black,
+                                  fontWeight: FontWeight.w600,
+                                  fontSize: 14,
+                                ),
+                              ),
+                            ),
                           ),
-                        ),
+                        ],
                       ),
-                      const SizedBox(width: 12),
-                      TextButton(
-                        onPressed: () {
-                          Navigator.of(context).pop();
-                          _showRenameDialog(context, friendName, index);
-                        },
-                        style: TextButton.styleFrom(
-                          backgroundColor: Colors.white,
-                          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(8),
+                      const SizedBox(height: 12),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.end,
+                        children: [
+                          Expanded(
+                            child: TextButton(
+                              onPressed: () {
+                                Navigator.of(context).pop();
+                                _showMoveDialog(context, friendName, index, iconName);
+                              },
+                              style: TextButton.styleFrom(
+                                backgroundColor: Colors.white,
+                                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
+                              ),
+                              child: Text(
+                                InstagramConstants.moveButton,
+                                style: TextStyle(
+                                  color: Colors.black,
+                                  fontWeight: FontWeight.w600,
+                                  fontSize: 14,
+                                ),
+                              ),
+                            ),
                           ),
-                        ),
-                        child: Text(
-                          'RENAME',
-                          style: TextStyle(
-                            color: Colors.black,
-                            fontWeight: FontWeight.w600,
-                            fontSize: 14,
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: TextButton(
+                              onPressed: () {
+                                Navigator.of(context).pop();
+                                _showDeleteConfirmationDialog(context, friendName, index);
+                              },
+                              style: TextButton.styleFrom(
+                                backgroundColor: Colors.white,
+                                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
+                              ),
+                              child: Text(
+                                InstagramConstants.deleteButton,
+                                style: TextStyle(
+                                  color: Colors.red,
+                                  fontWeight: FontWeight.w600,
+                                  fontSize: 14,
+                                ),
+                              ),
+                            ),
                           ),
-                        ),
-                      ),
-                      const SizedBox(width: 12),
-                      TextButton(
-                        onPressed: () {
-                          Navigator.of(context).pop();
-                          _showMoveDialog(context, friendName, index, iconName);
-                        },
-                        style: TextButton.styleFrom(
-                          backgroundColor: Colors.white,
-                          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                        ),
-                        child: Text(
-                          'MOVE',
-                          style: TextStyle(
-                            color: Colors.black,
-                            fontWeight: FontWeight.w600,
-                            fontSize: 14,
-                          ),
-                        ),
-                      ),
-                      const SizedBox(width: 12),
-                      TextButton(
-                        onPressed: () {
-                          Navigator.of(context).pop();
-                          _showDeleteConfirmationDialog(context, friendName, index);
-                        },
-                        style: TextButton.styleFrom(
-                          backgroundColor: Colors.white,
-                          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                        ),
-                        child: Text(
-                          'DELETE',
-                          style: TextStyle(
-                            color: Colors.red,
-                            fontWeight: FontWeight.w600,
-                            fontSize: 14,
-                          ),
-                        ),
+                        ],
                       ),
                     ],
                   ),
@@ -336,7 +349,6 @@ void _showMoveDialog(BuildContext context, String friendName, int index, String 
   // Get all available categories including custom ones
   final allCategories = controller.getAvailableCategories();
   
-  // Also get categories that have friends (for debugging)
   final categoriesWithFriends = controller.getCategoriesWithFriends();
 
   print('Instagram - All Categories: $allCategories');
@@ -381,9 +393,8 @@ void _showMoveDialog(BuildContext context, String friendName, int index, String 
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    // Title
                     Text(
-                      'Move Friend',
+                      InstagramConstants.moveFriendTitle,
                       style: TextStyle(
                         fontSize: 18,
                         fontWeight: FontWeight.w600,
@@ -391,9 +402,8 @@ void _showMoveDialog(BuildContext context, String friendName, int index, String 
                       ),
                     ),
                     const SizedBox(height: 20),
-                    // Content
                     Text(
-                      'Move $friendName to which category?',
+                      '${InstagramConstants.moveFriendMessage} $friendName ${InstagramConstants.moveFriendTo}',
                       style: TextStyle(
                         fontSize: 14,
                         color: isDark ? Colors.grey[300] : Colors.grey[700],
@@ -425,7 +435,6 @@ void _showMoveDialog(BuildContext context, String friendName, int index, String 
                       ),
                     ),
                     const SizedBox(height: 20),
-                    // Buttons
                     Row(
                       mainAxisAlignment: MainAxisAlignment.end,
                       children: [
@@ -439,7 +448,7 @@ void _showMoveDialog(BuildContext context, String friendName, int index, String 
                             ),
                           ),
                           child: Text(
-                            'CANCEL',
+                            InstagramConstants.cancelButton,
                             style: TextStyle(
                               color: Colors.black,
                               fontWeight: FontWeight.w600,
@@ -473,8 +482,8 @@ void _showMoveDialog(BuildContext context, String friendName, int index, String 
                               Navigator.of(context).pop();
                               final isDark = Theme.of(context).brightness == Brightness.dark;
                               Get.snackbar(
-                                'Friend Moved',
-                                '$friendName has been moved to $newCategory',
+                                InstagramConstants.friendMovedTitle,
+                                '$friendName ${InstagramConstants.friendMovedMessage} $newCategory',
                                 snackPosition: SnackPosition.BOTTOM,
                                 duration: const Duration(seconds: 2),
                                 backgroundColor: isDark ? Colors.green[900] : Colors.green.shade100,
@@ -490,7 +499,7 @@ void _showMoveDialog(BuildContext context, String friendName, int index, String 
                             ),
                           ),
                           child: Text(
-                            'MOVE',
+                            InstagramConstants.moveButton,
                             style: TextStyle(
                               color: Colors.black,
                               fontWeight: FontWeight.w600,
@@ -532,9 +541,8 @@ void _showRenameDialog(BuildContext context, String oldName, int index) {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                // Title
                 Text(
-                  "Rename Friend",
+                  InstagramConstants.renameFriendTitle,
                   style: TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.w600,
@@ -542,7 +550,6 @@ void _showRenameDialog(BuildContext context, String oldName, int index) {
                   ),
                 ),
                 const SizedBox(height: 20),
-                // Input Field
                 TextField(
                   controller: renameController,
                   autofocus: true,
@@ -575,7 +582,7 @@ void _showRenameDialog(BuildContext context, String oldName, int index) {
                         ),
                       ),
                       child: Text(
-                        'CANCEL',
+                        InstagramConstants.cancelButton,
                         style: TextStyle(
                           color: Colors.black,
                           fontWeight: FontWeight.w600,
@@ -606,8 +613,8 @@ void _showRenameDialog(BuildContext context, String oldName, int index) {
                           Navigator.of(context).pop();
                           final isDark = Theme.of(context).brightness == Brightness.dark;
                           Get.snackbar(
-                            'Friend Renamed',
-                            '$oldName has been renamed to $newName',
+                            InstagramConstants.friendRenamedTitle,
+                            '$oldName ${InstagramConstants.friendRenamedMessage} $newName',
                             snackPosition: SnackPosition.BOTTOM,
                             duration: const Duration(seconds: 2),
                             backgroundColor: isDark ? Colors.blue[900] : Colors.blue.shade100,
@@ -623,7 +630,7 @@ void _showRenameDialog(BuildContext context, String oldName, int index) {
                         ),
                       ),
                       child: Text(
-                        'RENAME',
+                        InstagramConstants.renameButton,
                         style: TextStyle(
                           color: Colors.black,
                           fontWeight: FontWeight.w600,
@@ -661,9 +668,8 @@ void _showRenameDialog(BuildContext context, String oldName, int index) {
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  // Title
                   Text(
-                    'Delete Friend',
+                    InstagramConstants.deleteFriendTitle,
                     style: TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.w600,
@@ -671,9 +677,8 @@ void _showRenameDialog(BuildContext context, String oldName, int index) {
                     ),
                   ),
                   const SizedBox(height: 20),
-                  // Content
                   Text(
-                    'Are you sure you want to delete $friendName from your $iconName list?',
+                    '${InstagramConstants.deleteFriendMessage} $friendName ${InstagramConstants.deleteFriendFrom} $iconName ${InstagramConstants.deleteFriendList}',
                     style: TextStyle(
                       fontSize: 14,
                       color: isDark ? Colors.grey[300] : Colors.grey[700],
@@ -681,7 +686,6 @@ void _showRenameDialog(BuildContext context, String oldName, int index) {
                     textAlign: TextAlign.center,
                   ),
                   const SizedBox(height: 20),
-                  // Buttons
                   Row(
                     mainAxisAlignment: MainAxisAlignment.end,
                     children: [
@@ -695,7 +699,7 @@ void _showRenameDialog(BuildContext context, String oldName, int index) {
                           ),
                         ),
                         child: Text(
-                          'CANCEL',
+                          InstagramConstants.cancelButton,
                           style: TextStyle(
                             color: Colors.black,
                             fontWeight: FontWeight.w600,
@@ -729,8 +733,8 @@ void _showRenameDialog(BuildContext context, String oldName, int index) {
                           Navigator.of(context).pop();
                           final isDark = Theme.of(context).brightness == Brightness.dark;
                           Get.snackbar(
-                            'Friend Deleted',
-                            '$friendName has been removed from your $iconName list',
+                            InstagramConstants.friendDeletedTitle,
+                            '$friendName ${InstagramConstants.friendDeletedMessage} $iconName list',
                             snackPosition: SnackPosition.BOTTOM,
                             duration: const Duration(seconds: 2),
                             backgroundColor: isDark ? Colors.red[900] : Colors.red.shade100,
@@ -745,7 +749,7 @@ void _showRenameDialog(BuildContext context, String oldName, int index) {
                           ),
                         ),
                         child: Text(
-                          'DELETE',
+                          InstagramConstants.deleteButton,
                           style: TextStyle(
                             color: Colors.red,
                             fontWeight: FontWeight.w600,
