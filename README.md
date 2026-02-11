@@ -183,12 +183,6 @@ We welcome contributions! Please feel free to submit pull requests or open issue
 
 This project is licensed under the MIT License - see the LICENSE file for details.
 
-## 📞 Support
-
-Having trouble with StayConnected? 
-- Check our documentation
-- Create an issue in the GitHub repository
-- Review the code comments for implementation details
 
 ## 🙏 Acknowledgments
 
