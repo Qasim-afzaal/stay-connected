@@ -274,13 +274,13 @@ class SnapchatController extends GetxController {
   }
 
   List<String> getCategoriesWithFriends() {
-    Set<String> categories = {};
+    final categories = <String>{};
     for (var icon in icons) {
-      if (icon['category'] != null && 
-          icon['category']!.isNotEmpty &&
-          icon['profileUrl'] != null &&
-          icon['profileUrl']!.isNotEmpty) {
-        categories.add(icon['category']!);
+      final category = icon['category'];
+      final profileUrl = icon['profileUrl'];
+      if ((category != null && category.isNotEmpty) &&
+          (profileUrl != null && profileUrl.isNotEmpty)) {
+        categories.add(category);
       }
     }
     return categories.toList()..sort();
