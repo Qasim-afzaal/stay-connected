@@ -1,19 +1,19 @@
 class HttpUtil {
-  static String name = "name";
-  static String firstName = "firstname";
-  static String lastName = "lastname";
-  static String email = "email";
-  static String password = "password";
-  static String authProvider = "auth_provider";
-  static String gender = "gender";
-  static String age = "age";
-  static String personalityType = "personality_type";
-  static String profileImageUrl = "profile_image_url";
-  static String otp = "otp";
-  static String pin = "pin";
-  static String newPin = "newPin";
-  static String oldPin = "oldPin";
-  static String deviceId = "device_id";
-  static String isForgetPin = "isForgetPin";
-  static String conversationId = "conversation_id";
+  static const String name = "name";
+  static const String firstName = "firstname";
+  static const String lastName = "lastname";
+  static const String email = "email";
+  static const String password = "password";
+  static const String authProvider = "auth_provider";
+  static const String gender = "gender";
+  static const String age = "age";
+  static const String personalityType = "personality_type";
+  static const String profileImageUrl = "profile_image_url";
+  static const String otp = "otp";
+  static const String pin = "pin";
+  static const String newPin = "newPin";
+  static const String oldPin = "oldPin";
+  static const String deviceId = "device_id";
+  static const String isForgetPin = "isForgetPin";
+  static const String conversationId = "conversation_id";
 }
