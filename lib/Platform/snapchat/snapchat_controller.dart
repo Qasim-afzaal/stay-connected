@@ -70,77 +70,92 @@ class SnapchatController extends GetxController {
       {
         'name': 'Favorites',
         'icon': 'assets/images/platform_icons/img_favorite_1.png',
-        'category': 'Favorites'
+        'category': 'Favorites',
+        'profileUrl': ''
       },
       {
         'name': 'Games',
         'icon': 'assets/images/platform_icons/img_gamepad_1.png',
-        'category': 'Games'
+        'category': 'Games',
+        'profileUrl': ''
       },
       {
         'name': 'Music',
         'icon': 'assets/images/platform_icons/img_music_1.png',
-        'category': 'Music'
+        'category': 'Music',
+        'profileUrl': ''
       },
       {
         'name': 'Gym',
         'icon': 'assets/images/platform_icons/img_fitness_1.png',
-        'category': 'Gym'
+        'category': 'Gym',
+        'profileUrl': ''
       },
       {
         'name': 'Photos',
         'icon': 'assets/images/platform_icons/img_photo_1.png',
-        'category': 'Photos'
+        'category': 'Photos',
+        'profileUrl': ''
       },
       {
         'name': 'Pets',
         'icon': 'assets/images/platform_icons/img_pets_1.png',
-        'category': 'Pets'
+        'category': 'Pets',
+        'profileUrl': ''
       },
       {
         'name': 'Travel',
         'icon': 'assets/images/platform_icons/img_travel_1.png',
-        'category': 'Travel'
+        'category': 'Travel',
+        'profileUrl': ''
       },
       {
         'name': 'Desserts',
         'icon': 'assets/images/platform_icons/img_desserts_1_64x64.png',
-        'category': 'Desserts'
+        'category': 'Desserts',
+        'profileUrl': ''
       },
       {
         'name': 'Food',
         'icon': 'assets/images/platform_icons/img_food_12.png',
-        'category': 'Food'
+        'category': 'Food',
+        'profileUrl': ''
       },
       {
         'name': 'Auto',
         'icon': 'assets/images/platform_icons/auto.png',
-        'category': 'Auto'
+        'category': 'Auto',
+        'profileUrl': ''
       },
       {
         'name': 'Celebrity',
         'icon': 'assets/images/img_celebrities_1.png',
-        'category': 'Celebrity'
+        'category': 'Celebrity',
+        'profileUrl': ''
       },
       {
         'name': 'Fashion',
         'icon': 'assets/images/platform_icons/fashion.png',
-        'category': 'Fashion'
+        'category': 'Fashion',
+        'profileUrl': ''
       },
       {
         'name': 'News',
         'icon': 'assets/images/platform_icons/news.png',
-        'category': 'News'
+        'category': 'News',
+        'profileUrl': ''
       },
       {
         'name': 'Health',
         'icon': 'assets/images/platform_icons/health.png',
-        'category': 'Health'
+        'category': 'Health',
+        'profileUrl': ''
       },
       {
         'name': 'Ent',
         'icon': 'assets/images/platform_icons/ic_entertainment.png',
-        'category': 'Entertainment'
+        'category': 'Entertainment',
+        'profileUrl': ''
       },
     ];
   }
