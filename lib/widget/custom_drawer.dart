@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-
+import 'package:flutter/foundation.dart';
 import 'package:get/get.dart';
 
 import 'package:stay_connected/home/home.dart';
@@ -127,7 +127,7 @@ class CustomDrawer extends StatelessWidget {
                       ),
                 title: Text(item['name']),
                 onTap: () {
-                  print(item["name"]);
+                  debugPrint(item["name"].toString());
                   Navigator.pop(context);
                   switch (item["name"].toString().toLowerCase()) {
                     case "facebook":
