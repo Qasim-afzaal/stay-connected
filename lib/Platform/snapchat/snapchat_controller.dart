@@ -350,12 +350,5 @@ class SnapchatController extends GetxController {
     }
   }
 
-  Future<void> saveToPrefs() async {
-    try {
-      final prefs = await SharedPreferences.getInstance();
-      await prefs.setString(_sharedPrefsKey, jsonEncode(icons));
-    } catch (e) {
-      print('Error saving icons for $platformName: $e');
-    }
-  }
+  Future<void> saveToPrefs() async => _saveToPrefs();
 }
