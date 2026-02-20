@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:flutter/foundation.dart';
 import 'package:get/get.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -31,11 +32,11 @@ class YouTubeController extends GetxController {
   Future<void> loadIcons() async {
     try {
       final prefs = await SharedPreferences.getInstance();
-      print('YouTube - Using SharedPreferences key: $_sharedPrefsKey');
+      debugPrint('YouTube - Using SharedPreferences key: $_sharedPrefsKey');
       final platformData = prefs.getString(_sharedPrefsKey);
 
       if (platformData != null && platformData.isNotEmpty) {
-        print('YouTube - Loading data: $platformData');
+        debugPrint('YouTube - Loading data: $platformData');
         final decoded = jsonDecode(platformData) as List<dynamic>;
         icons = decoded.map((item) {
           if (item is Map) {
@@ -55,9 +56,9 @@ class YouTubeController extends GetxController {
                 (icon) => icon['name']!.isNotEmpty && icon['icon']!.isNotEmpty)
             .toList();
 
-        print('YouTube - Loaded ${icons.length} icons');
+        debugPrint('YouTube - Loaded ${icons.length} icons');
         for (var icon in icons) {
-          print(
+          debugPrint(
               'YouTube - Loaded icon: ${icon['name']}, Category: ${icon['category']}, ProfileUrl: ${icon['profileUrl']}');
         }
       } else {
@@ -65,7 +66,7 @@ class YouTubeController extends GetxController {
         await _saveToPrefs();
       }
     } catch (e) {
-      print('Error loading icons for $platformName: $e');
+      debugPrint('Error loading icons for $platformName: $e');
 
       icons = _getDefaultIcons();
     }
@@ -185,7 +186,7 @@ class YouTubeController extends GetxController {
       await _saveToPrefs();
       update();
     } catch (e) {
-      print('Error deleting icons for $platformName: $e');
+      debugPrint('Error deleting icons for $platformName: $e');
     }
   }
 
@@ -196,9 +197,9 @@ class YouTubeController extends GetxController {
       icons.add({'name': name, 'icon': iconUrl, 'category': categoryName});
       await _saveToPrefs();
       update();
-      print('YouTube - Added icon: $name with category: $categoryName');
+      debugPrint('YouTube - Added icon: $name with category: $categoryName');
     } catch (e) {
-      print('Error adding icon for $platformName: $e');
+      debugPrint('Error adding icon for $platformName: $e');
     }
   }
 
@@ -214,7 +215,7 @@ class YouTubeController extends GetxController {
       await _saveToPrefs();
       update();
     } catch (e) {
-      print('Error adding friend to category for $platformName: $e');
+      debugPrint('Error adding friend to category for $platformName: $e');
     }
   }
 
@@ -233,13 +234,13 @@ class YouTubeController extends GetxController {
       await _saveToPrefs();
       update();
     } catch (e) {
-      print('Error moving friend to category for $platformName: $e');
+      debugPrint('Error moving friend to category for $platformName: $e');
     }
   }
 
   List<String> getAvailableCategories() {
     Set<String> categories = {};
-    print('YouTube - Getting available categories from ${icons.length} icons');
+    debugPrint('YouTube - Getting available categories from ${icons.length} icons');
     
     // Fix existing categories that were incorrectly stored without category field
     bool needsSave = false;
@@ -248,7 +249,7 @@ class YouTubeController extends GetxController {
         // If no category, use the name as category (for custom categories)
         icon['category'] = icon['name'] ?? 'General';
         needsSave = true;
-        print('YouTube - Fixed category for ${icon['name']} from null to ${icon['name']}');
+        debugPrint('YouTube - Fixed category for ${icon['name']} from null to ${icon['name']}');
       }
     }
     
@@ -260,11 +261,11 @@ class YouTubeController extends GetxController {
     for (var icon in icons) {
       if (icon['category'] != null && icon['category']!.isNotEmpty) {
         categories.add(icon['category']!);
-        print('YouTube - Found category: ${icon['category']}');
+        debugPrint('YouTube - Found category: ${icon['category']}');
       }
     }
     final result = categories.toList()..sort();
-    print('YouTube - Available categories: $result');
+    debugPrint('YouTube - Available categories: $result');
     return result;
   }
 
@@ -286,9 +287,9 @@ class YouTubeController extends GetxController {
       icons = _getDefaultIcons();
       await _saveToPrefs();
       update();
-      print('YouTube - Reset to default icons');
+      debugPrint('YouTube - Reset to default icons');
     } catch (e) {
-      print('Error resetting icons for $platformName: $e');
+      debugPrint('Error resetting icons for $platformName: $e');
     }
   }
 
@@ -300,7 +301,7 @@ class YouTubeController extends GetxController {
         update();
       }
     } catch (e) {
-      print('Error removing icon for $platformName: $e');
+      debugPrint('Error removing icon for $platformName: $e');
     }
   }
 
@@ -312,7 +313,7 @@ class YouTubeController extends GetxController {
         update();
       }
     } catch (e) {
-      print('Error renaming icon for $platformName: $e');
+      debugPrint('Error renaming icon for $platformName: $e');
     }
   }
 
@@ -339,9 +340,9 @@ class YouTubeController extends GetxController {
       
       await _saveToPrefs();
       update();
-      print('YouTube - Renamed category from $oldCategoryName to $newCategoryName');
+      debugPrint('YouTube - Renamed category from $oldCategoryName to $newCategoryName');
     } catch (e) {
-      print('Error renaming category for $platformName: $e');
+      debugPrint('Error renaming category for $platformName: $e');
     }
   }
 
@@ -350,7 +351,7 @@ class YouTubeController extends GetxController {
       final prefs = await SharedPreferences.getInstance();
       await prefs.setString(_sharedPrefsKey, jsonEncode(icons));
     } catch (e) {
-      print('Error saving icons for $platformName: $e');
+      debugPrint('Error saving icons for $platformName: $e');
     }
   }
 
@@ -359,7 +360,7 @@ class YouTubeController extends GetxController {
       final prefs = await SharedPreferences.getInstance();
       await prefs.setString(_sharedPrefsKey, jsonEncode(icons));
     } catch (e) {
-      print('Error saving icons for $platformName: $e');
+      debugPrint('Error saving icons for $platformName: $e');
     }
   }
 }
