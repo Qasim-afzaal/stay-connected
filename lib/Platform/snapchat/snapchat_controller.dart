@@ -54,10 +54,6 @@ class SnapchatController extends GetxController {
             .toList();
 
         debugPrint('Snapchat - Loaded ${icons.length} icons');
-        for (var icon in icons) {
-          debugPrint(
-              'Snapchat - Loaded icon: ${icon['name']}, Category: ${icon['category']}, ProfileUrl: ${icon['profileUrl']}');
-        }
       } else {
         icons = _getDefaultIcons();
         await _saveToPrefs();
