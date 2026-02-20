@@ -268,7 +268,6 @@ class SnapchatController extends GetxController {
     for (var icon in icons) {
       if (icon['category'] != null && icon['category']!.isNotEmpty) {
         categories.add(icon['category']!);
-        debugPrint('Snapchat - Found category: ${icon['category']}');
       }
     }
     final result = categories.toList()..sort();
