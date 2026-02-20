@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:flutter/foundation.dart';
 import 'package:get/get.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -28,11 +29,11 @@ class FaceBookController extends GetxController {
   Future<void> loadIcons() async {
     try {
       final prefs = await SharedPreferences.getInstance();
-      print('Facebook - Using SharedPreferences key: $_sharedPrefsKey');
+      debugPrint('Facebook - Using SharedPreferences key: $_sharedPrefsKey');
       final platformData = prefs.getString(_sharedPrefsKey);
 
       if (platformData != null && platformData.isNotEmpty) {
-        print('Facebook - Loading data: $platformData');
+        debugPrint('Facebook - Loading data: $platformData');
         final decoded = jsonDecode(platformData) as List<dynamic>;
         icons = decoded.map((item) {
           if (item is Map) {
@@ -52,9 +53,9 @@ class FaceBookController extends GetxController {
                 (icon) => icon['name']!.isNotEmpty && icon['icon']!.isNotEmpty)
             .toList();
 
-        print('Facebook - Loaded ${icons.length} icons');
+        debugPrint('Facebook - Loaded ${icons.length} icons');
         for (var icon in icons) {
-          print(
+          debugPrint(
               'Facebook - Loaded icon: ${icon['name']}, Category: ${icon['category']}, ProfileUrl: ${icon['profileUrl']}');
         }
         
@@ -65,12 +66,12 @@ class FaceBookController extends GetxController {
         
         final missingDefaultCategories = defaultCategories.difference(currentCategories);
         if (missingDefaultCategories.isNotEmpty) {
-          print('Facebook - Missing default categories: $missingDefaultCategories');
+          debugPrint('Facebook - Missing default categories: $missingDefaultCategories');
           // Add missing default categories
           for (var defaultIcon in defaultIcons) {
             if (missingDefaultCategories.contains(defaultIcon['category'])) {
               icons.add(defaultIcon);
-              print('Facebook - Added missing default icon: ${defaultIcon['name']}');
+              debugPrint('Facebook - Added missing default icon: ${defaultIcon['name']}');
             }
           }
           await _saveToPrefs(); // Save updated icons
@@ -80,7 +81,7 @@ class FaceBookController extends GetxController {
         await _saveToPrefs(); // Save default icons
       }
     } catch (e) {
-      print('Error loading icons for $platformName: $e');
+      debugPrint('Error loading icons for $platformName: $e');
       icons = _getDefaultIcons();
     }
     update();
@@ -199,7 +200,7 @@ class FaceBookController extends GetxController {
       await _saveToPrefs();
       update();
     } catch (e) {
-      print('Error deleting icons for $platformName: $e');
+      debugPrint('Error deleting icons for $platformName: $e');
     }
   }
 
@@ -211,9 +212,9 @@ class FaceBookController extends GetxController {
           {'name': name, 'icon': iconUrl, 'category': categoryName});
       await _saveToPrefs();
       update();
-      print('Facebook - Added icon: $name with category: $categoryName');
+      debugPrint('Facebook - Added icon: $name with category: $categoryName');
     } catch (e) {
-      print('Error adding icon for $platformName: $e');
+      debugPrint('Error adding icon for $platformName: $e');
     }
   }
 
@@ -229,7 +230,7 @@ class FaceBookController extends GetxController {
       await _saveToPrefs();
       update();
     } catch (e) {
-      print('Error adding friend to category for $platformName: $e');
+      debugPrint('Error adding friend to category for $platformName: $e');
     }
   }
 
@@ -248,13 +249,13 @@ class FaceBookController extends GetxController {
       await _saveToPrefs();
       update();
     } catch (e) {
-      print('Error moving friend to category for $platformName: $e');
+      debugPrint('Error moving friend to category for $platformName: $e');
     }
   }
 
   List<String> getAvailableCategories() {
     Set<String> categories = {};
-    print('Facebook - Getting available categories from ${icons.length} icons');
+    debugPrint('Facebook - Getting available categories from ${icons.length} icons');
     
     // Fix existing "test" category that was incorrectly stored as "General"
     bool needsSave = false;
@@ -262,7 +263,7 @@ class FaceBookController extends GetxController {
       if (icon['name'] == 'test' && icon['category'] == 'General') {
         icon['category'] = 'test';
         needsSave = true;
-        print('Facebook - Fixed test category from General to test');
+        debugPrint('Facebook - Fixed test category from General to test');
       }
     }
     
@@ -274,11 +275,11 @@ class FaceBookController extends GetxController {
     for (var icon in icons) {
       if (icon['category'] != null && icon['category']!.isNotEmpty) {
         categories.add(icon['category']!);
-        print('Facebook - Found category: ${icon['category']}');
+        debugPrint('Facebook - Found category: ${icon['category']}');
       }
     }
     final result = categories.toList()..sort();
-    print('Facebook - Available categories: $result');
+    debugPrint('Facebook - Available categories: $result');
     return result;
   }
 
@@ -303,7 +304,7 @@ class FaceBookController extends GetxController {
         update();
       }
     } catch (e) {
-      print('Error removing icon for $platformName: $e');
+      debugPrint('Error removing icon for $platformName: $e');
     }
   }
 
@@ -315,7 +316,7 @@ class FaceBookController extends GetxController {
         update();
       }
     } catch (e) {
-      print('Error renaming icon for $platformName: $e');
+      debugPrint('Error renaming icon for $platformName: $e');
     }
   }
 
@@ -342,9 +343,9 @@ class FaceBookController extends GetxController {
       
       await _saveToPrefs();
       update();
-      print('Facebook - Renamed category from $oldCategoryName to $newCategoryName');
+      debugPrint('Facebook - Renamed category from $oldCategoryName to $newCategoryName');
     } catch (e) {
-      print('Error renaming category for $platformName: $e');
+      debugPrint('Error renaming category for $platformName: $e');
     }
   }
 
@@ -353,7 +354,7 @@ class FaceBookController extends GetxController {
       final prefs = await SharedPreferences.getInstance();
       await prefs.setString(_sharedPrefsKey, jsonEncode(icons));
     } catch (e) {
-      print('Error saving icons for $platformName: $e');
+      debugPrint('Error saving icons for $platformName: $e');
     }
   }
 
@@ -362,7 +363,7 @@ class FaceBookController extends GetxController {
       final prefs = await SharedPreferences.getInstance();
       await prefs.setString(_sharedPrefsKey, jsonEncode(icons));
     } catch (e) {
-      print('Error saving icons for $platformName: $e');
+      debugPrint('Error saving icons for $platformName: $e');
     }
   }
 
@@ -371,9 +372,9 @@ class FaceBookController extends GetxController {
       icons = _getDefaultIcons();
       await _saveToPrefs();
       update();
-      print('Facebook - Reset to default icons');
+      debugPrint('Facebook - Reset to default icons');
     } catch (e) {
-      print('Error resetting icons for $platformName: $e');
+      debugPrint('Error resetting icons for $platformName: $e');
     }
   }
 }
