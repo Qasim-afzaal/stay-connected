@@ -118,7 +118,7 @@ class SnapchatController extends GetxController {
       {
         'name': 'Auto',
         'icon': 'assets/images/platform_icons/auto.png',
-        'category': 'Audio'
+        'category': 'Auto'
       },
       {
         'name': 'Celebrity',
