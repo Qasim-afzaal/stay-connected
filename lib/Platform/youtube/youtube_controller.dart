@@ -22,12 +22,9 @@ class YouTubeController extends GetxController {
 
   @override
   void onClose() {
-    // Save data when controller is disposed
     _saveToPrefs();
     super.onClose();
   }
-
-  // Clear existing corrupted data
 
   Future<void> loadIcons() async {
     try {
