@@ -5,7 +5,7 @@ import 'package:get/get.dart';
 
 import 'package:stay_connected/Platform/twitter/twitter_controller.dart';
 import 'package:stay_connected/Platform/twitter/twitter_icon_screen.dart';
-import 'package:stay_connected/widget/custom_drwaer.dart';
+import 'package:stay_connected/widget/custom_drawer.dart';
 
 class TwitterPage extends StatelessWidget {
   TwitterPage({Key? key}) : super(key: key);

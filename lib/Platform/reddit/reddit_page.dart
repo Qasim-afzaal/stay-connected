@@ -5,7 +5,7 @@ import 'package:get/get.dart';
 
 import 'package:stay_connected/Platform/reddit/reddit_controller.dart';
 import 'package:stay_connected/Platform/reddit/reddit_icon_screen.dart';
-import 'package:stay_connected/widget/custom_drwaer.dart';
+import 'package:stay_connected/widget/custom_drawer.dart';
 
 class RedditPage extends StatelessWidget {
   RedditPage({Key? key}) : super(key: key);

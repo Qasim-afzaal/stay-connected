@@ -5,7 +5,7 @@ import 'package:get/get.dart';
 
 import 'package:stay_connected/Platform/instagram/instagram_controller.dart';
 import 'package:stay_connected/Platform/instagram/instagram_icon_screen.dart';
-import 'package:stay_connected/widget/custom_drwaer.dart';
+import 'package:stay_connected/widget/custom_drawer.dart';
 
 class InstagramPage extends StatelessWidget {
   InstagramPage({Key? key}) : super(key: key);

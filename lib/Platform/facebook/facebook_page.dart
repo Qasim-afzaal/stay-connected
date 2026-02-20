@@ -6,7 +6,7 @@ import 'package:get/get.dart';
 
 import 'package:stay_connected/Platform/facebook/facebook_controller.dart';
 import 'package:stay_connected/Platform/facebook/facebook_icon_screen.dart';
-import 'package:stay_connected/widget/custom_drwaer.dart';
+import 'package:stay_connected/widget/custom_drawer.dart';
 
 class FacebookPage extends StatelessWidget {
   const FacebookPage({super.key});
