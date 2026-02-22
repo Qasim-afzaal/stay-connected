@@ -471,8 +471,6 @@ void _showMoveDialog(BuildContext context, String friendName, int index, String 
 
   // Get all available categories including custom ones
   final allCategories = controller.getAvailableCategories();
-  
-  // Also get categories that have friends (for debugging)
   final categoriesWithFriends = controller.getCategoriesWithFriends();
 
   debugPrint('Twitter - All Categories: $allCategories');
