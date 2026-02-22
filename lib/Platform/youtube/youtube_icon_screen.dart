@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 import 'package:get/get.dart';
@@ -33,13 +34,9 @@ class YouTubeIconScreen extends StatelessWidget {
                 icon['profileUrl']!.isNotEmpty)
             .toList();
 
-        print('YouTube - Current category: $iconName');
-        print('YouTube - Total icons: ${controller.icons.length}');
-        print('YouTube - Category friends: ${categoryFriends.length}');
-        for (var icon in controller.icons) {
-          print(
-              'YouTube - Icon: ${icon['name']}, Category: ${icon['category']}, ProfileUrl: ${icon['profileUrl']}');
-        }
+        debugPrint('YouTube - Current category: $iconName');
+        debugPrint('YouTube - Total icons: ${controller.icons.length}');
+        debugPrint('YouTube - Category friends: ${categoryFriends.length}');
 
         return Scaffold(
           appBar: AppBar(
@@ -485,15 +482,10 @@ void _showMoveDialog(BuildContext context, String friendName, int index, String 
   // Also get categories that have friends (for debugging)
   final categoriesWithFriends = controller.getCategoriesWithFriends();
 
-  print('YouTube - All Categories: $allCategories');
-  print('YouTube - Categories with Friends: $categoriesWithFriends');
-  print('YouTube - Current category: $iconName');
-  print('YouTube - Total icons in controller: ${controller.icons.length}');
-  
-  // Debug: Print all icons to see what's stored
-  for (var icon in controller.icons) {
-    print('YouTube - Icon: ${icon['name']}, Category: ${icon['category']}, ProfileUrl: ${icon['profileUrl']}');
-  }
+  debugPrint('YouTube - All Categories: $allCategories');
+  debugPrint('YouTube - Categories with Friends: $categoriesWithFriends');
+  debugPrint('YouTube - Current category: $iconName');
+  debugPrint('YouTube - Total icons in controller: ${controller.icons.length}');
 
   if (allCategories.isEmpty) {
     Get.snackbar(
@@ -880,7 +872,7 @@ class _FriendProfileWebViewState extends State<_FriendProfileWebView> {
                   urlLower.startsWith('itms-apps://') ||
                   urlLower.contains('play.google.com/store') ||
                   urlLower.startsWith('market://')) {
-                print('YouTube Profile - Blocking: $url');
+                debugPrint('YouTube Profile - Blocking: $url');
                 return NavigationActionPolicy.CANCEL;
               }
               
@@ -889,7 +881,7 @@ class _FriendProfileWebViewState extends State<_FriendProfileWebView> {
                   urlLower.contains('doubleclick.net') ||
                   urlLower.contains('google-analytics.com') ||
                   urlLower.contains('googleadservices.com')) {
-                print('YouTube Profile - Blocking tracking URL: $url');
+                debugPrint('YouTube Profile - Blocking tracking URL: $url');
                 return NavigationActionPolicy.CANCEL;
               }
               
