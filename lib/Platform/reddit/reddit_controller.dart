@@ -116,7 +116,7 @@ class RedditController extends GetxController {
       {
         'name': 'Auto',
         'icon': 'assets/images/platform_icons/auto.png',
-        'category': 'Audio'
+        'category': 'Auto'
       },
       {
         'name': 'Celebrity',
@@ -155,15 +155,13 @@ class RedditController extends GetxController {
   }
 
   void toggleIconSelection(int index) {
-    if (selectedIcons.contains(index)) {
-      selectedIcons.remove(index);
-    } else {
+    if (!selectedIcons.remove(index)) {
       selectedIcons.add(index);
     }
     update();
   }
 
-  void deleteSelectedIcons() async {
+  Future<void> deleteSelectedIcons() async {
     try {
       final sortedIndices = selectedIcons.toList()
         ..sort((a, b) => b.compareTo(a));
