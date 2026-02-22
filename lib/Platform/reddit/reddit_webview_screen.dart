@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
@@ -239,25 +240,25 @@ class _RedditWebviewScreenState extends State<RedditWebviewScreen> {
               final urlLower = url.toLowerCase();
               final isMainFrame = navigationAction.targetFrame?.isMainFrame ?? true;
               
-              print('Reddit WebView - Navigation request to: $url (isMainFrame: $isMainFrame)');
+              debugPrint('Reddit WebView - Navigation request to: $url (isMainFrame: $isMainFrame)');
               
               // Block Google OAuth/iframe URLs that cause white screens
               if (urlLower.contains('accounts.google.com') ||
                   urlLower.contains('google.com/gsi/') ||
                   urlLower.contains('google.com/oauth2/')) {
-                print('Reddit WebView - Blocking Google OAuth/iframe URL: $url');
+                debugPrint('Reddit WebView - Blocking Google OAuth/iframe URL: $url');
                 return NavigationActionPolicy.CANCEL;
               }
               
               // Block applink.reddit.com URLs (Universal Links)
               if (urlLower.contains('applink.reddit.com')) {
-                print('Reddit WebView - Blocking applink URL: $url');
+                debugPrint('Reddit WebView - Blocking applink URL: $url');
                 return NavigationActionPolicy.CANCEL;
               }
               
               // Block URLs with launch_app_store parameter
               if (urlLower.contains('launch_app_store=true')) {
-                print('Reddit WebView - Blocking URL with launch_app_store: $url');
+                debugPrint('Reddit WebView - Blocking URL with launch_app_store: $url');
                 return NavigationActionPolicy.CANCEL;
               }
               
@@ -269,7 +270,7 @@ class _RedditWebviewScreenState extends State<RedditWebviewScreen> {
                   urlLower.startsWith('itms-apps://') ||
                   urlLower.contains('play.google.com/store') ||
                   urlLower.startsWith('market://')) {
-                print('Reddit WebView - Blocking app scheme/App Store URL: $url');
+                debugPrint('Reddit WebView - Blocking app scheme/App Store URL: $url');
                 return NavigationActionPolicy.CANCEL;
               }
               
@@ -282,7 +283,7 @@ class _RedditWebviewScreenState extends State<RedditWebviewScreen> {
                   !urlLower.contains('google.com/oauth2/') &&
                   !urlLower.contains('_webview=1') &&
                   !urlLower.contains('noapp=1')) {
-                print('Reddit WebView - Modifying URL to prevent Universal Links: $url');
+                debugPrint('Reddit WebView - Modifying URL to prevent Universal Links: $url');
                 final modifiedUrl = url.contains('?')
                     ? '$url&_webview=1&noapp=1'
                     : '$url?_webview=1&noapp=1';
