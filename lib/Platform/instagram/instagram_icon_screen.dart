@@ -1,4 +1,5 @@
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
@@ -351,16 +352,11 @@ void _showMoveDialog(BuildContext context, String friendName, int index, String 
   
   final categoriesWithFriends = controller.getCategoriesWithFriends();
 
-  print('Instagram - All Categories: $allCategories');
-  print('Instagram - Categories with Friends: $categoriesWithFriends');
-  print('Instagram - Current category: $iconName');
-  print('Instagram - Total icons in controller: ${controller.icons.length}');
+  debugPrint('Instagram - All Categories: $allCategories');
+  debugPrint('Instagram - Categories with Friends: $categoriesWithFriends');
+  debugPrint('Instagram - Current category: $iconName');
+  debugPrint('Instagram - Total icons in controller: ${controller.icons.length}');
   
-  // Debug: Print all icons to see what's stored
-  for (var icon in controller.icons) {
-    print('Instagram - Icon: ${icon['name']}, Category: ${icon['category']}, ProfileUrl: ${icon['profileUrl']}');
-  }
-
   if (allCategories.isEmpty) {
     Get.snackbar(
       'No Categories Available',
@@ -1111,7 +1107,7 @@ class _FriendProfileScreenState extends State<FriendProfileScreen> {
                   if (args.isNotEmpty) {
                     final postUrl = args[0].toString();
                     if (postUrl.isNotEmpty && postUrl.startsWith('http')) {
-                      print('Instagram Profile - Captured post URL: $postUrl');
+                      debugPrint('Instagram Profile - Captured post URL: $postUrl');
                       _capturedPostUrl = postUrl;
                       Future.microtask(() {
                         controller.loadUrl(urlRequest: URLRequest(url: WebUri(postUrl)));
@@ -1170,15 +1166,15 @@ class _FriendProfileScreenState extends State<FriendProfileScreen> {
               final urlLower = url.toLowerCase();
               final originalUrl = url;
               
-              print('Instagram Profile - Navigation request to: $originalUrl');
+              debugPrint('Instagram Profile - Navigation request to: $originalUrl');
               
               // Block applink.instagram.com URLs (Universal Links) - try to extract post URL from page
               if (urlLower.contains('applink.instagram.com')) {
-                print('Instagram Profile - Blocking applink URL, trying to extract post URL: $originalUrl');
+                debugPrint('Instagram Profile - Blocking applink URL, trying to extract post URL: $originalUrl');
                 
                 // Check if we have a captured post URL from JavaScript handler
                 if (_capturedPostUrl != null) {
-                  print('Instagram Profile - Using captured post URL: $_capturedPostUrl');
+                  debugPrint('Instagram Profile - Using captured post URL: $_capturedPostUrl');
                   final capturedUrl = _capturedPostUrl!;
                   _capturedPostUrl = null; // Reset
                   Future.microtask(() {
@@ -1235,15 +1231,15 @@ class _FriendProfileScreenState extends State<FriendProfileScreen> {
                   
                   if (postUrl != null && postUrl.toString().isNotEmpty && postUrl.toString() != 'null') {
                     final extractedUrl = postUrl.toString().replaceAll('"', '').trim();
-                    print('Instagram Profile - Extracted post URL from page: $extractedUrl');
+                    debugPrint('Instagram Profile - Extracted post URL from page: $extractedUrl');
                     Future.microtask(() {
                       controller.loadUrl(urlRequest: URLRequest(url: WebUri(extractedUrl)));
                     });
                   } else {
-                    print('Instagram Profile - Could not extract post URL, staying on current page');
+                    debugPrint('Instagram Profile - Could not extract post URL, staying on current page');
                   }
                 } catch (e) {
-                  print('Instagram Profile - Error extracting post URL: $e');
+                  debugPrint('Instagram Profile - Error extracting post URL: $e');
                 }
                 
                 return NavigationActionPolicy.CANCEL;
@@ -1251,7 +1247,7 @@ class _FriendProfileScreenState extends State<FriendProfileScreen> {
               
               // Block URLs with launch_app_store parameter
               if (urlLower.contains('launch_app_store=true')) {
-                print('Instagram Profile - Blocking URL with launch_app_store: $originalUrl');
+                debugPrint('Instagram Profile - Blocking URL with launch_app_store: $originalUrl');
                 return NavigationActionPolicy.CANCEL;
               }
               
@@ -1261,7 +1257,7 @@ class _FriendProfileScreenState extends State<FriendProfileScreen> {
                    urlLower.contains('/reel/') || 
                    urlLower.contains('/tv/') ||
                    urlLower.contains('/reels/'))) {
-                print('Instagram Profile - Allowing navigation to post: $originalUrl');
+                debugPrint('Instagram Profile - Allowing navigation to post: $originalUrl');
                 return NavigationActionPolicy.ALLOW;
               }
               
@@ -1275,13 +1271,13 @@ class _FriendProfileScreenState extends State<FriendProfileScreen> {
                   urlLower.startsWith('itms-apps://') ||
                   urlLower.contains('play.google.com/store') ||
                   urlLower.startsWith('market://')) {
-                print('Instagram Profile - Blocking navigation to: $originalUrl');
+                debugPrint('Instagram Profile - Blocking navigation to: $originalUrl');
                 return NavigationActionPolicy.CANCEL;
               }
               
               // Check if we have a captured post URL
               if (_capturedPostUrl != null) {
-                print('Instagram Profile - Loading captured post URL: $_capturedPostUrl');
+                debugPrint('Instagram Profile - Loading captured post URL: $_capturedPostUrl');
                 final capturedUrl = _capturedPostUrl!;
                 _capturedPostUrl = null; // Reset
                 Future.microtask(() {
@@ -1292,7 +1288,7 @@ class _FriendProfileScreenState extends State<FriendProfileScreen> {
               
               // Allow other Instagram URLs
               if (urlLower.contains('instagram.com')) {
-                print('Instagram Profile - Allowing navigation within Instagram: $originalUrl');
+                debugPrint('Instagram Profile - Allowing navigation within Instagram: $originalUrl');
                 return NavigationActionPolicy.ALLOW;
               }
               
