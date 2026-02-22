@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 import 'package:get/get.dart';
@@ -130,12 +131,12 @@ class _TikTokWebviewScreenState extends State<TikTokWebviewScreen> {
                       
                       // Only load if it's different from current URL
                       if (videoUrl != cleanCurrentUrl && videoUrl.contains('/video/')) {
-                        print('TikTok WebView - Captured video URL: $videoUrl');
+                        debugPrint('TikTok WebView - Captured video URL: $videoUrl');
                         Future.microtask(() {
                           controller.loadUrl(urlRequest: URLRequest(url: WebUri(videoUrl)));
                         });
                       } else {
-                        print('TikTok WebView - Ignoring duplicate URL: $videoUrl');
+                        debugPrint('TikTok WebView - Ignoring duplicate URL: $videoUrl');
                       }
                     }
                   }
@@ -631,10 +632,10 @@ class _TikTokWebviewScreenState extends State<TikTokWebviewScreen> {
               );
             },
             onLoadStart: (controller, url) {
-            print('TikTok WebView - Page Started: $url');
+            debugPrint('TikTok WebView - Page Started: $url');
 
               if (url?.toString().startsWith('tiktok://') ?? false) {
-              print('TikTok WebView - Detected TikTok app redirect, ignoring');
+              debugPrint('TikTok WebView - Detected TikTok app redirect, ignoring');
               return;
             }
 
@@ -796,10 +797,10 @@ class _TikTokWebviewScreenState extends State<TikTokWebviewScreen> {
               ''');
             },
             onLoadStop: (controller, url) async {
-            print('TikTok WebView - Page Finished: $url');
+            debugPrint('TikTok WebView - Page Finished: $url');
 
               if (url?.toString().startsWith('tiktok://') ?? false) {
-              print('TikTok WebView - Ignoring app redirect completion');
+              debugPrint('TikTok WebView - Ignoring app redirect completion');
               return;
             }
 
@@ -1139,7 +1140,7 @@ class _TikTokWebviewScreenState extends State<TikTokWebviewScreen> {
               ''');
             },
             onProgressChanged: (controller, progress) {
-              print('TikTok WebView - Loading Progress: $progress%');
+              debugPrint('TikTok WebView - Loading Progress: $progress%');
               setState(() {
                 loadingProgress = progress.toInt();
               });
@@ -1149,31 +1150,31 @@ class _TikTokWebviewScreenState extends State<TikTokWebviewScreen> {
               final urlLower = url.toLowerCase();
               final isMainFrame = navigationAction.targetFrame?.isMainFrame ?? true;
               
-              print('TikTok WebView - Navigation request to: $url (isMainFrame: $isMainFrame)');
+              debugPrint('TikTok WebView - Navigation request to: $url (isMainFrame: $isMainFrame)');
 
               // Block Google OAuth/iframe URLs that cause white screens
               if (urlLower.contains('accounts.google.com') ||
                   urlLower.contains('google.com/gsi/') ||
                   urlLower.contains('google.com/oauth2/')) {
-                print('TikTok WebView - Blocking Google OAuth/iframe URL: $url');
+                debugPrint('TikTok WebView - Blocking Google OAuth/iframe URL: $url');
                 return NavigationActionPolicy.CANCEL;
               }
               
               // Block applink.tiktok.com URLs (Universal Links)
               if (urlLower.contains('applink.tiktok.com')) {
-                print('TikTok WebView - Blocking applink URL: $url');
+                debugPrint('TikTok WebView - Blocking applink URL: $url');
                 return NavigationActionPolicy.CANCEL;
               }
               
               // Block URLs with launch_app_store parameter
               if (urlLower.contains('launch_app_store=true')) {
-                print('TikTok WebView - Blocking URL with launch_app_store: $url');
+                debugPrint('TikTok WebView - Blocking URL with launch_app_store: $url');
                 return NavigationActionPolicy.CANCEL;
               }
 
               // Allow intent:// for TikTok (Android deep links)
               if (url.startsWith('intent://') && urlLower.contains('tiktok')) {
-                print('TikTok WebView - Allowing intent:// redirect for TikTok: $url');
+                debugPrint('TikTok WebView - Allowing intent:// redirect for TikTok: $url');
                 return NavigationActionPolicy.ALLOW;
               }
 
@@ -1187,7 +1188,7 @@ class _TikTokWebviewScreenState extends State<TikTokWebviewScreen> {
                   urlLower.startsWith('snssdk://') ||
                   urlLower.startsWith('musical://') ||
                   urlLower.startsWith('tt://')) {
-                print('TikTok WebView - Allowing app redirect for TikTok content: $url');
+                debugPrint('TikTok WebView - Allowing app redirect for TikTok content: $url');
                 return NavigationActionPolicy.ALLOW;
               }
               
@@ -1198,7 +1199,7 @@ class _TikTokWebviewScreenState extends State<TikTokWebviewScreen> {
                   urlLower.startsWith('itms-apps://') ||
                   urlLower.startsWith('play.google.com/store') ||
                   urlLower.startsWith('market://')) {
-                print('TikTok WebView - Blocking app scheme/App Store URL: $url');
+                debugPrint('TikTok WebView - Blocking app scheme/App Store URL: $url');
                 return NavigationActionPolicy.CANCEL;
               }
               
@@ -1211,7 +1212,7 @@ class _TikTokWebviewScreenState extends State<TikTokWebviewScreen> {
                   !urlLower.contains('google.com/oauth2/') &&
                   !urlLower.contains('_webview=1') &&
                   !urlLower.contains('noapp=1')) {
-                print('TikTok WebView - Modifying URL to prevent Universal Links: $url');
+                debugPrint('TikTok WebView - Modifying URL to prevent Universal Links: $url');
                 final modifiedUrl = url.contains('?')
                     ? '$url&_webview=1&noapp=1'
                     : '$url?_webview=1&noapp=1';
