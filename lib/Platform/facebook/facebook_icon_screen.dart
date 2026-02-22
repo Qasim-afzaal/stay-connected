@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 import 'package:get/get.dart';
@@ -33,13 +34,9 @@ class FacebookIconScreen extends StatelessWidget {
                 icon['profileUrl']!.isNotEmpty)
             .toList();
 
-        print('Facebook - Current category: $iconName');
-        print('Facebook - Total icons: ${controller.icons.length}');
-        print('Facebook - Category friends: ${categoryFriends.length}');
-        for (var icon in controller.icons) {
-          print(
-              'Facebook - Icon: ${icon['name']}, Category: ${icon['category']}, ProfileUrl: ${icon['profileUrl']}');
-        }
+        debugPrint('Facebook - Current category: $iconName');
+        debugPrint('Facebook - Total icons: ${controller.icons.length}');
+        debugPrint('Facebook - Category friends: ${categoryFriends.length}');
 
         return Scaffold(
           appBar: AppBar(
@@ -558,14 +555,10 @@ class FacebookIconScreen extends StatelessWidget {
     final allCategories = controller.getAvailableCategories();
     final categoriesWithFriends = controller.getCategoriesWithFriends();
 
-    print('Facebook - All Categories: $allCategories');
-    print('Facebook - Categories with Friends: $categoriesWithFriends');
-    print('Facebook - Current category: $iconName');
-    print('Facebook - Total icons in controller: ${controller.icons.length}');
-    
-    for (var icon in controller.icons) {
-      print('Facebook - Icon: ${icon['name']}, Category: ${icon['category']}, ProfileUrl: ${icon['profileUrl']}');
-    }
+    debugPrint('Facebook - All Categories: $allCategories');
+    debugPrint('Facebook - Categories with Friends: $categoriesWithFriends');
+    debugPrint('Facebook - Current category: $iconName');
+    debugPrint('Facebook - Total icons in controller: ${controller.icons.length}');
 
     if (allCategories.isEmpty) {
       final isDark = Theme.of(context).brightness == Brightness.dark;
@@ -952,15 +945,15 @@ class _FriendProfileWebViewState extends State<_FriendProfileWebView> {
               final url = navigationAction.request.url?.toString() ?? '';
               final urlLower = url.toLowerCase();
               
-              print('Facebook Profile - Navigation request to: $url');
+              debugPrint('Facebook Profile - Navigation request to: $url');
               
               if (urlLower.contains('applink.facebook.com')) {
-                print('Facebook Profile - Blocking applink URL: $url');
+                debugPrint('Facebook Profile - Blocking applink URL: $url');
                 return NavigationActionPolicy.CANCEL;
               }
               
               if (urlLower.contains('launch_app_store=true')) {
-                print('Facebook Profile - Blocking URL with launch_app_store: $url');
+                debugPrint('Facebook Profile - Blocking URL with launch_app_store: $url');
                 return NavigationActionPolicy.CANCEL;
               }
               
@@ -973,19 +966,19 @@ class _FriendProfileWebViewState extends State<_FriendProfileWebView> {
                   urlLower.startsWith('itms-apps://') ||
                   urlLower.contains('play.google.com/store') ||
                   urlLower.startsWith('market://')) {
-                print('Facebook Profile - Blocking app scheme/App Store URL: $url');
+                debugPrint('Facebook Profile - Blocking app scheme/App Store URL: $url');
                 return NavigationActionPolicy.CANCEL;
               }
               
               if (urlLower.contains('fbsbx.com') || urlLower.contains('facebook.com/tr/')) {
-                print('Facebook Profile - Blocking tracking URL, staying on profile');
+                debugPrint('Facebook Profile - Blocking tracking URL, staying on profile');
                 return NavigationActionPolicy.CANCEL;
               }
               
               if (urlLower.contains('facebook.com') &&
                   !urlLower.contains(FacebookConstants.webviewParam1) &&
                   !urlLower.contains(FacebookConstants.webviewParam2)) {
-                print('Facebook Profile - Modifying URL to prevent Universal Links: $url');
+                debugPrint('Facebook Profile - Modifying URL to prevent Universal Links: $url');
                 final modifiedUrl = url.contains('?')
                     ? '$url&${FacebookConstants.webviewParam1}&${FacebookConstants.webviewParam2}'
                     : '$url?${FacebookConstants.webviewParam1}&${FacebookConstants.webviewParam2}';
