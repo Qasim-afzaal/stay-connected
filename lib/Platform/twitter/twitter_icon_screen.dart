@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 import 'package:get/get.dart';
@@ -33,13 +34,9 @@ class TwitterIconScreen extends StatelessWidget {
                 icon['profileUrl']!.isNotEmpty)
             .toList();
 
-        print('Twitter - Current category: $iconName');
-        print('Twitter - Total icons: ${controller.icons.length}');
-        print('Twitter - Category friends: ${categoryFriends.length}');
-        for (var icon in controller.icons) {
-          print(
-              'Twitter - Icon: ${icon['name']}, Category: ${icon['category']}, ProfileUrl: ${icon['profileUrl']}');
-        }
+        debugPrint('Twitter - Current category: $iconName');
+        debugPrint('Twitter - Total icons: ${controller.icons.length}');
+        debugPrint('Twitter - Category friends: ${categoryFriends.length}');
 
         return Scaffold(
           appBar: AppBar(
@@ -478,15 +475,10 @@ void _showMoveDialog(BuildContext context, String friendName, int index, String 
   // Also get categories that have friends (for debugging)
   final categoriesWithFriends = controller.getCategoriesWithFriends();
 
-  print('Twitter - All Categories: $allCategories');
-  print('Twitter - Categories with Friends: $categoriesWithFriends');
-  print('Twitter - Current category: $iconName');
-  print('Twitter - Total icons in controller: ${controller.icons.length}');
-  
-  // Debug: Print all icons to see what's stored
-  for (var icon in controller.icons) {
-    print('Twitter - Icon: ${icon['name']}, Category: ${icon['category']}, ProfileUrl: ${icon['profileUrl']}');
-  }
+  debugPrint('Twitter - All Categories: $allCategories');
+  debugPrint('Twitter - Categories with Friends: $categoriesWithFriends');
+  debugPrint('Twitter - Current category: $iconName');
+  debugPrint('Twitter - Total icons in controller: ${controller.icons.length}');
 
   if (allCategories.isEmpty) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
@@ -872,7 +864,7 @@ class _FriendProfileWebViewState extends State<_FriendProfileWebView> {
                   urlLower.startsWith('itms-apps://') ||
                   urlLower.contains('play.google.com/store') ||
                   urlLower.startsWith('market://')) {
-                print('Twitter Profile - Blocking: $url');
+                debugPrint('Twitter Profile - Blocking: $url');
                 return NavigationActionPolicy.CANCEL;
               }
               
