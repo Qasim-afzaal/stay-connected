@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
@@ -248,17 +249,17 @@ class _FacebookWebviewScreenState extends State<FacebookWebviewScreen> {
               final url = navigationAction.request.url?.toString() ?? '';
               final urlLower = url.toLowerCase();
               
-              print('Facebook WebView - Navigation request to: $url');
+              debugPrint('Facebook WebView - Navigation request to: $url');
               
               // Block applink.facebook.com URLs (Universal Links)
               if (urlLower.contains('applink.facebook.com')) {
-                print('Facebook WebView - Blocking applink URL: $url');
+                debugPrint('Facebook WebView - Blocking applink URL: $url');
                 return NavigationActionPolicy.CANCEL;
               }
               
               // Block URLs with launch_app_store parameter
               if (urlLower.contains('launch_app_store=true')) {
-                print('Facebook WebView - Blocking URL with launch_app_store: $url');
+                debugPrint('Facebook WebView - Blocking URL with launch_app_store: $url');
                 return NavigationActionPolicy.CANCEL;
               }
               
@@ -272,13 +273,13 @@ class _FacebookWebviewScreenState extends State<FacebookWebviewScreen> {
                   urlLower.startsWith('itms-apps://') ||
                   urlLower.contains('play.google.com/store') ||
                   urlLower.startsWith('market://')) {
-                print('Facebook WebView - Blocking app scheme/App Store URL: $url');
+                debugPrint('Facebook WebView - Blocking app scheme/App Store URL: $url');
                 return NavigationActionPolicy.CANCEL;
               }
               
               // Block tracking URLs (fbsbx.com) - these are just analytics pixels
               if (urlLower.contains('fbsbx.com') || urlLower.contains('facebook.com/tr/')) {
-                print('Facebook WebView - Blocking tracking URL: $url');
+                debugPrint('Facebook WebView - Blocking tracking URL: $url');
                 return NavigationActionPolicy.CANCEL;
               }
               
@@ -286,7 +287,7 @@ class _FacebookWebviewScreenState extends State<FacebookWebviewScreen> {
               if (urlLower.contains('facebook.com') &&
                   !urlLower.contains('_webview=1') &&
                   !urlLower.contains('noapp=1')) {
-                print('Facebook WebView - Modifying URL to prevent Universal Links: $url');
+                debugPrint('Facebook WebView - Modifying URL to prevent Universal Links: $url');
                 final modifiedUrl = url.contains('?')
                     ? '$url&_webview=1&noapp=1'
                     : '$url?_webview=1&noapp=1';

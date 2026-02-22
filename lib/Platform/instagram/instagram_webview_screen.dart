@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 import 'package:get/get.dart';
@@ -123,12 +124,12 @@ class _InstagramWebviewScreenState extends State<InstagramWebviewScreen> {
                       
                       // Only load if it's different from current URL
                       if (postUrl != cleanCurrentUrl && (postUrl.contains('/p/') || postUrl.contains('/reel/') || postUrl.contains('/tv/') || postUrl.contains('/reels/'))) {
-                        print('Instagram WebView - Captured post URL: $postUrl');
+                        debugPrint('Instagram WebView - Captured post URL: $postUrl');
                         Future.microtask(() {
                           controller.loadUrl(urlRequest: URLRequest(url: WebUri(postUrl)));
                         });
                       } else {
-                        print('Instagram WebView - Ignoring duplicate URL: $postUrl');
+                        debugPrint('Instagram WebView - Ignoring duplicate URL: $postUrl');
                       }
                     }
                   }
@@ -241,10 +242,10 @@ class _InstagramWebviewScreenState extends State<InstagramWebviewScreen> {
               );
             },
             onLoadStart: (controller, url) {
-              print('Instagram WebView - Page Started: $url');
+              debugPrint('Instagram WebView - Page Started: $url');
 
               if (url?.toString().startsWith('instagram://') ?? false) {
-                print('Instagram WebView - Detected Instagram app redirect, ignoring');
+                debugPrint('Instagram WebView - Detected Instagram app redirect, ignoring');
                 return;
               }
 
@@ -315,10 +316,10 @@ class _InstagramWebviewScreenState extends State<InstagramWebviewScreen> {
               ''');
             },
             onLoadStop: (controller, url) async {
-              print('Instagram WebView - Page Finished: $url');
+              debugPrint('Instagram WebView - Page Finished: $url');
 
               if (url?.toString().startsWith('instagram://') ?? false) {
-                print('Instagram WebView - Ignoring app redirect completion');
+                debugPrint('Instagram WebView - Ignoring app redirect completion');
                 return;
               }
 
@@ -403,7 +404,7 @@ class _InstagramWebviewScreenState extends State<InstagramWebviewScreen> {
               ''');
             },
             onProgressChanged: (controller, progress) {
-            print('Instagram WebView - Loading Progress: $progress%');
+            debugPrint('Instagram WebView - Loading Progress: $progress%');
             setState(() {
                 loadingProgress = progress.toInt();
                 if (progress >= 100) {
@@ -416,25 +417,25 @@ class _InstagramWebviewScreenState extends State<InstagramWebviewScreen> {
               final urlLower = url.toLowerCase();
               final isMainFrame = navigationAction.targetFrame?.isMainFrame ?? true;
               
-              print('Instagram WebView - Navigation request to: $url (isMainFrame: $isMainFrame)');
+              debugPrint('Instagram WebView - Navigation request to: $url (isMainFrame: $isMainFrame)');
 
               // Block Google OAuth/iframe URLs that cause white screens
               if (urlLower.contains('accounts.google.com') ||
                   urlLower.contains('google.com/gsi/') ||
                   urlLower.contains('google.com/oauth2/')) {
-                print('Instagram WebView - Blocking Google OAuth/iframe URL: $url');
+                debugPrint('Instagram WebView - Blocking Google OAuth/iframe URL: $url');
                 return NavigationActionPolicy.CANCEL;
               }
               
               // Block applink.instagram.com URLs (Universal Links)
               if (urlLower.contains('applink.instagram.com')) {
-                print('Instagram WebView - Blocking applink URL: $url');
+                debugPrint('Instagram WebView - Blocking applink URL: $url');
                 return NavigationActionPolicy.CANCEL;
               }
               
               // Block URLs with launch_app_store parameter
               if (urlLower.contains('launch_app_store=true')) {
-                print('Instagram WebView - Blocking URL with launch_app_store: $url');
+                debugPrint('Instagram WebView - Blocking URL with launch_app_store: $url');
                 return NavigationActionPolicy.CANCEL;
               }
               
@@ -443,7 +444,7 @@ class _InstagramWebviewScreenState extends State<InstagramWebviewScreen> {
               if (urlLower.startsWith('instagram://') ||
                   urlLower.startsWith('fb://') ||
                   urlLower.startsWith('fbapi://')) {
-                print('Instagram WebView - Allowing app redirect for Instagram content: $url');
+                debugPrint('Instagram WebView - Allowing app redirect for Instagram content: $url');
                 return NavigationActionPolicy.ALLOW;
               }
               
@@ -451,7 +452,7 @@ class _InstagramWebviewScreenState extends State<InstagramWebviewScreen> {
               if (urlLower.startsWith('itms://') ||
                   urlLower.startsWith('itms-apps://') ||
                   urlLower.startsWith('market://')) {
-                print('Instagram WebView - Blocking App Store/market URL: $url');
+                debugPrint('Instagram WebView - Blocking App Store/market URL: $url');
                 return NavigationActionPolicy.CANCEL;
               }
               
@@ -463,7 +464,7 @@ class _InstagramWebviewScreenState extends State<InstagramWebviewScreen> {
                   !urlLower.contains('/p/') &&
                   !urlLower.contains('/reel/') &&
                   !urlLower.contains('/tv/')) {
-                print('Instagram WebView - Blocking App Store URL: $url');
+                debugPrint('Instagram WebView - Blocking App Store URL: $url');
                 return NavigationActionPolicy.CANCEL;
               }
               
@@ -476,7 +477,7 @@ class _InstagramWebviewScreenState extends State<InstagramWebviewScreen> {
                   !urlLower.contains('google.com/oauth2/') &&
                   !urlLower.contains('_webview=1') &&
                   !urlLower.contains('noapp=1')) {
-                print('Instagram WebView - Modifying URL to prevent Universal Links: $url');
+                debugPrint('Instagram WebView - Modifying URL to prevent Universal Links: $url');
                 final modifiedUrl = url.contains('?')
                     ? '$url&_webview=1&noapp=1'
                     : '$url?_webview=1&noapp=1';

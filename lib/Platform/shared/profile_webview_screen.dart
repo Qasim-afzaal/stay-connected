@@ -1,6 +1,8 @@
-import 'package:flutter/cupertino.dart';
-import 'package:flutter/material.dart';
 import 'dart:io';
+
+import 'package:flutter/cupertino.dart';
+import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
 
 import 'package:get/get.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
@@ -410,7 +412,7 @@ class _ProfileWebViewScreenState extends State<ProfileWebViewScreen> {
                     );
                   },
                   onLoadStart: (controller, url) {
-                    print('ProfileWebView - Load Start: $url');
+                    debugPrint('ProfileWebView - Load Start: $url');
                     setState(() {
                       isLoading = true;
                       currentUrl = url?.toString();
@@ -418,7 +420,7 @@ class _ProfileWebViewScreenState extends State<ProfileWebViewScreen> {
                     
                     // Block app redirects immediately
                     if (url != null && _shouldBlockUrl(url.toString())) {
-                      print('ProfileWebView - BLOCKING URL at load start: $url');
+                      debugPrint('ProfileWebView - BLOCKING URL at load start: $url');
                       controller.goBack();
                       return;
                     }
@@ -432,7 +434,7 @@ class _ProfileWebViewScreenState extends State<ProfileWebViewScreen> {
                     }
                   },
                   onLoadStop: (controller, url) async {
-                    print('ProfileWebView - Load Stop: $url');
+                    debugPrint('ProfileWebView - Load Stop: $url');
                     setState(() {
                       isLoading = false;
                       currentUrl = url?.toString();
@@ -469,7 +471,7 @@ class _ProfileWebViewScreenState extends State<ProfileWebViewScreen> {
                         message.contains('instagram://') ||
                         message.contains('twitter://') ||
                         message.contains('apps.apple.com')) {
-                      print('ProfileWebView - Console [${consoleMessage.messageLevel}]: ${consoleMessage.message}');
+                      debugPrint('ProfileWebView - Console [${consoleMessage.messageLevel}]: ${consoleMessage.message}');
                     }
                   },
                   onReceivedServerTrustAuthRequest: (controller, challenge) async {
@@ -481,17 +483,17 @@ class _ProfileWebViewScreenState extends State<ProfileWebViewScreen> {
                     final navigationType = navigationAction.navigationType;
                     final isMainFrame = navigationAction.isForMainFrame;
                     
-                    print('ProfileWebView - shouldOverrideUrlLoading: $url (type: $navigationType, mainFrame: $isMainFrame)');
+                    debugPrint('ProfileWebView - shouldOverrideUrlLoading: $url (type: $navigationType, mainFrame: $isMainFrame)');
                     
                     // Block TikTok redirect URLs that try to open the app
                     if (url.contains('tiktokv.com/redirect') || url.contains('tiktok.com/redirect')) {
-                      print('ProfileWebView - Blocking TikTok redirect URL: $url');
+                      debugPrint('ProfileWebView - Blocking TikTok redirect URL: $url');
                       return NavigationActionPolicy.CANCEL;
                     }
                     
                     // CRITICAL: Block ALL navigation types for app schemes
                     if (_shouldBlockUrl(url)) {
-                      print('ProfileWebView - CRITICAL: BLOCKING navigation: $url');
+                      debugPrint('ProfileWebView - CRITICAL: BLOCKING navigation: $url');
                       return NavigationActionPolicy.CANCEL;
                     }
                     
@@ -500,7 +502,7 @@ class _ProfileWebViewScreenState extends State<ProfileWebViewScreen> {
                     final blockedSchemes = _getBlockedSchemes();
                     for (var scheme in blockedSchemes) {
                       if (urlLower.startsWith(scheme)) {
-                        print('ProfileWebView - CRITICAL: BLOCKING app scheme ($scheme): $url');
+                        debugPrint('ProfileWebView - CRITICAL: BLOCKING app scheme ($scheme): $url');
                         return NavigationActionPolicy.CANCEL;
                       }
                     }
@@ -512,13 +514,13 @@ class _ProfileWebViewScreenState extends State<ProfileWebViewScreen> {
                         urlLower.startsWith('itms-apps://') ||
                         urlLower.contains('play.google.com/store') ||
                         urlLower.startsWith('market://')) {
-                      print('ProfileWebView - CRITICAL: BLOCKING App Store URL: $url');
+                      debugPrint('ProfileWebView - CRITICAL: BLOCKING App Store URL: $url');
                       return NavigationActionPolicy.CANCEL;
                     }
                     
                     // CRITICAL: Block about:blank in iframes (often used for redirects)
                     if (urlLower == 'about:blank' && !isMainFrame) {
-                      print('ProfileWebView - BLOCKING about:blank in iframe');
+                      debugPrint('ProfileWebView - BLOCKING about:blank in iframe');
                       return NavigationActionPolicy.CANCEL;
                     }
                     
@@ -547,7 +549,7 @@ class _ProfileWebViewScreenState extends State<ProfileWebViewScreen> {
                     if (isSocialMediaUrl && 
                         !url.contains('_webview=1') && 
                         !url.contains('noapp=1')) {
-                      print('ProfileWebView - Modifying social media URL to prevent Universal Links: $url');
+                      debugPrint('ProfileWebView - Modifying social media URL to prevent Universal Links: $url');
                       
                       // Add a parameter that prevents Universal Link detection (only once)
                       final modifiedUrl = url.contains('?') 
@@ -567,7 +569,7 @@ class _ProfileWebViewScreenState extends State<ProfileWebViewScreen> {
                             ),
                           );
                         } catch (e) {
-                          print('ProfileWebView - Error loading modified URL: $e');
+                          debugPrint('ProfileWebView - Error loading modified URL: $e');
                         }
                       });
                       
@@ -577,7 +579,7 @@ class _ProfileWebViewScreenState extends State<ProfileWebViewScreen> {
                     // If social media URL already has our parameters, allow it
                     if (isSocialMediaUrl && 
                         (url.contains('_webview=1') || url.contains('noapp=1'))) {
-                      print('ProfileWebView - Allowing social media URL with prevention parameters: $url');
+                      debugPrint('ProfileWebView - Allowing social media URL with prevention parameters: $url');
                       return NavigationActionPolicy.ALLOW;
                     }
                     
@@ -602,16 +604,16 @@ class _ProfileWebViewScreenState extends State<ProfileWebViewScreen> {
                     }
                     
                     if (isAllowed) {
-                      print('ProfileWebView - Allowing navigation: $url');
+                      debugPrint('ProfileWebView - Allowing navigation: $url');
                       return NavigationActionPolicy.ALLOW;
                     }
                     
                     // Block everything else
-                    print('ProfileWebView - BLOCKING navigation (not allowed domain): $url');
+                    debugPrint('ProfileWebView - BLOCKING navigation (not allowed domain): $url');
                     return NavigationActionPolicy.CANCEL;
                   },
                   onReceivedError: (controller, request, error) {
-                    print('ProfileWebView - Received Error: ${error.description} for ${request.url}');
+                    debugPrint('ProfileWebView - Received Error: ${error.description} for ${request.url}');
                   },
                 ),
                 if (isLoading)
