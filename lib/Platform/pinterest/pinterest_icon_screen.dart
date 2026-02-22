@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 import 'package:get/get.dart';
@@ -342,15 +343,10 @@ void _showMoveDialog(BuildContext context, String friendName, int index, String 
   // Also get categories that have friends (for debugging)
   final categoriesWithFriends = controller.getCategoriesWithFriends();
 
-  print('Pinterest - All Categories: $allCategories');
-  print('Pinterest - Categories with Friends: $categoriesWithFriends');
-  print('Pinterest - Current category: $iconName');
-  print('Pinterest - Total icons in controller: ${controller.icons.length}');
-  
-  // Debug: Print all icons to see what's stored
-  for (var icon in controller.icons) {
-    print('Pinterest - Icon: ${icon['name']}, Category: ${icon['category']}, ProfileUrl: ${icon['profileUrl']}');
-  }
+  debugPrint('Pinterest - All Categories: $allCategories');
+  debugPrint('Pinterest - Categories with Friends: $categoriesWithFriends');
+  debugPrint('Pinterest - Current category: $iconName');
+  debugPrint('Pinterest - Total icons in controller: ${controller.icons.length}');
 
   if (allCategories.isEmpty) {
     Get.snackbar(
@@ -867,13 +863,13 @@ class _FriendProfileWebViewState extends State<_FriendProfileWebView> {
                   urlLower.startsWith('itms-apps://') ||
                   urlLower.contains('play.google.com/store') ||
                   urlLower.startsWith('market://')) {
-                print('Pinterest Profile - Blocking: $url');
+                debugPrint('Pinterest Profile - Blocking: $url');
                 return NavigationActionPolicy.CANCEL;
               }
               
               // Block tracking URLs (ct.pinterest.com) - redirect back to main profile
               if (urlLower.contains('ct.pinterest.com')) {
-                print('Pinterest Profile - Blocking tracking URL, staying on profile');
+                debugPrint('Pinterest Profile - Blocking tracking URL, staying on profile');
                 return NavigationActionPolicy.CANCEL;
               }
               
