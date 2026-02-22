@@ -1,4 +1,5 @@
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 import 'package:get/get.dart';
@@ -32,13 +33,9 @@ class TikTokIconScreen extends StatelessWidget {
                 icon['profileUrl']!.isNotEmpty)
             .toList();
 
-        print('TikTok - Current category: $iconName');
-        print('TikTok - Total icons: ${controller.icons.length}');
-        print('TikTok - Category friends: ${categoryFriends.length}');
-        for (var icon in controller.icons) {
-          print(
-              'TikTok - Icon: ${icon['name']}, Category: ${icon['category']}, ProfileUrl: ${icon['profileUrl']}');
-        }
+        debugPrint('TikTok - Current category: $iconName');
+        debugPrint('TikTok - Total icons: ${controller.icons.length}');
+        debugPrint('TikTok - Category friends: ${categoryFriends.length}');
 
         return Scaffold(
           appBar: AppBar(
@@ -482,15 +479,10 @@ void _showMoveDialog(BuildContext context, String friendName, int index, String 
   // Also get categories that have friends (for debugging)
   final categoriesWithFriends = controller.getCategoriesWithFriends();
 
-  print('TikTok - All Categories: $allCategories');
-  print('TikTok - Categories with Friends: $categoriesWithFriends');
-  print('TikTok - Current category: $iconName');
-  print('TikTok - Total icons in controller: ${controller.icons.length}');
-  
-  // Debug: Print all icons to see what's stored
-  for (var icon in controller.icons) {
-    print('TikTok - Icon: ${icon['name']}, Category: ${icon['category']}, ProfileUrl: ${icon['profileUrl']}');
-  }
+  debugPrint('TikTok - All Categories: $allCategories');
+  debugPrint('TikTok - Categories with Friends: $categoriesWithFriends');
+  debugPrint('TikTok - Current category: $iconName');
+  debugPrint('TikTok - Total icons in controller: ${controller.icons.length}');
 
   if (allCategories.isEmpty) {
     Get.snackbar(
@@ -806,7 +798,7 @@ class _FriendProfileWebViewState extends State<_FriendProfileWebView> {
         onMessageReceived: (JavaScriptMessage message) {
           final videoUrl = message.message;
           if (videoUrl.isNotEmpty && videoUrl.startsWith('http')) {
-            print('TikTok Profile - Captured video URL: $videoUrl');
+            debugPrint('TikTok Profile - Captured video URL: $videoUrl');
             _capturedVideoUrl = videoUrl;
             // Load the video URL directly in the main webview
             Future.microtask(() {
@@ -836,7 +828,7 @@ class _FriendProfileWebViewState extends State<_FriendProfileWebView> {
                 urlLower.startsWith('market://') ||
                 urlLower.contains('app-store') ||
                 urlLower.contains('get-app')) {
-              print('TikTok Profile - Blocking app redirect: $url');
+              debugPrint('TikTok Profile - Blocking app redirect: $url');
               _controller.goBack();
               return;
             }
@@ -1257,11 +1249,11 @@ class _FriendProfileWebViewState extends State<_FriendProfileWebView> {
             
             // Block TikTok redirect URLs - try to extract video URL and load it
             if (url.contains('tiktokv.com/redirect') || url.contains('tiktok.com/redirect')) {
-              print('TikTok Profile - Blocking redirect: $originalUrl');
+              debugPrint('TikTok Profile - Blocking redirect: $originalUrl');
               
               // Check if we have a captured video URL from JavaScript
               if (_capturedVideoUrl != null) {
-                print('TikTok Profile - Loading captured video URL in webview: $_capturedVideoUrl');
+                debugPrint('TikTok Profile - Loading captured video URL in webview: $_capturedVideoUrl');
                 final capturedUrl = _capturedVideoUrl!;
                 _capturedVideoUrl = null; // Reset
                 // Load the video URL directly in the webview
@@ -1357,7 +1349,7 @@ class _FriendProfileWebViewState extends State<_FriendProfileWebView> {
                     }
                   })();
                 ''').catchError((error) {
-                  print('TikTok Profile - JavaScript error (ignored): $error');
+                  debugPrint('TikTok Profile - JavaScript error (ignored): $error');
                 });
               });
               
@@ -1380,7 +1372,7 @@ class _FriendProfileWebViewState extends State<_FriendProfileWebView> {
                 url.startsWith('market://') ||
                 url.contains('app-store') ||
                 url.contains('get-app')) {
-              print('TikTok Profile - Blocking navigation to: $originalUrl');
+              debugPrint('TikTok Profile - Blocking navigation to: $originalUrl');
               return NavigationDecision.prevent;
             }
 
@@ -1394,7 +1386,7 @@ class _FriendProfileWebViewState extends State<_FriendProfileWebView> {
                  url.contains('app_redirect') ||
                  url.contains('open_app') ||
                  url.contains('app_link'))) {
-              print('TikTok Profile - Blocking app download/deep link: $originalUrl');
+              debugPrint('TikTok Profile - Blocking app download/deep link: $originalUrl');
               return NavigationDecision.prevent;
             }
 
@@ -1405,7 +1397,7 @@ class _FriendProfileWebViewState extends State<_FriendProfileWebView> {
                 !url.startsWith('data:') &&
                 !url.startsWith('javascript:') &&
                 !url.startsWith('file://')) {
-              print('TikTok Profile - Blocking non-web URL: $originalUrl');
+              debugPrint('TikTok Profile - Blocking non-web URL: $originalUrl');
               return NavigationDecision.prevent;
             }
             
