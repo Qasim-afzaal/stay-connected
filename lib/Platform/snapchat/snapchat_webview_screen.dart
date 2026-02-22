@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
@@ -238,17 +239,17 @@ class _SnapchatWebviewScreenState extends State<SnapchatWebviewScreen> {
               final url = navigationAction.request.url?.toString() ?? '';
               final urlLower = url.toLowerCase();
               
-              print('Snapchat WebView - Navigation request to: $url');
+              debugPrint('Snapchat WebView - Navigation request to: $url');
               
               // Block applink.snapchat.com URLs (Universal Links)
               if (urlLower.contains('applink.snapchat.com')) {
-                print('Snapchat WebView - Blocking applink URL: $url');
+                debugPrint('Snapchat WebView - Blocking applink URL: $url');
                 return NavigationActionPolicy.CANCEL;
               }
               
               // Block URLs with launch_app_store parameter
               if (urlLower.contains('launch_app_store=true')) {
-                print('Snapchat WebView - Blocking URL with launch_app_store: $url');
+                debugPrint('Snapchat WebView - Blocking URL with launch_app_store: $url');
                 return NavigationActionPolicy.CANCEL;
               }
               
@@ -260,7 +261,7 @@ class _SnapchatWebviewScreenState extends State<SnapchatWebviewScreen> {
                   urlLower.startsWith('itms-apps://') ||
                   urlLower.contains('play.google.com/store') ||
                   urlLower.startsWith('market://')) {
-                print('Snapchat WebView - Blocking app scheme/App Store URL: $url');
+                debugPrint('Snapchat WebView - Blocking app scheme/App Store URL: $url');
                 return NavigationActionPolicy.CANCEL;
               }
               
@@ -268,7 +269,7 @@ class _SnapchatWebviewScreenState extends State<SnapchatWebviewScreen> {
               if (urlLower.contains('snapchat.com') &&
                   !urlLower.contains('_webview=1') &&
                   !urlLower.contains('noapp=1')) {
-                print('Snapchat WebView - Modifying URL to prevent Universal Links: $url');
+                debugPrint('Snapchat WebView - Modifying URL to prevent Universal Links: $url');
                 final modifiedUrl = url.contains('?')
                     ? '$url&_webview=1&noapp=1'
                     : '$url?_webview=1&noapp=1';
