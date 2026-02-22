@@ -28,7 +28,7 @@ class HomeController extends GetxController {
       'icon': 'assets/images/img_pinterest_1.png',
     },
     {
-      'name': 'tiktok',
+      'name': 'TikTok',
       'url': 'https://tiktok.com',
       'icon': 'assets/images/img_tumblr_1.png',
     },
