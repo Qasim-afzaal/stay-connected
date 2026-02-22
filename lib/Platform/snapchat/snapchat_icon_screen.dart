@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 import 'package:get/get.dart';
@@ -33,13 +34,9 @@ class SnapchatIconScreen extends StatelessWidget {
                 icon['profileUrl']!.isNotEmpty)
             .toList();
 
-        print('Snapchat - Current category: $iconName');
-        print('Snapchat - Total icons: ${controller.icons.length}');
-        print('Snapchat - Category friends: ${categoryFriends.length}');
-        for (var icon in controller.icons) {
-          print(
-              'Snapchat - Icon: ${icon['name']}, Category: ${icon['category']}, ProfileUrl: ${icon['profileUrl']}');
-        }
+        debugPrint('Snapchat - Current category: $iconName');
+        debugPrint('Snapchat - Total icons: ${controller.icons.length}');
+        debugPrint('Snapchat - Category friends: ${categoryFriends.length}');
 
         return Scaffold(
           appBar: AppBar(
@@ -482,15 +479,10 @@ void _showMoveDialog(BuildContext context, String friendName, int index, String 
   // Also get categories that have friends (for debugging)
   final categoriesWithFriends = controller.getCategoriesWithFriends();
 
-  print('Snapchat - All Categories: $allCategories');
-  print('Snapchat - Categories with Friends: $categoriesWithFriends');
-  print('Snapchat - Current category: $iconName');
-  print('Snapchat - Total icons in controller: ${controller.icons.length}');
-  
-  // Debug: Print all icons to see what's stored
-  for (var icon in controller.icons) {
-    print('Snapchat - Icon: ${icon['name']}, Category: ${icon['category']}, ProfileUrl: ${icon['profileUrl']}');
-  }
+  debugPrint('Snapchat - All Categories: $allCategories');
+  debugPrint('Snapchat - Categories with Friends: $categoriesWithFriends');
+  debugPrint('Snapchat - Current category: $iconName');
+  debugPrint('Snapchat - Total icons in controller: ${controller.icons.length}');
 
   if (allCategories.isEmpty) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
@@ -878,7 +870,7 @@ class _FriendProfileWebViewState extends State<_FriendProfileWebView> {
                   urlLower.startsWith('itms-apps://') ||
                   urlLower.contains('play.google.com/store') ||
                   urlLower.startsWith('market://')) {
-                print('Snapchat Profile - Blocking: $url');
+                debugPrint('Snapchat Profile - Blocking: $url');
                 return NavigationActionPolicy.CANCEL;
               }
               
