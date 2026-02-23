@@ -161,7 +161,7 @@ class PinterestController extends GetxController {
     update();
   }
 
-  void deleteSelectedIcons() async {
+  Future<void> deleteSelectedIcons() async {
     try {
       final sortedIndices = selectedIcons.toList()
         ..sort((a, b) => b.compareTo(a));
