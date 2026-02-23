@@ -668,7 +668,7 @@ class _ProfileWebViewScreenState extends State<ProfileWebViewScreen> {
     return url.contains('$platform.com') && !url.contains('google.com/search');
   }
 
-  void _onOkPressed() async {
+  Future<void> _onOkPressed() async {
     final url = currentUrl;
 
     if (url != null && _isValidProfileUrl(url)) {

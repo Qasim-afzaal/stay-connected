@@ -744,7 +744,7 @@ class _PinterestWebviewScreenState extends State<PinterestWebviewScreen> {
     );
   }
 
-  void _showAddFriendDialog() async {
+  Future<void> _showAddFriendDialog() async {
     // Don't show dialog if on Google search page
     if (_isOnGoogleSearch()) {
       Get.snackbar(

@@ -392,7 +392,7 @@ class _RedditWebviewScreenState extends State<RedditWebviewScreen> {
     return url.contains('google.com') || url.contains('googleapis.com');
   }
 
-  void _showAddFriendDialog() async {
+  Future<void> _showAddFriendDialog() async {
     // Don't show dialog if on Google search page
     if (_isOnGoogleSearch()) {
       Get.snackbar(
