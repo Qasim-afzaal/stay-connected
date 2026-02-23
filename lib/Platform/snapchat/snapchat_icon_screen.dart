@@ -473,7 +473,6 @@ class SnapchatIconScreen extends StatelessWidget {
 void _showMoveDialog(BuildContext context, String friendName, int index, String iconName) {
   final controller = Get.find<SnapchatController>();
 
-  // Get all available categories including custom ones
   final allCategories = controller.getAvailableCategories();
   final categoriesWithFriends = controller.getCategoriesWithFriends();
 

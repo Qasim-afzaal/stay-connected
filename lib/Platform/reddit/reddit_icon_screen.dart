@@ -478,7 +478,6 @@ void _showMoveDialog(BuildContext context, String friendName, int index, String 
   final controller = Get.find<RedditController>();
   final isDark = Theme.of(context).brightness == Brightness.dark;
 
-  // Get all available categories including custom ones
   final allCategories = controller.getAvailableCategories();
   final categoriesWithFriends = controller.getCategoriesWithFriends();
 
