@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 import 'package:get/get.dart';
@@ -33,13 +34,9 @@ class RedditIconScreen extends StatelessWidget {
                 icon['profileUrl']!.isNotEmpty)
             .toList();
 
-        print('Reddit - Current category: $iconName');
-        print('Reddit - Total icons: ${controller.icons.length}');
-        print('Reddit - Category friends: ${categoryFriends.length}');
-        for (var icon in controller.icons) {
-          print(
-              'Reddit - Icon: ${icon['name']}, Category: ${icon['category']}, ProfileUrl: ${icon['profileUrl']}');
-        }
+        debugPrint('Reddit - Current category: $iconName');
+        debugPrint('Reddit - Total icons: ${controller.icons.length}');
+        debugPrint('Reddit - Category friends: ${categoryFriends.length}');
 
         return Scaffold(
           appBar: AppBar(
@@ -485,15 +482,10 @@ void _showMoveDialog(BuildContext context, String friendName, int index, String 
   final allCategories = controller.getAvailableCategories();
   final categoriesWithFriends = controller.getCategoriesWithFriends();
 
-  print('Reddit - All Categories: $allCategories');
-  print('Reddit - Categories with Friends: $categoriesWithFriends');
-  print('Reddit - Current category: $iconName');
-  print('Reddit - Total icons in controller: ${controller.icons.length}');
-  
-  // Debug: Print all icons to see what's stored
-  for (var icon in controller.icons) {
-    print('Reddit - Icon: ${icon['name']}, Category: ${icon['category']}, ProfileUrl: ${icon['profileUrl']}');
-  }
+  debugPrint('Reddit - All Categories: $allCategories');
+  debugPrint('Reddit - Categories with Friends: $categoriesWithFriends');
+  debugPrint('Reddit - Current category: $iconName');
+  debugPrint('Reddit - Total icons in controller: ${controller.icons.length}');
 
   if (allCategories.isEmpty) {
     Get.snackbar(
@@ -878,7 +870,7 @@ class _FriendProfileWebViewState extends State<_FriendProfileWebView> {
                   urlLower.startsWith('itms-apps://') ||
                   urlLower.contains('play.google.com/store') ||
                   urlLower.startsWith('market://')) {
-                print('Reddit Profile - Blocking: $url');
+                debugPrint('Reddit Profile - Blocking: $url');
                 return NavigationActionPolicy.CANCEL;
               }
               
