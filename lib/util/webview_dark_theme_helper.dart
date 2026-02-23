@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 
@@ -108,7 +109,7 @@ class WebViewDarkThemeHelper {
           })();
         ''');
       } catch (e) {
-        print('Error injecting dark theme: $e');
+        debugPrint('Error injecting dark theme: $e');
       }
     }
   }
