@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 import 'package:get/get.dart';
@@ -58,7 +59,7 @@ class HomePage extends StatelessWidget {
                     final item = controller.socialPlatforms[index];
                     return GestureDetector(
                       onTap: () {
-                        print(item['name']);
+                        debugPrint(item['name'].toString());
                         switch (item["name"].toString().toLowerCase()) {
                           case "facebook":
                             Get.offNamed(Routes.FACEBOOK);
