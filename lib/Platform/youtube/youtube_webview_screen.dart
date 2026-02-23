@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 import 'package:get/get.dart';
@@ -50,9 +51,9 @@ class _YouTubeWebviewScreenState extends State<YouTubeWebviewScreen> {
 
   void _startLoaderTimeout() {
     _loaderTimer?.cancel();
-    print('YouTube WebView - Starting 25 second timeout timer');
+    debugPrint('YouTube WebView - Starting 25 second timeout timer');
     _loaderTimer = Timer(const Duration(seconds: 25), () {
-      print('YouTube WebView - TIMEOUT: Loading took longer than 25 seconds');
+      debugPrint('YouTube WebView - TIMEOUT: Loading took longer than 25 seconds');
       if (mounted &&
           isLoading &&
           !hasLoadedSuccessfully &&
@@ -75,7 +76,7 @@ class _YouTubeWebviewScreenState extends State<YouTubeWebviewScreen> {
           !hasLoadedSuccessfully &&
           loadingProgress >= 85 &&
           !isNavigatingToApp) {
-        print(
+        debugPrint(
             'YouTube WebView - Progress stuck at $loadingProgress%, forcing completion');
         setState(() {
           isLoading = false;
@@ -89,12 +90,12 @@ class _YouTubeWebviewScreenState extends State<YouTubeWebviewScreen> {
   }
 
   Future<void> _checkBlockOrCaptcha() async {
-    print('YouTube WebView - Checking for block/captcha...');
+    debugPrint('YouTube WebView - Checking for block/captcha...');
     try {
       String? title = await webViewController?.getTitle();
       String url = currentUrl ?? '';
-      print('YouTube WebView - Page title: $title');
-      print('YouTube WebView - Current URL: $url');
+      debugPrint('YouTube WebView - Page title: $title');
+      debugPrint('YouTube WebView - Current URL: $url');
 
       if ((title != null &&
               (title.toLowerCase().contains('not supported') ||
@@ -107,7 +108,7 @@ class _YouTubeWebviewScreenState extends State<YouTubeWebviewScreen> {
           url.contains('blocked') ||
           url.contains('unsupported') ||
           url.contains('checkpoint')) {
-        print(
+        debugPrint(
             'YouTube WebView - BLOCK DETECTED: Title or URL contains block indicators');
         setState(() {
           isBlocked = true;
@@ -117,10 +118,10 @@ class _YouTubeWebviewScreenState extends State<YouTubeWebviewScreen> {
               'YouTube is blocking this browser or showing a captcha.';
         });
       } else {
-        print('YouTube WebView - No block detected, page appears normal');
+        debugPrint('YouTube WebView - No block detected, page appears normal');
       }
     } catch (e) {
-      print('YouTube WebView - Error checking block/captcha: $e');
+      debugPrint('YouTube WebView - Error checking block/captcha: $e');
     }
   }
 
@@ -136,20 +137,20 @@ class _YouTubeWebviewScreenState extends State<YouTubeWebviewScreen> {
   }
 
   void _initializeWebView() {
-    print('YouTube WebView - Initializing WebView controller');
+    debugPrint('YouTube WebView - Initializing WebView controller');
 
     _fallbackTimer = Timer(const Duration(seconds: 8), () async {
       if (mounted &&
           isLoading &&
           !hasLoadedSuccessfully &&
           !isNavigatingToApp) {
-        print(
+        debugPrint(
             'YouTube WebView - Fallback 1: Checking if page actually loaded after 8 seconds');
         try {
           String? title = await webViewController?.getTitle();
-          print('YouTube WebView - Fallback 1: Page title after 8s: $title');
+          debugPrint('YouTube WebView - Fallback 1: Page title after 8s: $title');
           if (title != null && title.isNotEmpty && title != 'Google') {
-            print(
+            debugPrint(
                 'YouTube WebView - Fallback 1: Page seems loaded, forcing finish');
             setState(() {
               isLoading = false;
@@ -161,7 +162,7 @@ class _YouTubeWebviewScreenState extends State<YouTubeWebviewScreen> {
             await _checkBlockOrCaptcha();
           }
         } catch (e) {
-          print('YouTube WebView - Fallback 1: Error checking title: $e');
+          debugPrint('YouTube WebView - Fallback 1: Error checking title: $e');
         }
       }
     });
@@ -171,13 +172,13 @@ class _YouTubeWebviewScreenState extends State<YouTubeWebviewScreen> {
           isLoading &&
           !hasLoadedSuccessfully &&
           !isNavigatingToApp) {
-        print(
+        debugPrint(
             'YouTube WebView - Fallback 2: Checking if page actually loaded after 15 seconds');
         try {
           String? title = await webViewController?.getTitle();
-          print('YouTube WebView - Fallback 2: Page title after 15s: $title');
+          debugPrint('YouTube WebView - Fallback 2: Page title after 15s: $title');
           if (title != null && title.isNotEmpty) {
-            print(
+            debugPrint(
                 'YouTube WebView - Fallback 2: Page seems loaded, forcing finish');
             setState(() {
               isLoading = false;
@@ -189,7 +190,7 @@ class _YouTubeWebviewScreenState extends State<YouTubeWebviewScreen> {
             await _checkBlockOrCaptcha();
           }
         } catch (e) {
-          print('YouTube WebView - Fallback 2: Error checking title: $e');
+          debugPrint('YouTube WebView - Fallback 2: Error checking title: $e');
         }
       }
     });
@@ -200,7 +201,7 @@ class _YouTubeWebviewScreenState extends State<YouTubeWebviewScreen> {
           !hasLoadedSuccessfully &&
           loadingProgress >= 85 &&
           !isNavigatingToApp) {
-        print(
+        debugPrint(
             'YouTube WebView - Fallback 3: Progress stuck at $loadingProgress%, forcing completion');
         setState(() {
           isLoading = false;
@@ -231,7 +232,7 @@ class _YouTubeWebviewScreenState extends State<YouTubeWebviewScreen> {
         ? 'Mozilla/5.0 (iPhone; CPU iPhone OS 15_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/15.0 Mobile/15E148 Safari/604.1'
         : 'Mozilla/5.0 (Linux; Android 10; SM-G975F) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.120 Mobile Safari/537.36';
 
-    print(
+    debugPrint(
         'YouTube WebView - Build: isLoading=$isLoading, hasError=$hasError, hasLoadedSuccessfully=$hasLoadedSuccessfully, progress=$loadingProgress%, isNavigatingToApp=$isNavigatingToApp');
 
     return Scaffold(
@@ -392,10 +393,10 @@ class _YouTubeWebviewScreenState extends State<YouTubeWebviewScreen> {
                 );
               },
               onLoadStart: (controller, url) {
-                print('YouTube WebView - Page Started: $url');
+                debugPrint('YouTube WebView - Page Started: $url');
 
                 if (url?.toString().startsWith('youtube://') ?? false) {
-                  print(
+                  debugPrint(
                       'YouTube WebView - Detected YouTube app redirect, ignoring');
                   setState(() {
                     isNavigatingToApp = true;
@@ -403,7 +404,7 @@ class _YouTubeWebviewScreenState extends State<YouTubeWebviewScreen> {
                   return;
                 }
 
-                print('YouTube WebView - Starting loader timeout...');
+                debugPrint('YouTube WebView - Starting loader timeout...');
                 if (mounted) {
                   setState(() {
                     isLoading = true;
@@ -452,14 +453,14 @@ class _YouTubeWebviewScreenState extends State<YouTubeWebviewScreen> {
                 ''');
               },
               onLoadStop: (controller, url) async {
-                print('YouTube WebView - Page Finished: $url');
+                debugPrint('YouTube WebView - Page Finished: $url');
 
                 if (url?.toString().startsWith('youtube://') ?? false) {
-                  print('YouTube WebView - Ignoring app redirect completion');
+                  debugPrint('YouTube WebView - Ignoring app redirect completion');
                   return;
                 }
 
-                print('YouTube WebView - Cancelling timeout timer');
+                debugPrint('YouTube WebView - Cancelling timeout timer');
                 if (mounted) {
                   setState(() {
                     isLoading = false;
@@ -525,7 +526,7 @@ class _YouTubeWebviewScreenState extends State<YouTubeWebviewScreen> {
                 ''');
               },
               onProgressChanged: (controller, progress) {
-                print('YouTube WebView - Loading Progress: $progress%');
+                debugPrint('YouTube WebView - Loading Progress: $progress%');
                 setState(() {
                   loadingProgress = progress.toInt();
                   lastProgressUpdate = DateTime.now().millisecondsSinceEpoch;
@@ -535,7 +536,7 @@ class _YouTubeWebviewScreenState extends State<YouTubeWebviewScreen> {
                     isLoading &&
                     !hasLoadedSuccessfully &&
                     !isNavigatingToApp) {
-                  print(
+                  debugPrint(
                       'YouTube WebView - High progress detected ($progress%), considering loaded');
                   setState(() {
                     isLoading = false;
@@ -556,32 +557,32 @@ class _YouTubeWebviewScreenState extends State<YouTubeWebviewScreen> {
                 final urlLower = url.toLowerCase();
                 final isMainFrame = navigationAction.targetFrame?.isMainFrame ?? true;
                 
-                print('YouTube WebView - Navigation request to: $url (isMainFrame: $isMainFrame)');
+                debugPrint('YouTube WebView - Navigation request to: $url (isMainFrame: $isMainFrame)');
 
                 // Block Google OAuth/iframe URLs that cause white screens
                 if (urlLower.contains('accounts.google.com') ||
                     urlLower.contains('google.com/gsi/') ||
                     urlLower.contains('google.com/oauth2/')) {
-                  print('YouTube WebView - Blocking Google OAuth/iframe URL: $url');
+                  debugPrint('YouTube WebView - Blocking Google OAuth/iframe URL: $url');
                   return NavigationActionPolicy.CANCEL;
                 }
                 
                 // Block applink.youtube.com URLs (Universal Links)
                 if (urlLower.contains('applink.youtube.com')) {
-                  print('YouTube WebView - Blocking applink URL: $url');
+                  debugPrint('YouTube WebView - Blocking applink URL: $url');
                   return NavigationActionPolicy.CANCEL;
                 }
                 
                 // Block URLs with launch_app_store parameter
                 if (urlLower.contains('launch_app_store=true')) {
-                  print('YouTube WebView - Blocking URL with launch_app_store: $url');
+                  debugPrint('YouTube WebView - Blocking URL with launch_app_store: $url');
                   return NavigationActionPolicy.CANCEL;
                 }
 
                 if (url.startsWith('youtube://') ||
                     url.startsWith('youtubewatch://') ||
                     url.startsWith('youtubeembed://')) {
-                  print('YouTube WebView - Blocking YouTube app redirect');
+                  debugPrint('YouTube WebView - Blocking YouTube app redirect');
                   setState(() {
                     isNavigatingToApp = true;
                   });
@@ -593,7 +594,7 @@ class _YouTubeWebviewScreenState extends State<YouTubeWebviewScreen> {
                     urlLower.contains('doubleclick.net') ||
                     urlLower.contains('google-analytics.com') ||
                     urlLower.contains('googleadservices.com')) {
-                  print('YouTube WebView - Blocking tracking URL: $url');
+                  debugPrint('YouTube WebView - Blocking tracking URL: $url');
                   return NavigationActionPolicy.CANCEL;
                 }
 
@@ -604,7 +605,7 @@ class _YouTubeWebviewScreenState extends State<YouTubeWebviewScreen> {
                     urlLower.startsWith('itms-apps://') ||
                     urlLower.contains('play.google.com/store') ||
                     urlLower.startsWith('market://')) {
-                  print('YouTube WebView - Blocking app scheme/App Store URL: $url');
+                  debugPrint('YouTube WebView - Blocking app scheme/App Store URL: $url');
                   return NavigationActionPolicy.CANCEL;
                 }
                 
@@ -621,7 +622,7 @@ class _YouTubeWebviewScreenState extends State<YouTubeWebviewScreen> {
                     !urlLower.contains('googleadservices.com') &&
                     !urlLower.contains('_webview=1') &&
                     !urlLower.contains('noapp=1')) {
-                  print('YouTube WebView - Modifying URL to prevent Universal Links: $url');
+                  debugPrint('YouTube WebView - Modifying URL to prevent Universal Links: $url');
                   final modifiedUrl = url.contains('?')
                       ? '$url&_webview=1&noapp=1'
                       : '$url?_webview=1&noapp=1';
@@ -640,8 +641,8 @@ class _YouTubeWebviewScreenState extends State<YouTubeWebviewScreen> {
                 return NavigationActionPolicy.ALLOW;
               },
               onReceivedError: (controller, request, error) {
-                print('YouTube WebView - Error: ${error.description}');
-                print('YouTube WebView - Error Type: ${error.type}');
+                debugPrint('YouTube WebView - Error: ${error.description}');
+                debugPrint('YouTube WebView - Error Type: ${error.type}');
 
                 // Convert error type to a numeric code for comparison
                 final errorCode = error.type == WebResourceErrorType.HOST_LOOKUP ? -1002 :
@@ -662,7 +663,7 @@ class _YouTubeWebviewScreenState extends State<YouTubeWebviewScreen> {
                     _progressTimer?.cancel();
                   }
                 } else if (_isExpectedError(errorCode)) {
-                  print(
+                  debugPrint(
                       'YouTube WebView - Ignoring expected error: $errorCode');
                 }
               },
