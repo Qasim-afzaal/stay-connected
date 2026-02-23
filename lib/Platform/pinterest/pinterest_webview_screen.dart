@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 import 'package:get/get.dart';
@@ -50,13 +51,13 @@ class _PinterestWebviewScreenState extends State<PinterestWebviewScreen> {
 
   void _startLoaderTimeout() {
     _loaderTimer?.cancel();
-    print('Pinterest WebView - Starting 25 second timeout timer');
+    debugPrint('Pinterest WebView - Starting 25 second timeout timer');
     _loaderTimer = Timer(const Duration(seconds: 25), () {
-      print('Pinterest WebView - TIMEOUT: Loading took longer than 25 seconds');
-      print('Pinterest WebView - Current URL: $currentUrl');
-      print('Pinterest WebView - Is Loading: $isLoading');
-      print('Pinterest WebView - Has Error: $hasError');
-      print('Pinterest WebView - Loading Progress: $loadingProgress%');
+      debugPrint('Pinterest WebView - TIMEOUT: Loading took longer than 25 seconds');
+      debugPrint('Pinterest WebView - Current URL: $currentUrl');
+      debugPrint('Pinterest WebView - Is Loading: $isLoading');
+      debugPrint('Pinterest WebView - Has Error: $hasError');
+      debugPrint('Pinterest WebView - Loading Progress: $loadingProgress%');
       if (mounted &&
           isLoading &&
           !hasLoadedSuccessfully &&
@@ -67,7 +68,7 @@ class _PinterestWebviewScreenState extends State<PinterestWebviewScreen> {
           errorMessage =
               'Loading timed out. Pinterest may be blocking this browser.';
         });
-        print('Pinterest WebView - Set timeout error state');
+        debugPrint('Pinterest WebView - Set timeout error state');
       }
     });
   }
@@ -80,7 +81,7 @@ class _PinterestWebviewScreenState extends State<PinterestWebviewScreen> {
           !hasLoadedSuccessfully &&
           loadingProgress >= 85 &&
           !isNavigatingToApp) {
-        print(
+        debugPrint(
             'Pinterest WebView - Progress stuck at $loadingProgress%, forcing completion');
         setState(() {
           isLoading = false;
@@ -94,12 +95,12 @@ class _PinterestWebviewScreenState extends State<PinterestWebviewScreen> {
   }
 
   Future<void> _checkBlockOrCaptcha() async {
-    print('Pinterest WebView - Checking for block/captcha...');
+    debugPrint('Pinterest WebView - Checking for block/captcha...');
     try {
       String? title = await webViewController?.getTitle();
       String url = currentUrl ?? '';
-      print('Pinterest WebView - Page title: $title');
-      print('Pinterest WebView - Current URL: $url');
+      debugPrint('Pinterest WebView - Page title: $title');
+      debugPrint('Pinterest WebView - Current URL: $url');
 
       if ((title != null &&
               (title.toLowerCase().contains('not supported') ||
@@ -112,7 +113,7 @@ class _PinterestWebviewScreenState extends State<PinterestWebviewScreen> {
           url.contains('blocked') ||
           url.contains('unsupported') ||
           url.contains('checkpoint')) {
-        print(
+        debugPrint(
             'Pinterest WebView - BLOCK DETECTED: Title or URL contains block indicators');
         setState(() {
           isBlocked = true;
@@ -122,10 +123,10 @@ class _PinterestWebviewScreenState extends State<PinterestWebviewScreen> {
               'Pinterest is blocking this browser or showing a captcha.';
         });
       } else {
-        print('Pinterest WebView - No block detected, page appears normal');
+        debugPrint('Pinterest WebView - No block detected, page appears normal');
       }
     } catch (e) {
-      print('Pinterest WebView - Error checking block/captcha: $e');
+      debugPrint('Pinterest WebView - Error checking block/captcha: $e');
     }
   }
 
@@ -141,20 +142,20 @@ class _PinterestWebviewScreenState extends State<PinterestWebviewScreen> {
   }
 
   void _initializeWebView() {
-    print('Pinterest WebView - Initializing WebView controller');
+    debugPrint('Pinterest WebView - Initializing WebView controller');
 
     _fallbackTimer = Timer(const Duration(seconds: 8), () async {
       if (mounted &&
           isLoading &&
           !hasLoadedSuccessfully &&
           !isNavigatingToApp) {
-        print(
+        debugPrint(
             'Pinterest WebView - Fallback 1: Checking if page actually loaded after 8 seconds');
         try {
           String? title = await webViewController?.getTitle();
-          print('Pinterest WebView - Fallback 1: Page title after 8s: $title');
+          debugPrint('Pinterest WebView - Fallback 1: Page title after 8s: $title');
           if (title != null && title.isNotEmpty && title != 'Google') {
-            print(
+            debugPrint(
                 'Pinterest WebView - Fallback 1: Page seems loaded, forcing finish');
             setState(() {
               isLoading = false;
@@ -166,7 +167,7 @@ class _PinterestWebviewScreenState extends State<PinterestWebviewScreen> {
             await _checkBlockOrCaptcha();
           }
         } catch (e) {
-          print('Pinterest WebView - Fallback 1: Error checking title: $e');
+          debugPrint('Pinterest WebView - Fallback 1: Error checking title: $e');
         }
       }
     });
@@ -176,13 +177,13 @@ class _PinterestWebviewScreenState extends State<PinterestWebviewScreen> {
           isLoading &&
           !hasLoadedSuccessfully &&
           !isNavigatingToApp) {
-        print(
+        debugPrint(
             'Pinterest WebView - Fallback 2: Checking if page actually loaded after 15 seconds');
         try {
           String? title = await webViewController?.getTitle();
-          print('Pinterest WebView - Fallback 2: Page title after 15s: $title');
+          debugPrint('Pinterest WebView - Fallback 2: Page title after 15s: $title');
           if (title != null && title.isNotEmpty) {
-            print(
+            debugPrint(
                 'Pinterest WebView - Fallback 2: Page seems loaded, forcing finish');
             setState(() {
               isLoading = false;
@@ -194,7 +195,7 @@ class _PinterestWebviewScreenState extends State<PinterestWebviewScreen> {
             await _checkBlockOrCaptcha();
           }
         } catch (e) {
-          print('Pinterest WebView - Fallback 2: Error checking title: $e');
+          debugPrint('Pinterest WebView - Fallback 2: Error checking title: $e');
         }
       }
     });
@@ -205,7 +206,7 @@ class _PinterestWebviewScreenState extends State<PinterestWebviewScreen> {
           !hasLoadedSuccessfully &&
           loadingProgress >= 85 &&
           !isNavigatingToApp) {
-        print(
+        debugPrint(
             'Pinterest WebView - Fallback 3: Progress stuck at $loadingProgress%, forcing completion');
         setState(() {
           isLoading = false;
@@ -236,7 +237,7 @@ class _PinterestWebviewScreenState extends State<PinterestWebviewScreen> {
         ? 'Mozilla/5.0 (iPhone; CPU iPhone OS 15_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/15.0 Mobile/15E148 Safari/604.1'
         : 'Mozilla/5.0 (Linux; Android 10; SM-G975F) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.120 Mobile Safari/537.36';
 
-    print(
+    debugPrint(
         'Pinterest WebView - Build: isLoading=$isLoading, hasError=$hasError, hasLoadedSuccessfully=$hasLoadedSuccessfully, progress=$loadingProgress%, isNavigatingToApp=$isNavigatingToApp');
 
     return Scaffold(
@@ -395,10 +396,10 @@ class _PinterestWebviewScreenState extends State<PinterestWebviewScreen> {
                 );
               },
               onLoadStart: (controller, url) {
-                print('Pinterest WebView - Page Started: $url');
+                debugPrint('Pinterest WebView - Page Started: $url');
 
                 if (url?.toString().startsWith('pinterest://') ?? false) {
-                  print(
+                  debugPrint(
                       'Pinterest WebView - Detected Pinterest app redirect, ignoring');
                   setState(() {
                     isNavigatingToApp = true;
@@ -406,7 +407,7 @@ class _PinterestWebviewScreenState extends State<PinterestWebviewScreen> {
                   return;
                 }
 
-                print('Pinterest WebView - Starting loader timeout...');
+                debugPrint('Pinterest WebView - Starting loader timeout...');
                 if (mounted) {
                   setState(() {
                     isLoading = true;
@@ -453,14 +454,14 @@ class _PinterestWebviewScreenState extends State<PinterestWebviewScreen> {
                 ''');
               },
               onLoadStop: (controller, url) async {
-                print('Pinterest WebView - Page Finished: $url');
+                debugPrint('Pinterest WebView - Page Finished: $url');
 
                 if (url?.toString().startsWith('pinterest://') ?? false) {
-                  print('Pinterest WebView - Ignoring app redirect completion');
+                  debugPrint('Pinterest WebView - Ignoring app redirect completion');
                   return;
                 }
 
-                print('Pinterest WebView - Cancelling timeout timer');
+                debugPrint('Pinterest WebView - Cancelling timeout timer');
                 if (mounted) {
                   setState(() {
                     isLoading = false;
@@ -522,7 +523,7 @@ class _PinterestWebviewScreenState extends State<PinterestWebviewScreen> {
                 ''');
               },
               onProgressChanged: (controller, progress) {
-                print('Pinterest WebView - Loading Progress: $progress%');
+                debugPrint('Pinterest WebView - Loading Progress: $progress%');
                 setState(() {
                   loadingProgress = progress.toInt();
                   lastProgressUpdate = DateTime.now().millisecondsSinceEpoch;
@@ -532,7 +533,7 @@ class _PinterestWebviewScreenState extends State<PinterestWebviewScreen> {
                     isLoading &&
                     !hasLoadedSuccessfully &&
                     !isNavigatingToApp) {
-                  print(
+                  debugPrint(
                       'Pinterest WebView - High progress detected ($progress%), considering loaded');
                   setState(() {
                     isLoading = false;
@@ -553,30 +554,30 @@ class _PinterestWebviewScreenState extends State<PinterestWebviewScreen> {
                 final urlLower = url.toLowerCase();
                 final isMainFrame = navigationAction.targetFrame?.isMainFrame ?? true;
                 
-                print('Pinterest WebView - Navigation Request: $url (isMainFrame: $isMainFrame)');
+                debugPrint('Pinterest WebView - Navigation Request: $url (isMainFrame: $isMainFrame)');
 
                 // Block Google OAuth/iframe URLs that cause white screens
                 if (urlLower.contains('accounts.google.com') ||
                     urlLower.contains('google.com/gsi/') ||
                     urlLower.contains('google.com/oauth2/')) {
-                  print('Pinterest WebView - Blocking Google OAuth/iframe URL: $url');
+                  debugPrint('Pinterest WebView - Blocking Google OAuth/iframe URL: $url');
                   return NavigationActionPolicy.CANCEL;
                 }
                 
                 // Block applink.pinterest.com URLs (Universal Links)
                 if (urlLower.contains('applink.pinterest.com')) {
-                  print('Pinterest WebView - Blocking applink URL: $url');
+                  debugPrint('Pinterest WebView - Blocking applink URL: $url');
                   return NavigationActionPolicy.CANCEL;
                 }
                 
                 // Block URLs with launch_app_store parameter
                 if (urlLower.contains('launch_app_store=true')) {
-                  print('Pinterest WebView - Blocking URL with launch_app_store: $url');
+                  debugPrint('Pinterest WebView - Blocking URL with launch_app_store: $url');
                   return NavigationActionPolicy.CANCEL;
                 }
 
                 if (url.startsWith('pinterest://')) {
-                  print('Pinterest WebView - Blocking Pinterest app redirect');
+                  debugPrint('Pinterest WebView - Blocking Pinterest app redirect');
                   setState(() {
                     isNavigatingToApp = true;
                   });
@@ -590,7 +591,7 @@ class _PinterestWebviewScreenState extends State<PinterestWebviewScreen> {
                     urlLower.startsWith('itms-apps://') ||
                     urlLower.contains('play.google.com/store') ||
                     urlLower.startsWith('market://')) {
-                  print('Pinterest WebView - Blocking app scheme/App Store URL: $url');
+                  debugPrint('Pinterest WebView - Blocking app scheme/App Store URL: $url');
                   return NavigationActionPolicy.CANCEL;
                 }
                 
@@ -603,7 +604,7 @@ class _PinterestWebviewScreenState extends State<PinterestWebviewScreen> {
                     !urlLower.contains('google.com/oauth2/') &&
                     !urlLower.contains('_webview=1') &&
                     !urlLower.contains('noapp=1')) {
-                  print('Pinterest WebView - Modifying URL to prevent Universal Links: $url');
+                  debugPrint('Pinterest WebView - Modifying URL to prevent Universal Links: $url');
                   final modifiedUrl = url.contains('?')
                       ? '$url&_webview=1&noapp=1'
                       : '$url?_webview=1&noapp=1';
@@ -622,9 +623,9 @@ class _PinterestWebviewScreenState extends State<PinterestWebviewScreen> {
                 return NavigationActionPolicy.ALLOW;
               },
               onReceivedError: (controller, request, error) {
-                print('Pinterest WebView - Error: ${error.description}');
-                print('Pinterest WebView - Error Type: ${error.type}');
-                print('Pinterest WebView - Error URL: ${request.url}');
+                debugPrint('Pinterest WebView - Error: ${error.description}');
+                debugPrint('Pinterest WebView - Error Type: ${error.type}');
+                debugPrint('Pinterest WebView - Error URL: ${request.url}');
 
                 // Convert error type to a numeric code for comparison
                 final errorCode = error.type == WebResourceErrorType.HOST_LOOKUP ? -1002 :
@@ -645,7 +646,7 @@ class _PinterestWebviewScreenState extends State<PinterestWebviewScreen> {
                     _progressTimer?.cancel();
                   }
                 } else if (_isExpectedError(errorCode)) {
-                  print(
+                  debugPrint(
                       'Pinterest WebView - Ignoring expected error: $errorCode');
                 }
               },
