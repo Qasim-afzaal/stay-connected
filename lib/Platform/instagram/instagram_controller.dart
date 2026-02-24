@@ -253,7 +253,7 @@ class InstagramController extends GetxController {
   }
 
   List<String> getAvailableCategories() {
-    Set<String> categories = {};
+    final categories = <String>{};
     debugPrint('Instagram - Getting available categories from ${icons.length} icons');
     
     // Fix existing categories that were incorrectly stored without category field
@@ -284,7 +284,7 @@ class InstagramController extends GetxController {
   }
 
   List<String> getCategoriesWithFriends() {
-    Set<String> categories = {};
+    final categories = <String>{};
     for (var icon in icons) {
       if (icon['category'] != null && 
           icon['category']!.isNotEmpty &&
