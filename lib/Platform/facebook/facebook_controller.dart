@@ -254,7 +254,7 @@ class FaceBookController extends GetxController {
   }
 
   List<String> getAvailableCategories() {
-    Set<String> categories = {};
+    final categories = <String>{};
     debugPrint('Facebook - Getting available categories from ${icons.length} icons');
     
     // Fix existing "test" category that was incorrectly stored as "General"
@@ -275,7 +275,6 @@ class FaceBookController extends GetxController {
     for (var icon in icons) {
       if (icon['category'] != null && icon['category']!.isNotEmpty) {
         categories.add(icon['category']!);
-        debugPrint('Facebook - Found category: ${icon['category']}');
       }
     }
     final result = categories.toList()..sort();
@@ -284,7 +283,7 @@ class FaceBookController extends GetxController {
   }
 
   List<String> getCategoriesWithFriends() {
-    Set<String> categories = {};
+    final categories = <String>{};
     for (var icon in icons) {
       if (icon['category'] != null && 
           icon['category']!.isNotEmpty &&
