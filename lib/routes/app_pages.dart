@@ -35,14 +35,14 @@ class AppPages {
         name: _Paths.SPLASH,
         page: () => const SplashPage(),
         binding: SplashBinding()),
-    GetPage(name: _Paths.HOME, page: () => HomePage(), binding: HomeBinding()),
+    GetPage(name: _Paths.HOME, page: () => const HomePage(), binding: HomeBinding()),
     GetPage(
         name: _Paths.WEBVIEW,
-        page: () => WebviewPage(),
+        page: () => const WebviewPage(),
         binding: WebviewBinding()),
     GetPage(
         name: _Paths.FACEBOOK,
-        page: () => FacebookPage(),
+        page: () => const FacebookPage(),
         binding: FacebookBinding()),
     GetPage(
         name: _Paths.INSTAGRAM,
