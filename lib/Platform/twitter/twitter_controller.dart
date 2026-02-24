@@ -258,7 +258,6 @@ class TwitterController extends GetxController {
     for (var icon in icons) {
       if (icon['category'] != null && icon['category']!.isNotEmpty) {
         categories.add(icon['category']!);
-        debugPrint('Twitter - Found category: ${icon['category']}');
       }
     }
     final result = categories.toList()..sort();
