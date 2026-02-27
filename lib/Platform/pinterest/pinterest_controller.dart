@@ -153,9 +153,7 @@ class PinterestController extends GetxController {
   }
 
   void toggleIconSelection(int index) {
-    if (selectedIcons.contains(index)) {
-      selectedIcons.remove(index);
-    } else {
+    if (!selectedIcons.remove(index)) {
       selectedIcons.add(index);
     }
     update();
@@ -230,7 +228,7 @@ class PinterestController extends GetxController {
   }
 
   List<String> getAvailableCategories() {
-    final categories = <String>{};
+    Set<String> categories = {};
     debugPrint('Pinterest - Getting available categories from ${icons.length} icons');
     
     // Fix existing categories that were incorrectly stored without category field
@@ -252,6 +250,7 @@ class PinterestController extends GetxController {
     for (var icon in icons) {
       if (icon['category'] != null && icon['category']!.isNotEmpty) {
         categories.add(icon['category']!);
+        debugPrint('Pinterest - Found category: ${icon['category']}');
       }
     }
     final result = categories.toList()..sort();
@@ -260,7 +259,7 @@ class PinterestController extends GetxController {
   }
 
   List<String> getCategoriesWithFriends() {
-    final categories = <String>{};
+    Set<String> categories = {};
     for (var icon in icons) {
       if (icon['category'] != null && 
           icon['category']!.isNotEmpty &&
@@ -345,12 +344,5 @@ class PinterestController extends GetxController {
     }
   }
 
-  Future<void> saveToPrefs() async {
-    try {
-      final prefs = await SharedPreferences.getInstance();
-      await prefs.setString(_sharedPrefsKey, jsonEncode(icons));
-    } catch (e) {
-      debugPrint('Error saving icons for $platformName: $e');
-    }
-  }
+  Future<void> saveToPrefs() async => _saveToPrefs();
 }
