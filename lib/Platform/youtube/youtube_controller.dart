@@ -120,7 +120,7 @@ class YouTubeController extends GetxController {
       {
         'name': 'Auto',
         'icon': 'assets/images/platform_icons/auto.png',
-        'category': 'Audio'
+        'category': 'Auto'
       },
       {
         'name': 'Celebrity',
@@ -159,7 +159,9 @@ class YouTubeController extends GetxController {
   }
 
   void toggleIconSelection(int index) {
-    if (!selectedIcons.remove(index)) {
+    if (selectedIcons.contains(index)) {
+      selectedIcons.remove(index);
+    } else {
       selectedIcons.add(index);
     }
     update();
@@ -349,5 +351,12 @@ class YouTubeController extends GetxController {
     }
   }
 
-  Future<void> saveToPrefs() async => _saveToPrefs();
+  Future<void> saveToPrefs() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setString(_sharedPrefsKey, jsonEncode(icons));
+    } catch (e) {
+      debugPrint('Error saving icons for $platformName: $e');
+    }
+  }
 }
