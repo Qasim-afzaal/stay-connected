@@ -230,7 +230,7 @@ class RedditController extends GetxController {
   }
 
   List<String> getAvailableCategories() {
-    Set<String> categories = {};
+    final categories = <String>{};
     debugPrint('Reddit - Getting available categories from ${icons.length} icons');
     
     // Fix existing categories that were incorrectly stored without category field
@@ -252,7 +252,6 @@ class RedditController extends GetxController {
     for (var icon in icons) {
       if (icon['category'] != null && icon['category']!.isNotEmpty) {
         categories.add(icon['category']!);
-        debugPrint('Reddit - Found category: ${icon['category']}');
       }
     }
     final result = categories.toList()..sort();
@@ -346,5 +345,12 @@ class RedditController extends GetxController {
     }
   }
 
-  Future<void> saveToPrefs() async => _saveToPrefs();
+  Future<void> saveToPrefs() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setString(_sharedPrefsKey, jsonEncode(icons));
+    } catch (e) {
+      debugPrint('Error saving icons for $platformName: $e');
+    }
+  }
 }
