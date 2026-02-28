@@ -8,7 +8,6 @@ import 'package:sizer/sizer.dart';
 import 'package:stay_connected/routes/app_pages.dart';
 
 void main() async {
-//  Get.lazyPut<SocketService>(() => SocketService(), fenix: true);
   runApp(const MyApp());
 }
 
