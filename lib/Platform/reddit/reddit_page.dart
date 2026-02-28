@@ -8,7 +8,7 @@ import 'package:stay_connected/Platform/reddit/reddit_icon_screen.dart';
 import 'package:stay_connected/widget/custom_drawer.dart';
 
 class RedditPage extends StatelessWidget {
-  RedditPage({Key? key}) : super(key: key);
+  const RedditPage({super.key});
 
   @override
   Widget build(BuildContext context) {

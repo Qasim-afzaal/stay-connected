@@ -8,7 +8,7 @@ import 'package:stay_connected/Platform/tiktok/tiktok_icon_screen.dart';
 import 'package:stay_connected/widget/custom_drawer.dart';
 
 class TikTokPage extends StatelessWidget {
-  TikTokPage({Key? key}) : super(key: key);
+  const TikTokPage({super.key});
 
   @override
   Widget build(BuildContext context) {
