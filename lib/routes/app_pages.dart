@@ -46,31 +46,31 @@ class AppPages {
         binding: FacebookBinding()),
     GetPage(
         name: _Paths.INSTAGRAM,
-        page: () => InstagramPage(),
+        page: () => const InstagramPage(),
         binding: InstagramBinding()),
     GetPage(
         name: _Paths.YOUTUBE,
-        page: () => YouTubePage(),
+        page: () => const YouTubePage(),
         binding: YouTubeBinding()),
     GetPage(
         name: _Paths.TWITTER,
-        page: () => TwitterPage(),
+        page: () => const TwitterPage(),
         binding: TwitterBinding()),
     GetPage(
         name: _Paths.TIKTOK,
-        page: () => TikTokPage(),
+        page: () => const TikTokPage(),
         binding: TikTokBinding()),
     GetPage(
         name: _Paths.REDDIT,
-        page: () => RedditPage(),
+        page: () => const RedditPage(),
         binding: RedditBinding()),
     GetPage(
         name: _Paths.SNAPCHAT,
-        page: () => SnapchatPage(),
+        page: () => const SnapchatPage(),
         binding: SnapchatBinding()),
     GetPage(
         name: _Paths.PINTEREST,
-        page: () => PinterestPage(),
+        page: () => const PinterestPage(),
         binding: PinterestBinding()),
   ];
 }
