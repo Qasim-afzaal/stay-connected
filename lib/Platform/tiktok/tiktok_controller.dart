@@ -154,7 +154,9 @@ class TikTokController extends GetxController {
   }
 
   void toggleIconSelection(int index) {
-    if (!selectedIcons.remove(index)) {
+    if (selectedIcons.contains(index)) {
+      selectedIcons.remove(index);
+    } else {
       selectedIcons.add(index);
     }
     update();
@@ -229,7 +231,7 @@ class TikTokController extends GetxController {
   }
 
   List<String> getAvailableCategories() {
-    Set<String> categories = {};
+    final categories = <String>{};
     debugPrint('TikTok - Getting available categories from ${icons.length} icons');
     
     // Fix existing categories that were incorrectly stored without category field
@@ -251,7 +253,6 @@ class TikTokController extends GetxController {
     for (var icon in icons) {
       if (icon['category'] != null && icon['category']!.isNotEmpty) {
         categories.add(icon['category']!);
-        debugPrint('TikTok - Found category: ${icon['category']}');
       }
     }
     final result = categories.toList()..sort();
@@ -260,13 +261,13 @@ class TikTokController extends GetxController {
   }
 
   List<String> getCategoriesWithFriends() {
-    Set<String> categories = {};
+    final categories = <String>{};
     for (var icon in icons) {
-      if (icon['category'] != null && 
-          icon['category']!.isNotEmpty &&
-          icon['profileUrl'] != null &&
-          icon['profileUrl']!.isNotEmpty) {
-        categories.add(icon['category']!);
+      final category = icon['category'];
+      final profileUrl = icon['profileUrl'];
+      if ((category != null && category.isNotEmpty) &&
+          (profileUrl != null && profileUrl.isNotEmpty)) {
+        categories.add(category);
       }
     }
     return categories.toList()..sort();
@@ -345,5 +346,12 @@ class TikTokController extends GetxController {
     }
   }
 
-  Future<void> saveToPrefs() async => _saveToPrefs();
+  Future<void> saveToPrefs() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setString(_sharedPrefsKey, jsonEncode(icons));
+    } catch (e) {
+      debugPrint('Error saving icons for $platformName: $e');
+    }
+  }
 }
