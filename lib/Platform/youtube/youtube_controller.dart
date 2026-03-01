@@ -54,10 +54,6 @@ class YouTubeController extends GetxController {
             .toList();
 
         debugPrint('YouTube - Loaded ${icons.length} icons');
-        for (var icon in icons) {
-          debugPrint(
-              'YouTube - Loaded icon: ${icon['name']}, Category: ${icon['category']}, ProfileUrl: ${icon['profileUrl']}');
-        }
       } else {
         icons = _getDefaultIcons();
         await _saveToPrefs();
@@ -120,7 +116,7 @@ class YouTubeController extends GetxController {
       {
         'name': 'Auto',
         'icon': 'assets/images/platform_icons/auto.png',
-        'category': 'Auto'
+        'category': 'Audio'
       },
       {
         'name': 'Celebrity',
@@ -236,7 +232,7 @@ class YouTubeController extends GetxController {
   }
 
   List<String> getAvailableCategories() {
-    final categories = <String>{};
+    Set<String> categories = {};
     debugPrint('YouTube - Getting available categories from ${icons.length} icons');
     
     // Fix existing categories that were incorrectly stored without category field
@@ -258,6 +254,7 @@ class YouTubeController extends GetxController {
     for (var icon in icons) {
       if (icon['category'] != null && icon['category']!.isNotEmpty) {
         categories.add(icon['category']!);
+        debugPrint('YouTube - Found category: ${icon['category']}');
       }
     }
     final result = categories.toList()..sort();
@@ -266,13 +263,13 @@ class YouTubeController extends GetxController {
   }
 
   List<String> getCategoriesWithFriends() {
-    final categories = <String>{};
+    Set<String> categories = {};
     for (var icon in icons) {
-      final category = icon['category'];
-      final profileUrl = icon['profileUrl'];
-      if ((category != null && category.isNotEmpty) &&
-          (profileUrl != null && profileUrl.isNotEmpty)) {
-        categories.add(category);
+      if (icon['category'] != null && 
+          icon['category']!.isNotEmpty &&
+          icon['profileUrl'] != null &&
+          icon['profileUrl']!.isNotEmpty) {
+        categories.add(icon['category']!);
       }
     }
     return categories.toList()..sort();
