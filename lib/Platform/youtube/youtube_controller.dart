@@ -8,7 +8,7 @@ class YouTubeController extends GetxController {
   final String platformName;
   List<Map<String, String>> icons = [];
   bool isDeleteMode = false;
-  Set<int> selectedIcons = {};
+  final selectedIcons = <int>{};
 
   String get _sharedPrefsKey => 'platform_icons_${platformName.toLowerCase()}';
 

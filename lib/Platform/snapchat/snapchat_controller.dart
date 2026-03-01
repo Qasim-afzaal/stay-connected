@@ -8,7 +8,7 @@ class SnapchatController extends GetxController {
   final String platformName;
   List<Map<String, String>> icons = [];
   bool isDeleteMode = false;
-  Set<int> selectedIcons = {};
+  final selectedIcons = <int>{};
 
   String get _sharedPrefsKey => 'platform_icons_${platformName.toLowerCase()}';
 
@@ -242,7 +242,7 @@ class SnapchatController extends GetxController {
   }
 
   List<String> getAvailableCategories() {
-    final categories = <String>{};
+    Set<String> categories = {};
     debugPrint('Snapchat - Getting available categories from ${icons.length} icons');
     
     // Fix existing categories that were incorrectly stored without category field

@@ -8,7 +8,7 @@ class InstagramController extends GetxController {
   final String platformName;
   List<Map<String, String>> icons = [];
   bool isDeleteMode = false;
-  Set<int> selectedIcons = {};
+  final selectedIcons = <int>{};
 
   String get _sharedPrefsKey => 'platform_icons_${platformName.toLowerCase()}';
 
@@ -137,7 +137,7 @@ class InstagramController extends GetxController {
       {
         'name': 'Auto',
         'icon': 'assets/images/platform_icons/auto.png',
-        'category': 'Auto'
+        'category': 'Audio'
       },
       {
         'name': 'Celebrity',
@@ -253,7 +253,7 @@ class InstagramController extends GetxController {
   }
 
   List<String> getAvailableCategories() {
-    final categories = <String>{};
+    Set<String> categories = {};
     debugPrint('Instagram - Getting available categories from ${icons.length} icons');
     
     // Fix existing categories that were incorrectly stored without category field
@@ -275,6 +275,7 @@ class InstagramController extends GetxController {
     for (var icon in icons) {
       if (icon['category'] != null && icon['category']!.isNotEmpty) {
         categories.add(icon['category']!);
+        debugPrint('Instagram - Found category: ${icon['category']}');
       }
     }
     final result = categories.toList()..sort();
@@ -283,13 +284,13 @@ class InstagramController extends GetxController {
   }
 
   List<String> getCategoriesWithFriends() {
-    final categories = <String>{};
+    Set<String> categories = {};
     for (var icon in icons) {
-      final category = icon['category'];
-      final profileUrl = icon['profileUrl'];
-      if ((category != null && category.isNotEmpty) &&
-          (profileUrl != null && profileUrl.isNotEmpty)) {
-        categories.add(category);
+      if (icon['category'] != null && 
+          icon['category']!.isNotEmpty &&
+          icon['profileUrl'] != null &&
+          icon['profileUrl']!.isNotEmpty) {
+        categories.add(icon['category']!);
       }
     }
     return categories.toList()..sort();

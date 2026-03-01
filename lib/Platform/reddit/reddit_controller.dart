@@ -8,7 +8,7 @@ class RedditController extends GetxController {
   final String platformName;
   List<Map<String, String>> icons = [];
   bool isDeleteMode = false;
-  Set<int> selectedIcons = {};
+  final selectedIcons = <int>{};
 
   String get _sharedPrefsKey => 'platform_icons_${platformName.toLowerCase()}';
 
@@ -230,7 +230,7 @@ class RedditController extends GetxController {
   }
 
   List<String> getAvailableCategories() {
-    final categories = <String>{};
+    Set<String> categories = {};
     debugPrint('Reddit - Getting available categories from ${icons.length} icons');
     
     // Fix existing categories that were incorrectly stored without category field
@@ -252,6 +252,7 @@ class RedditController extends GetxController {
     for (var icon in icons) {
       if (icon['category'] != null && icon['category']!.isNotEmpty) {
         categories.add(icon['category']!);
+        debugPrint('Reddit - Found category: ${icon['category']}');
       }
     }
     final result = categories.toList()..sort();
