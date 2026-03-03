@@ -8,7 +8,7 @@ class RedditController extends GetxController {
   final String platformName;
   List<Map<String, String>> icons = [];
   bool isDeleteMode = false;
-  final selectedIcons = <int>{};
+  Set<int> selectedIcons = {};
 
   String get _sharedPrefsKey => 'platform_icons_${platformName.toLowerCase()}';
 
@@ -71,92 +71,77 @@ class RedditController extends GetxController {
       {
         'name': 'Favorites',
         'icon': 'assets/images/platform_icons/img_favorite_1.png',
-        'category': 'Favorites',
-        'profileUrl': ''
+        'category': 'Favorites'
       },
       {
         'name': 'Games',
         'icon': 'assets/images/platform_icons/img_gamepad_1.png',
-        'category': 'Games',
-        'profileUrl': ''
+        'category': 'Games'
       },
       {
         'name': 'Music',
         'icon': 'assets/images/platform_icons/img_music_1.png',
-        'category': 'Music',
-        'profileUrl': ''
+        'category': 'Music'
       },
       {
         'name': 'Gym',
         'icon': 'assets/images/platform_icons/img_fitness_1.png',
-        'category': 'Gym',
-        'profileUrl': ''
+        'category': 'Gym'
       },
       {
         'name': 'Photos',
         'icon': 'assets/images/platform_icons/img_photo_1.png',
-        'category': 'Photos',
-        'profileUrl': ''
+        'category': 'Photos'
       },
       {
         'name': 'Pets',
         'icon': 'assets/images/platform_icons/img_pets_1.png',
-        'category': 'Pets',
-        'profileUrl': ''
+        'category': 'Pets'
       },
       {
         'name': 'Travel',
         'icon': 'assets/images/platform_icons/img_travel_1.png',
-        'category': 'Travel',
-        'profileUrl': ''
+        'category': 'Travel'
       },
       {
         'name': 'Desserts',
         'icon': 'assets/images/platform_icons/img_desserts_1_64x64.png',
-        'category': 'Desserts',
-        'profileUrl': ''
+        'category': 'Desserts'
       },
       {
         'name': 'Food',
         'icon': 'assets/images/platform_icons/img_food_12.png',
-        'category': 'Food',
-        'profileUrl': ''
+        'category': 'Food'
       },
       {
         'name': 'Auto',
         'icon': 'assets/images/platform_icons/auto.png',
-        'category': 'Auto',
-        'profileUrl': ''
+        'category': 'Auto'
       },
       {
         'name': 'Celebrity',
         'icon': 'assets/images/img_celebrities_1.png',
-        'category': 'Celebrity',
-        'profileUrl': ''
+        'category': 'Celebrity'
       },
       {
         'name': 'Fashion',
         'icon': 'assets/images/platform_icons/fashion.png',
-        'category': 'Fashion',
-        'profileUrl': ''
+        'category': 'Fashion'
       },
       {
         'name': 'News',
         'icon': 'assets/images/platform_icons/news.png',
-        'category': 'News',
-        'profileUrl': ''
+        'category': 'News'
       },
       {
         'name': 'Health',
         'icon': 'assets/images/platform_icons/health.png',
-        'category': 'Health',
-        'profileUrl': ''
+        'category': 'Health'
       },
       {
         'name': 'Ent',
         'icon': 'assets/images/platform_icons/ic_entertainment.png',
-        'category': 'Entertainment',
-        'profileUrl': ''
+        'category': 'Entertainment'
       },
     ];
   }
@@ -245,7 +230,7 @@ class RedditController extends GetxController {
   }
 
   List<String> getAvailableCategories() {
-    Set<String> categories = {};
+    final categories = <String>{};
     debugPrint('Reddit - Getting available categories from ${icons.length} icons');
     
     // Fix existing categories that were incorrectly stored without category field
@@ -361,12 +346,5 @@ class RedditController extends GetxController {
     }
   }
 
-  Future<void> saveToPrefs() async {
-    try {
-      final prefs = await SharedPreferences.getInstance();
-      await prefs.setString(_sharedPrefsKey, jsonEncode(icons));
-    } catch (e) {
-      debugPrint('Error saving icons for $platformName: $e');
-    }
-  }
+  Future<void> saveToPrefs() async => _saveToPrefs();
 }
