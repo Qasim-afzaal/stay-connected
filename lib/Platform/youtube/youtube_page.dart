@@ -8,7 +8,7 @@ import 'package:stay_connected/Platform/youtube/youtube_icon_screen.dart';
 import 'package:stay_connected/widget/custom_drawer.dart';
 
 class YouTubePage extends StatelessWidget {
-  const YouTubePage({super.key});
+  YouTubePage({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
