@@ -60,7 +60,7 @@ class TwitterController extends GetxController {
         }
       } else {
         icons = _getDefaultIcons();
-        await _saveToPrefs();
+        await _saveToPrefs(); // Save default icons
       }
     } catch (e) {
       debugPrint('Error loading icons for $platformName: $e');
@@ -159,7 +159,9 @@ class TwitterController extends GetxController {
   }
 
   void toggleIconSelection(int index) {
-    if (!selectedIcons.remove(index)) {
+    if (selectedIcons.contains(index)) {
+      selectedIcons.remove(index);
+    } else {
       selectedIcons.add(index);
     }
     update();
@@ -234,7 +236,7 @@ class TwitterController extends GetxController {
   }
 
   List<String> getAvailableCategories() {
-    final categories = <String>{};
+    Set<String> categories = {};
     debugPrint('Twitter - Getting available categories from ${icons.length} icons');
     
     // Fix existing categories that were incorrectly stored without category field
@@ -265,7 +267,7 @@ class TwitterController extends GetxController {
   }
 
   List<String> getCategoriesWithFriends() {
-    final categories = <String>{};
+    Set<String> categories = {};
     for (var icon in icons) {
       if (icon['category'] != null && 
           icon['category']!.isNotEmpty &&
@@ -351,3 +353,4 @@ class TwitterController extends GetxController {
   }
 
   Future<void> saveToPrefs() async => _saveToPrefs();
+}
