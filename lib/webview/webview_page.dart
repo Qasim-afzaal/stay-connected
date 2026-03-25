@@ -11,7 +11,7 @@ class WebviewPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final title = Get.arguments['title'] ?? 'Web';
-    final url = Get.arguments['url'];
+    final url = Get.arguments['url'] as String? ?? 'about:blank';
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
 
