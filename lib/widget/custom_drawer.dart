@@ -1,5 +1,5 @@
-import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 import 'package:stay_connected/home/home.dart';
@@ -20,7 +20,7 @@ class CustomDrawer extends StatelessWidget {
     return Drawer(
       backgroundColor: theme.drawerTheme.backgroundColor ?? theme.scaffoldBackgroundColor,
       child: ListView(
-        padding: EdgeInsets.zero,
+        padding: const EdgeInsets.zero,
         children: [
           DrawerHeader(
             decoration: BoxDecoration(
@@ -35,11 +35,10 @@ class CustomDrawer extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 CircleAvatar(
-                  radius: 25, // Keep your circle size
+                  radius: 25,
                   backgroundColor: Colors.white,
                   child: Padding(
-                    padding:
-                        const EdgeInsets.all(6.0), // Adjust padding as needed
+                    padding: const EdgeInsets.all(6.0),
                     child: Image.asset(
                       isDark ? 'assets/images/iconnew_nbg.png' : 'assets/images/img_logo1_1.png',
                       fit: BoxFit.contain,
