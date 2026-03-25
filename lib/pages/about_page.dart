@@ -11,7 +11,7 @@ class AboutPage extends StatelessWidget {
         fontSize: 20, 
         fontWeight: FontWeight.bold, 
         color: isDark ? Colors.blue[300] : Colors.blue[900]);
-    final sectionSpacing = SizedBox(height: 24);
+    const sectionSpacing = SizedBox(height: 24);
     return Scaffold(
       appBar: AppBar(
         title: Text(
