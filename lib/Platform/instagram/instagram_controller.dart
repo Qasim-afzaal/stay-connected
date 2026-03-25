@@ -74,11 +74,11 @@ class InstagramController extends GetxController {
               debugPrint('Instagram - Added missing default icon: ${defaultIcon['name']}');
             }
           }
-          await _saveToPrefs();
+          await _saveToPrefs(); // Save updated icons
         }
       } else {
         icons = _getDefaultIcons();
-        await _saveToPrefs();
+        await _saveToPrefs(); // Save default icons
       }
     } catch (e) {
       debugPrint('Error loading icons for $platformName: $e');
@@ -176,7 +176,9 @@ class InstagramController extends GetxController {
   }
 
   void toggleIconSelection(int index) {
-    if (!selectedIcons.remove(index)) {
+    if (selectedIcons.contains(index)) {
+      selectedIcons.remove(index);
+    } else {
       selectedIcons.add(index);
     }
     update();
@@ -251,7 +253,7 @@ class InstagramController extends GetxController {
   }
 
   List<String> getAvailableCategories() {
-    final categories = <String>{};
+    Set<String> categories = {};
     debugPrint('Instagram - Getting available categories from ${icons.length} icons');
     
     // Fix existing categories that were incorrectly stored without category field
@@ -273,6 +275,7 @@ class InstagramController extends GetxController {
     for (var icon in icons) {
       if (icon['category'] != null && icon['category']!.isNotEmpty) {
         categories.add(icon['category']!);
+        debugPrint('Instagram - Found category: ${icon['category']}');
       }
     }
     final result = categories.toList()..sort();
@@ -281,7 +284,7 @@ class InstagramController extends GetxController {
   }
 
   List<String> getCategoriesWithFriends() {
-    final categories = <String>{};
+    Set<String> categories = {};
     for (var icon in icons) {
       if (icon['category'] != null && 
           icon['category']!.isNotEmpty &&
