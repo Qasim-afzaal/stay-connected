@@ -242,7 +242,7 @@ class SnapchatController extends GetxController {
   }
 
   List<String> getAvailableCategories() {
-    final categories = <String>{};
+    Set<String> categories = {};
     debugPrint('Snapchat - Getting available categories from ${icons.length} icons');
     
     // Fix existing categories that were incorrectly stored without category field
