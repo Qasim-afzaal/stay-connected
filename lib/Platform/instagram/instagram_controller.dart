@@ -137,7 +137,7 @@ class InstagramController extends GetxController {
       {
         'name': 'Auto',
         'icon': 'assets/images/platform_icons/auto.png',
-        'category': 'Audio'
+        'category': 'Auto'
       },
       {
         'name': 'Celebrity',
@@ -176,9 +176,7 @@ class InstagramController extends GetxController {
   }
 
   void toggleIconSelection(int index) {
-    if (selectedIcons.contains(index)) {
-      selectedIcons.remove(index);
-    } else {
+    if (!selectedIcons.remove(index)) {
       selectedIcons.add(index);
     }
     update();
