@@ -54,7 +54,7 @@ class PinterestController extends GetxController {
       } else {
         // Initialize with default icons if no data exists for this platform
         icons = _getDefaultIcons();
-        await _saveToPrefs();
+        await _saveToPrefs(); // Save default icons
       }
     } catch (e) {
       debugPrint('Error loading icons for $platformName: $e');
@@ -153,7 +153,9 @@ class PinterestController extends GetxController {
   }
 
   void toggleIconSelection(int index) {
-    if (!selectedIcons.remove(index)) {
+    if (selectedIcons.contains(index)) {
+      selectedIcons.remove(index);
+    } else {
       selectedIcons.add(index);
     }
     update();
@@ -228,7 +230,7 @@ class PinterestController extends GetxController {
   }
 
   List<String> getAvailableCategories() {
-    final categories = <String>{};
+    Set<String> categories = {};
     debugPrint('Pinterest - Getting available categories from ${icons.length} icons');
     
     // Fix existing categories that were incorrectly stored without category field
@@ -259,7 +261,7 @@ class PinterestController extends GetxController {
   }
 
   List<String> getCategoriesWithFriends() {
-    final categories = <String>{};
+    Set<String> categories = {};
     for (var icon in icons) {
       if (icon['category'] != null && 
           icon['category']!.isNotEmpty &&
