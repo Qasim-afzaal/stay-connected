@@ -154,7 +154,9 @@ class TikTokController extends GetxController {
   }
 
   void toggleIconSelection(int index) {
-    if (!selectedIcons.remove(index)) {
+    if (selectedIcons.contains(index)) {
+      selectedIcons.remove(index);
+    } else {
       selectedIcons.add(index);
     }
     update();
@@ -229,7 +231,7 @@ class TikTokController extends GetxController {
   }
 
   List<String> getAvailableCategories() {
-    final categories = <String>{};
+    Set<String> categories = {};
     debugPrint('TikTok - Getting available categories from ${icons.length} icons');
     
     // Fix existing categories that were incorrectly stored without category field
@@ -260,7 +262,7 @@ class TikTokController extends GetxController {
   }
 
   List<String> getCategoriesWithFriends() {
-    final categories = <String>{};
+    Set<String> categories = {};
     for (var icon in icons) {
       if (icon['category'] != null && 
           icon['category']!.isNotEmpty &&
