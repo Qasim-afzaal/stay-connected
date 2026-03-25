@@ -153,9 +153,7 @@ class PinterestController extends GetxController {
   }
 
   void toggleIconSelection(int index) {
-    if (selectedIcons.contains(index)) {
-      selectedIcons.remove(index);
-    } else {
+    if (!selectedIcons.remove(index)) {
       selectedIcons.add(index);
     }
     update();
