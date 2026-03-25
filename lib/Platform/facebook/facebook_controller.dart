@@ -74,11 +74,11 @@ class FaceBookController extends GetxController {
               debugPrint('Facebook - Added missing default icon: ${defaultIcon['name']}');
             }
           }
-          await _saveToPrefs();
+          await _saveToPrefs(); // Save updated icons
         }
       } else {
         icons = _getDefaultIcons();
-        await _saveToPrefs();
+        await _saveToPrefs(); // Save default icons
       }
     } catch (e) {
       debugPrint('Error loading icons for $platformName: $e');
@@ -176,7 +176,9 @@ class FaceBookController extends GetxController {
   }
 
   void toggleIconSelection(int index) {
-    if (!selectedIcons.remove(index)) {
+    if (selectedIcons.contains(index)) {
+      selectedIcons.remove(index);
+    } else {
       selectedIcons.add(index);
     }
     update();
@@ -252,7 +254,7 @@ class FaceBookController extends GetxController {
   }
 
   List<String> getAvailableCategories() {
-    final categories = <String>{};
+    Set<String> categories = {};
     debugPrint('Facebook - Getting available categories from ${icons.length} icons');
     
     // Fix existing "test" category that was incorrectly stored as "General"
@@ -273,6 +275,7 @@ class FaceBookController extends GetxController {
     for (var icon in icons) {
       if (icon['category'] != null && icon['category']!.isNotEmpty) {
         categories.add(icon['category']!);
+        debugPrint('Facebook - Found category: ${icon['category']}');
       }
     }
     final result = categories.toList()..sort();
@@ -281,7 +284,7 @@ class FaceBookController extends GetxController {
   }
 
   List<String> getCategoriesWithFriends() {
-    final categories = <String>{};
+    Set<String> categories = {};
     for (var icon in icons) {
       if (icon['category'] != null && 
           icon['category']!.isNotEmpty &&
