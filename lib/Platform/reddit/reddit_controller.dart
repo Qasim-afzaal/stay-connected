@@ -163,10 +163,8 @@ class RedditController extends GetxController {
 
   Future<void> deleteSelectedIcons() async {
     try {
-      final sortedIndices = selectedIcons.toList()
-        ..sort((a, b) => b.compareTo(a));
-
-      for (int index in sortedIndices) {
+      final sortedIndices = selectedIcons.toList()..sort((a, b) => b.compareTo(a));
+      for (final index in sortedIndices) {
         if (index >= 0 && index < icons.length) {
           icons.removeAt(index);
         }
