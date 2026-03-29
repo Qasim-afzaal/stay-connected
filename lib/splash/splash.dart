@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+
 import 'package:get/get.dart';
 
 import 'splash_controller.dart';
@@ -12,7 +13,8 @@ class SplashPage extends StatelessWidget {
       init: SplashController(),
       builder: (controller) {
         final theme = Theme.of(context);
-
+        final isDark = theme.brightness == Brightness.dark;
+        
         return Scaffold(
           body: Container(
             decoration: BoxDecoration(
@@ -20,7 +22,7 @@ class SplashPage extends StatelessWidget {
             ),
             child: Center(
               child: Image.asset(
-                'assets/images/iconnew_nbg.png',
+                "assets/images/iconnew_nbg.png",
                 scale: 4,
               ),
             ),
