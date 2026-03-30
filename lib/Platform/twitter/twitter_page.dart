@@ -8,7 +8,7 @@ import 'package:stay_connected/Platform/twitter/twitter_icon_screen.dart';
 import 'package:stay_connected/widget/custom_drawer.dart';
 
 class TwitterPage extends StatelessWidget {
-  TwitterPage({Key? key}) : super(key: key);
+  const TwitterPage({super.key});
 
   @override
   Widget build(BuildContext context) {
