@@ -28,9 +28,9 @@ part 'app_routes.dart';
 class AppPages {
   AppPages._();
 
-  static const INITIAL = Routes.SPLASH;
+  static const String initialRoute = Routes.SPLASH;
 
-  static final routes = [
+  static final List<GetPage<dynamic>> routes = [
     GetPage(
         name: _Paths.SPLASH,
         page: () => const SplashPage(),
