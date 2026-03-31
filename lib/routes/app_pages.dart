@@ -71,6 +71,7 @@ class AppPages {
     GetPage(
         name: _Paths.PINTEREST,
         page: () => const PinterestPage(),
-        binding: PinterestBinding()),
+        binding: PinterestBinding(),
+    ),
   ];
 }
