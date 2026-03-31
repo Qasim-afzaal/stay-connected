@@ -115,7 +115,7 @@ class TikTokController extends GetxController {
       {
         'name': 'Auto',
         'icon': 'assets/images/platform_icons/auto.png',
-        'category': 'Auto'
+        'category': 'Audio'
       },
       {
         'name': 'Celebrity',
