@@ -7,6 +7,7 @@ void main() {
   testWidgets('MyApp builds without throwing', (WidgetTester tester) async {
     await tester.pumpWidget(const MyApp());
     await tester.pump();
+    await tester.pump(const Duration(milliseconds: 100));
     expect(find.byType(GetMaterialApp), findsOneWidget);
   });
 }
