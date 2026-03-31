@@ -10,8 +10,9 @@ class WebviewController extends GetxController {
   @override
   void onInit() {
     super.onInit();
+    final uri = Uri.parse(url);
     webViewController = WebViewController()
       ..setJavaScriptMode(JavaScriptMode.unrestricted)
-      ..loadRequest(Uri.parse(url));
+      ..loadRequest(uri);
   }
 }
