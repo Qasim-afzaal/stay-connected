@@ -13,8 +13,7 @@ class SplashPage extends StatelessWidget {
       init: SplashController(),
       builder: (controller) {
         final theme = Theme.of(context);
-        final isDark = theme.brightness == Brightness.dark;
-        
+
         return Scaffold(
           body: Container(
             decoration: BoxDecoration(
