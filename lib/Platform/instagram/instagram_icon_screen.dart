@@ -781,7 +781,6 @@ class FriendProfileScreen extends StatefulWidget {
 class _FriendProfileScreenState extends State<FriendProfileScreen> {
   bool isLoading = true;
   String? _capturedPostUrl;
-  InAppWebViewController? _webViewController;
 
   static const String iosUserAgent =
       'Mozilla/5.0 (iPhone; CPU iPhone OS 17_5 like Mac OS X) '
@@ -1097,8 +1096,6 @@ class _FriendProfileScreenState extends State<FriendProfileScreen> {
               useShouldOverrideUrlLoading: true,
             ),
             onWebViewCreated: (controller) {
-              _webViewController = controller;
-              
               // Register JavaScript handler for post capture
               controller.addJavaScriptHandler(
                 handlerName: 'InstagramPostCapture',
