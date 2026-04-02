@@ -8,7 +8,7 @@ import 'package:stay_connected/Platform/snapchat/snapchat_icon_screen.dart';
 import 'package:stay_connected/widget/custom_drawer.dart';
 
 class SnapchatPage extends StatelessWidget {
-  const SnapchatPage({super.key});
+  const SnapchatPage({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
