@@ -50,7 +50,7 @@ class MyApp extends StatelessWidget {
           ),
           themeMode: ThemeMode.system,
           builder: EasyLoading.init(),
-          initialRoute: AppPages.INITIAL,
+          initialRoute: AppPages.initialRoute,
           getPages: AppPages.routes,
         ),
       ),
