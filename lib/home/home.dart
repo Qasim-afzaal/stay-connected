@@ -60,7 +60,7 @@ class HomePage extends StatelessWidget {
                     return GestureDetector(
                       onTap: () {
                         debugPrint(item['name'].toString());
-                        switch (item['name'].toString().toLowerCase()) {
+                        switch (item["name"].toString().toLowerCase()) {
                           case "facebook":
                             Get.offNamed(Routes.FACEBOOK);
                             break;
