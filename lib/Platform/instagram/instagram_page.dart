@@ -8,7 +8,7 @@ import 'package:stay_connected/Platform/instagram/instagram_icon_screen.dart';
 import 'package:stay_connected/widget/custom_drawer.dart';
 
 class InstagramPage extends StatelessWidget {
-  const InstagramPage({super.key});
+  InstagramPage({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
