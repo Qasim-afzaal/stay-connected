@@ -6,6 +6,7 @@ import 'package:get/get.dart';
 import 'package:stay_connected/Platform/instagram/instagram_controller.dart';
 import 'package:stay_connected/Platform/instagram/instagram_icon_screen.dart';
 import 'package:stay_connected/widget/custom_drawer.dart';
+import 'package:stay_connected/widget/platform_app_bar_title.dart';
 
 class InstagramPage extends StatelessWidget {
   InstagramPage({Key? key}) : super(key: key);
@@ -24,7 +25,10 @@ class InstagramPage extends StatelessWidget {
         return Scaffold(
           drawer: const CustomDrawer(),
           appBar: AppBar(
-            title: const Text('Instagram'),
+            title: const PlatformAppBarTitle(
+              label: 'Instagram',
+              iconAsset: 'assets/images/img_instagram_2.png',
+            ),
             centerTitle: true,
             backgroundColor: isDark ? theme.appBarTheme.backgroundColor : Colors.white,
             foregroundColor: isDark ? theme.appBarTheme.foregroundColor : Colors.black,
