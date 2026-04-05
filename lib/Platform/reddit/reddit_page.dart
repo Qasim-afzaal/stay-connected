@@ -6,6 +6,7 @@ import 'package:get/get.dart';
 import 'package:stay_connected/Platform/reddit/reddit_controller.dart';
 import 'package:stay_connected/Platform/reddit/reddit_icon_screen.dart';
 import 'package:stay_connected/widget/custom_drawer.dart';
+import 'package:stay_connected/widget/platform_app_bar_title.dart';
 
 class RedditPage extends StatelessWidget {
   RedditPage({Key? key}) : super(key: key);
@@ -24,7 +25,10 @@ class RedditPage extends StatelessWidget {
         return Scaffold(
           drawer: const CustomDrawer(),
           appBar: AppBar(
-            title: const Text('Reddit'),
+            title: const PlatformAppBarTitle(
+              label: 'Reddit',
+              iconAsset: 'assets/images/img_ic_reddit_1.png',
+            ),
             centerTitle: true,
             backgroundColor: isDark ? theme.appBarTheme.backgroundColor : Colors.white,
             foregroundColor: isDark ? theme.appBarTheme.foregroundColor : Colors.black,
@@ -38,6 +42,18 @@ class RedditPage extends StatelessWidget {
               ),
             ),
             actions: [
+              IconButton(
+                icon: Icon(Icons.refresh, color: isDark ? Colors.blue[300] : Colors.blue),
+                onPressed: () {
+                  controller.resetToDefaults();
+                  Get.snackbar(
+                    'Reset',
+                    'Icons reset to defaults',
+                    snackPosition: SnackPosition.BOTTOM,
+                    duration: const Duration(seconds: 2),
+                  );
+                },
+              ),
               IconButton(
                 icon: controller.isDeleteMode
                     ? Image.asset(
