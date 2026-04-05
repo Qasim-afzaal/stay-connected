@@ -46,6 +46,13 @@ class MyApp extends StatelessWidget {
             colorScheme: ColorScheme.fromSeed(
               seedColor: Colors.black,
               brightness: Brightness.dark,
+            ).copyWith(
+              onSurface: Colors.white,
+              onSurfaceVariant: Colors.grey,
+            ),
+            listTileTheme: const ListTileThemeData(
+              textColor: Colors.white,
+              iconColor: Colors.white,
             ),
           ),
           themeMode: ThemeMode.system,
