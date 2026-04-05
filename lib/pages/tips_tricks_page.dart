@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import 'package:stay_connected/util/website_links.dart';
+
 class TipsTricksPage extends StatelessWidget {
   const TipsTricksPage({super.key});
 
@@ -43,6 +45,22 @@ class TipsTricksPage extends StatelessWidget {
                     fontSize: 26, 
                     fontWeight: FontWeight.bold,
                     color: isDark ? Colors.grey[300] : Colors.black,
+                  ),
+                ),
+              ),
+              SizedBox(height: 16),
+              Center(
+                child: InkWell(
+                  onTap: () => launchWebsiteUrl(kStayConnectedTipsPageUrl),
+                  child: Text(
+                    kStayConnectedTipsPageUrl,
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      fontSize: 15,
+                      color: isDark ? Colors.blue[300] : Colors.blue,
+                      decoration: TextDecoration.underline,
+                      fontWeight: FontWeight.w500,
+                    ),
                   ),
                 ),
               ),
