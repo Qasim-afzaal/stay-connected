@@ -1,12 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/foundation.dart';
 import 'package:get/get.dart';
 
 import 'package:stay_connected/home/home.dart';
 import 'package:stay_connected/home/home_controller.dart';
-import 'package:stay_connected/pages/about_page.dart';
-import 'package:stay_connected/pages/tips_tricks_page.dart';
 import 'package:stay_connected/routes/app_pages.dart';
+import 'package:stay_connected/util/website_links.dart';
 
 class CustomDrawer extends StatelessWidget {
   const CustomDrawer({super.key});
@@ -41,7 +39,9 @@ class CustomDrawer extends StatelessWidget {
                     padding:
                         const EdgeInsets.all(6.0), // Adjust padding as needed
                     child: Image.asset(
-                      isDark ? 'assets/images/iconnew_nbg.png' : 'assets/images/img_logo1_1.png',
+                      // Same asset as light mode: iconnew_nbg is tuned for dark
+                      // backgrounds and disappears on the white avatar circle.
+                      'assets/images/img_logo1_1.png',
                       fit: BoxFit.contain,
                     ),
                   ),
@@ -173,7 +173,7 @@ class CustomDrawer extends StatelessWidget {
             title: const Text('Tips & Tricks'),
             onTap: () {
               Navigator.pop(context);
-              Get.to(() => const TipsTricksPage());
+              launchWebsiteUrl(kStayConnectedTipsPageUrl);
             },
           ),
           ListTile(
@@ -186,7 +186,7 @@ class CustomDrawer extends StatelessWidget {
             title: const Text('About'),
             onTap: () {
               Navigator.pop(context);
-              Get.to(() => const AboutPage());
+              launchWebsiteUrl(kStayConnectedWebsiteUrl);
             },
           ),
         ],
