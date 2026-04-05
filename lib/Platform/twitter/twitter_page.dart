@@ -6,6 +6,7 @@ import 'package:get/get.dart';
 import 'package:stay_connected/Platform/twitter/twitter_controller.dart';
 import 'package:stay_connected/Platform/twitter/twitter_icon_screen.dart';
 import 'package:stay_connected/widget/custom_drawer.dart';
+import 'package:stay_connected/widget/platform_app_bar_title.dart';
 
 class TwitterPage extends StatelessWidget {
   TwitterPage({Key? key}) : super(key: key);
@@ -24,7 +25,13 @@ class TwitterPage extends StatelessWidget {
         return Scaffold(
           drawer: const CustomDrawer(),
           appBar: AppBar(
-            title: const Text('X'),
+            title: PlatformAppBarTitle(
+              iconAsset: isDark
+                  ? 'assets/images/x_dark.png'
+                  : 'assets/images/x_light.png',
+              iconOnly: true,
+              iconSize: 30,
+            ),
             centerTitle: true,
             backgroundColor: isDark ? theme.appBarTheme.backgroundColor : Colors.white,
             foregroundColor: isDark ? theme.appBarTheme.foregroundColor : Colors.black,
@@ -38,6 +45,18 @@ class TwitterPage extends StatelessWidget {
               ),
             ),
             actions: [
+              IconButton(
+                icon: Icon(Icons.refresh, color: isDark ? Colors.blue[300] : Colors.blue),
+                onPressed: () {
+                  controller.resetToDefaults();
+                  Get.snackbar(
+                    'Reset',
+                    'Icons reset to defaults',
+                    snackPosition: SnackPosition.BOTTOM,
+                    duration: const Duration(seconds: 2),
+                  );
+                },
+              ),
               IconButton(
                 icon: controller.isDeleteMode
                     ? Image.asset(
