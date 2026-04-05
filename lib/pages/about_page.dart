@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import 'package:stay_connected/util/website_links.dart';
+
 class AboutPage extends StatelessWidget {
   const AboutPage({super.key});
 
@@ -103,6 +105,21 @@ class AboutPage extends StatelessWidget {
                       '- Functional open app feature if you have the app installed',
                       style: TextStyle(fontSize: 15, color: isDark ? Colors.grey[300] : Colors.black87)),
                 ],
+              ),
+            ),
+            sectionSpacing,
+            Text('Website', style: headingStyle),
+            const SizedBox(height: 8),
+            InkWell(
+              onTap: () => launchWebsiteUrl(kStayConnectedWebsiteUrl),
+              child: Text(
+                kStayConnectedWebsiteUrl,
+                style: TextStyle(
+                  fontSize: 15,
+                  color: isDark ? Colors.blue[300] : Colors.blue,
+                  decoration: TextDecoration.underline,
+                  fontWeight: FontWeight.w500,
+                ),
               ),
             ),
             sectionSpacing,
