@@ -6,6 +6,7 @@ import 'package:get/get.dart';
 import 'package:stay_connected/Platform/youtube/youtube_controller.dart';
 import 'package:stay_connected/Platform/youtube/youtube_icon_screen.dart';
 import 'package:stay_connected/widget/custom_drawer.dart';
+import 'package:stay_connected/widget/platform_app_bar_title.dart';
 
 class YouTubePage extends StatelessWidget {
   YouTubePage({Key? key}) : super(key: key);
@@ -24,7 +25,10 @@ class YouTubePage extends StatelessWidget {
         return Scaffold(
           drawer: const CustomDrawer(),
           appBar: AppBar(
-            title: const Text('YouTube'),
+            title:  PlatformAppBarTitle(
+              label: 'YouTube',
+              iconAsset: 'assets/images/yt_resized.png',
+            ),
             centerTitle: true,
             backgroundColor: isDark ? theme.appBarTheme.backgroundColor : Colors.white,
             foregroundColor: isDark ? theme.appBarTheme.foregroundColor : Colors.black,
@@ -38,6 +42,18 @@ class YouTubePage extends StatelessWidget {
               ),
             ),
             actions: [
+              IconButton(
+                icon: Icon(Icons.refresh, color: isDark ? Colors.blue[300] : Colors.blue),
+                onPressed: () {
+                  controller.resetToDefaults();
+                  Get.snackbar(
+                    'Reset',
+                    'Icons reset to defaults',
+                    snackPosition: SnackPosition.BOTTOM,
+                    duration: const Duration(seconds: 2),
+                  );
+                },
+              ),
               IconButton(
                 icon: controller.isDeleteMode
                     ? Image.asset(
