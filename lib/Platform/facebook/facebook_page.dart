@@ -7,6 +7,7 @@ import 'package:get/get.dart';
 import 'package:stay_connected/Platform/facebook/facebook_controller.dart';
 import 'package:stay_connected/Platform/facebook/facebook_icon_screen.dart';
 import 'package:stay_connected/widget/custom_drawer.dart';
+import 'package:stay_connected/widget/platform_app_bar_title.dart';
 
 class FacebookPage extends StatelessWidget {
   const FacebookPage({super.key});
@@ -21,7 +22,10 @@ class FacebookPage extends StatelessWidget {
         return Scaffold(
           drawer: const CustomDrawer(),
           appBar: AppBar(
-            title: const Text('Facebook'),
+            title: const PlatformAppBarTitle(
+              label: 'Facebook',
+              iconAsset: 'assets/images/img_facebook_1_60x60.png',
+            ),
             centerTitle: true,
             backgroundColor: isDark ? theme.appBarTheme.backgroundColor : Colors.white,
             foregroundColor: isDark ? theme.appBarTheme.foregroundColor : Colors.black,
