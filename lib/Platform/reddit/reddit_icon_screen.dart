@@ -9,6 +9,7 @@ import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 import 'package:stay_connected/Platform/reddit/reddit_controller.dart';
 import 'package:stay_connected/Platform/reddit/reddit_search_dialog.dart';
 import 'package:stay_connected/Platform/reddit/reddit_constants.dart';
+import 'package:stay_connected/widget/filtered_friends_layer.dart';
 
 class RedditIconScreen extends StatelessWidget {
   final String iconName;
@@ -62,54 +63,67 @@ class RedditIconScreen extends StatelessWidget {
                 fit: BoxFit.cover,
               ),
             ),
-            child: categoryFriends.isEmpty
-                ? Center(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(
-                          Icons.people_outline,
-                          size: 64,
-                          color: isDark ? Colors.grey[600] : Colors.grey.shade400,
-                        ),
-                        const SizedBox(height: 16),
-                        Text(
-                          'Tap the + button to search people',
-                          style: TextStyle(
-                            fontSize: 14,
-                            color: isDark ? Colors.grey[400] : Colors.grey.shade500,
-                          ),
-                        ),
-                      ],
+            child: FilteredFriendsLayer(
+              isDark: isDark,
+              friends: categoryFriends,
+              emptyChild: Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(
+                      Icons.people_outline,
+                      size: 64,
+                      color: isDark ? Colors.grey[600] : Colors.grey.shade400,
                     ),
-                  )
-                : Padding(
-                    padding: const EdgeInsets.all(16),
-                    child: GridView.builder(
-                      itemCount: categoryFriends.length,
-                      gridDelegate:
-                          const SliverGridDelegateWithFixedCrossAxisCount(
-                        crossAxisCount: 4,
-                        mainAxisSpacing: 16,
-                        crossAxisSpacing: 16,
-                        childAspectRatio: 0.8,
+                    const SizedBox(height: 16),
+                    Text(
+                      RedditConstants.emptyCategoryMessage,
+                      style: TextStyle(
+                        fontSize: 14,
+                        color: isDark ? Colors.grey[400] : Colors.grey.shade500,
                       ),
-                      itemBuilder: (context, index) {
-                        final friend = categoryFriends[index];
-                        return GestureDetector(
-                          onTap: () {
-                            if (friend['profileUrl'] != null) {
-                              Get.to(() => _FriendProfileWebView(
-                                    profileUrl: friend['profileUrl']!,
-                                    friendName: friend['name'] ?? RedditConstants.unknownFriend,
-                                  ));
-                            }
-                          },
-                          onLongPress: () {
-                            _showActionDialog(
-                                context, friend['name'] ?? 'Unknown', index);
-                          },
-                          child: Stack(
+                    ),
+                  ],
+                ),
+              ),
+              contentBuilder: (context, filtered, all) {
+                return Padding(
+                  padding: const EdgeInsets.all(16),
+                  child: GridView.builder(
+                    itemCount: filtered.length,
+                    gridDelegate:
+                        const SliverGridDelegateWithFixedCrossAxisCount(
+                      crossAxisCount: 4,
+                      mainAxisSpacing: 16,
+                      crossAxisSpacing: 16,
+                      childAspectRatio: 0.72,
+                    ),
+                    itemBuilder: (context, index) {
+                      final friend = filtered[index];
+                      final fullIndex = all.indexWhere(
+                        (e) =>
+                            (e['profileUrl'] ?? '') ==
+                            (friend['profileUrl'] ?? ''),
+                      );
+                      return GestureDetector(
+                        onTap: () {
+                          FocusManager.instance.primaryFocus?.unfocus();
+                          if (friend['profileUrl'] != null) {
+                            Get.to(() => _FriendProfileWebView(
+                                  profileUrl: friend['profileUrl']!,
+                                  friendName: friend['name'] ??
+                                      RedditConstants.unknownFriend,
+                                ));
+                          }
+                        },
+                        onLongPress: () {
+                          _showActionDialog(
+                            context,
+                            friend['name'] ?? 'Unknown',
+                            fullIndex >= 0 ? fullIndex : 0,
+                          );
+                        },
+                        child: Stack(
                             children: [
                               Column(
                                 mainAxisAlignment: MainAxisAlignment.center,
@@ -155,7 +169,9 @@ class RedditIconScreen extends StatelessWidget {
                         );
                       },
                     ),
-                  ),
+                  );
+              },
+            ),
           ),
           floatingActionButton: FloatingActionButton(
             onPressed: () => _showSearchDialog(context),
