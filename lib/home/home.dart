@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 import 'package:get/get.dart';
@@ -95,9 +96,9 @@ class HomePage extends StatelessWidget {
                       },
                       child: Container(
                         decoration: BoxDecoration(
-                          color: isDark
-                              ? Colors.grey.withValues(alpha: 0.3)
-                              : Colors.grey.withValues(alpha: 0.1),
+                          color: isDark 
+                              ? Colors.grey.withOpacity(0.3)
+                              : Colors.grey.withOpacity(0.1),
                           borderRadius: BorderRadius.circular(50),
                         ),
                         alignment: Alignment.center,
