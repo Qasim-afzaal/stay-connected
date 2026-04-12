@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 import 'package:get/get.dart';
@@ -700,7 +701,7 @@ class _YouTubeWebviewScreenState extends State<YouTubeWebviewScreen> {
                 color: isDark ? Colors.grey[900] : Colors.white,
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.1),
+                    color: Colors.black.withOpacity(0.1),
                     blurRadius: 4,
                     offset: const Offset(0, -2),
                   ),
@@ -818,7 +819,7 @@ class _YouTubeWebviewScreenState extends State<YouTubeWebviewScreen> {
               Container(
                 padding: const EdgeInsets.all(8),
                 decoration: BoxDecoration(
-                  color: CupertinoColors.systemBlue.withValues(alpha: 0.1),
+                  color: CupertinoColors.systemBlue.withOpacity(0.1),
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: const Icon(CupertinoIcons.person_add,
