@@ -9,7 +9,7 @@ import 'package:stay_connected/widget/custom_drawer.dart';
 import 'package:stay_connected/widget/platform_app_bar_title.dart';
 
 class TwitterPage extends StatelessWidget {
-  TwitterPage({Key? key}) : super(key: key);
+  const TwitterPage({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -445,7 +445,7 @@ class TwitterPage extends StatelessWidget {
                     CupertinoButton(
                       padding: const EdgeInsets.symmetric(
                           horizontal: 8, vertical: 4),
-                      minSize: 28,
+                      minimumSize: const Size(28, 28),
                       child: Text(
                         'See more',
                         style: TextStyle(color: isDark ? Colors.blue[300] : Colors.blue),

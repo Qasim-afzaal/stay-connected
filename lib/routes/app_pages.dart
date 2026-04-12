@@ -54,11 +54,11 @@ class AppPages {
         binding: YouTubeBinding()),
     GetPage(
         name: _Paths.TWITTER,
-        page: () => TwitterPage(),
+        page: () => const TwitterPage(),
         binding: TwitterBinding()),
     GetPage(
         name: _Paths.TIKTOK,
-        page: () => TikTokPage(),
+        page: () => const TikTokPage(),
         binding: TikTokBinding()),
     GetPage(
         name: _Paths.REDDIT,

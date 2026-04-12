@@ -1,4 +1,3 @@
-import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:get/get.dart';
 import 'package:stay_connected/Platform/youtube/youtube_webview_screen.dart';
@@ -8,10 +7,10 @@ class YouTubeSearchDialog extends StatelessWidget {
   final String platformName;
 
   const YouTubeSearchDialog({
-    Key? key,
+    super.key,
     required this.iconName,
     required this.platformName,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
