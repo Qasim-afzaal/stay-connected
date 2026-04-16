@@ -9,7 +9,7 @@ import 'package:stay_connected/widget/custom_drawer.dart';
 import 'package:stay_connected/widget/platform_app_bar_title.dart';
 
 class InstagramPage extends StatelessWidget {
-  InstagramPage({Key? key}) : super(key: key);
+  const InstagramPage({super.key});
 
   @override
   Widget build(BuildContext context) {
