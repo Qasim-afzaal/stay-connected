@@ -439,7 +439,7 @@ class RedditPage extends StatelessWidget {
                     CupertinoButton(
                       padding: const EdgeInsets.symmetric(
                           horizontal: 8, vertical: 4),
-                      minSize: 28,
+                      minimumSize: const Size(0, 28),
                       child: Text(
                         'See more',
                         style: TextStyle(color: isDark ? Colors.blue[300] : Colors.blue),
