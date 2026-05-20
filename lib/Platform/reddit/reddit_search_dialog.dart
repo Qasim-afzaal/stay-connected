@@ -7,10 +7,10 @@ class RedditSearchDialog extends StatelessWidget {
   final String platformName;
 
   const RedditSearchDialog({
-    Key? key,
+    super.key,
     required this.iconName,
     required this.platformName,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
