@@ -80,13 +80,7 @@ class SnapchatPage extends StatelessWidget {
                           );
                         },
                       ),
-                onPressed: () {
-                  if (controller.isDeleteMode) {
-                    controller.toggleDeleteMode();
-                  } else {
-                    controller.toggleDeleteMode();
-                  }
-                },
+                onPressed: controller.toggleDeleteMode,
               ),
               if (controller.isDeleteMode &&
                   controller.selectedIcons.isNotEmpty)
