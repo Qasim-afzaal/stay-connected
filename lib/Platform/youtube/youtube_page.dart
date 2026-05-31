@@ -25,7 +25,7 @@ class YouTubePage extends StatelessWidget {
         return Scaffold(
           drawer: const CustomDrawer(),
           appBar: AppBar(
-            title:  PlatformAppBarTitle(
+            title: PlatformAppBarTitle(
               label: 'YouTube',
               iconAsset: 'assets/images/yt_resized.png',
             ),
@@ -140,7 +140,7 @@ class YouTubePage extends StatelessWidget {
                           ),
                           const SizedBox(height: 8),
                           Padding(
-                            padding: EdgeInsets.symmetric(horizontal: 8),
+                            padding: const EdgeInsets.symmetric(horizontal: 8),
                             child: Text(
                               'Add',
                               style: TextStyle(
