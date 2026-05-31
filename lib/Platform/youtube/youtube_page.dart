@@ -102,7 +102,7 @@ class YouTubePage extends StatelessWidget {
             decoration: BoxDecoration(
               color: isDark ? Colors.black : null,
               image: isDark ? null : DecorationImage(
-                image: AssetImage('assets/images/img_group_295.jpg'),
+                image: const AssetImage('assets/images/img_group_295.jpg'),
                 fit: BoxFit.cover,
               ),
             ),
